@@ -108,6 +108,8 @@
   var openAddBtn = document.getElementById("openAddActivity");
   var closeModalBtn = document.getElementById("closeModalBtn");
   var cancelModalBtn = document.getElementById("cancelModalBtn");
+  var editModeBtn = document.getElementById("editModeBtn");
+  var saveActivityBtn = document.getElementById("saveActivityBtn");
   var deleteBtn = document.getElementById("deleteActivityBtn");
 
   var fCustomer = document.getElementById("fCustomer");
@@ -121,6 +123,16 @@
   var fOwner = document.getElementById("fOwner");
   var fStatus = document.getElementById("fStatus");
   var fNotes = document.getElementById("fNotes");
+
+  var FORM_FIELD_IDS = ["fCustomer", "fMeetingType", "fPurpose", "fDate", "fTime", "fDuration", "fOwner", "fStatus", "fNotes"];
+  function setFormReadOnly(readOnly) {
+    FORM_FIELD_IDS.forEach(function (id) {
+      var el = document.getElementById(id);
+      el.disabled = readOnly;
+      var wrap = el.closest(".op-input-wrap");
+      if (wrap) wrap.classList.toggle("is-readonly", readOnly);
+    });
+  }
 
   var toast = document.getElementById("toast");
   var toastTimer = null;
@@ -210,12 +222,12 @@
 
       tr.innerHTML =
         '<td class="customer-name">' + escapeHtml(a.customer) + "</td>" +
-        "<td>" + formatDate(a.date) + "</td>" +
-        "<td>" + formatTime(a.time) + "</td>" +
         '<td><div class="owner-cell"><span class="owner-avatar" style="background:' + fill.bg + ";color:" + fill.text + '">' + (owner ? owner.initials : "?") + "</span>" + (owner ? owner.name : "Unassigned") + "</div></td>" +
         '<td><span class="meeting-badge">' + escapeHtml(a.meetingType) + (a.purpose ? " · " + escapeHtml(a.purpose) : "") + "</span></td>" +
+        "<td>" + formatDate(a.date) + "</td>" +
+        "<td>" + formatTime(a.time) + "</td>" +
         '<td><span class="status-badge status-' + a.status + '">' + a.status + "</span></td>" +
-        '<td class="action-col"><button class="view-edit-btn" data-id="' + a.id + '">View / Edit</button></td>';
+        '<td class="action-col"><button class="view-btn" data-id="' + a.id + '">View</button></td>';
 
       tableBody.appendChild(tr);
     });
@@ -234,6 +246,10 @@
   }
 
   // ---------- Modal ----------
+  // Opening an existing activity always starts read-only ("view"); the
+  // user must explicitly click Edit to make the form editable. Adding a
+  // brand new activity is editable immediately, since there's nothing to
+  // view yet.
   function openModal(mode, activity) {
     form.reset();
     editingId = null;
@@ -242,6 +258,10 @@
       modalTitle.textContent = "Add Activity";
       modalSubtitle.textContent = "Enter the details below to add a new activity";
       deleteBtn.hidden = true;
+      setFormReadOnly(false);
+      cancelModalBtn.textContent = "Cancel";
+      editModeBtn.hidden = true;
+      saveActivityBtn.hidden = false;
       fMeetingType.value = "Call";
       fOwner.value = REPS[0].id;
       fStatus.value = "Scheduled";
@@ -250,9 +270,13 @@
       fDate.value = today.toISOString().slice(0, 10);
     } else {
       editingId = activity.id;
-      modalTitle.textContent = "View / Edit Activity";
-      modalSubtitle.textContent = "Update the details or change the status of this activity";
-      deleteBtn.hidden = !canDelete();
+      modalTitle.textContent = "View Activity";
+      modalSubtitle.textContent = "Activity details";
+      deleteBtn.hidden = true;
+      setFormReadOnly(true);
+      cancelModalBtn.textContent = "Close";
+      editModeBtn.hidden = false;
+      saveActivityBtn.hidden = true;
 
       fCustomer.value = activity.customer;
       fMeetingType.value = activity.meetingType;
@@ -267,6 +291,15 @@
     }
 
     overlay.hidden = false;
+  }
+
+  function enterEditMode() {
+    modalTitle.textContent = "Edit Activity";
+    modalSubtitle.textContent = "Update the details of this activity";
+    setFormReadOnly(false);
+    cancelModalBtn.textContent = "Cancel";
+    editModeBtn.hidden = true;
+    saveActivityBtn.hidden = false;
   }
 
   function closeModal() {
@@ -286,6 +319,7 @@
   openAddBtn.addEventListener("click", function () { openModal("add"); });
   closeModalBtn.addEventListener("click", closeModal);
   cancelModalBtn.addEventListener("click", closeModal);
+  editModeBtn.addEventListener("click", enterEditMode);
   overlay.addEventListener("click", function (e) {
     if (e.target === overlay) closeModal();
   });
@@ -294,10 +328,10 @@
   });
 
   tableBody.addEventListener("click", function (e) {
-    var btn = e.target.closest(".view-edit-btn");
+    var btn = e.target.closest(".view-btn");
     if (!btn) return;
     var activity = activities.find(function (a) { return a.id === btn.dataset.id; });
-    if (activity) openModal("edit", activity);
+    if (activity) openModal("view", activity);
   });
 
   form.addEventListener("submit", function (e) {

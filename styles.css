@@ -371,7 +371,7 @@ body {
 .status-Completed { background: var(--op-chip-success-bg); color: var(--op-chip-success-text); }
 .status-Cancelled { background: var(--op-chip-error-bg); color: var(--op-chip-error-text); }
 
-.view-edit-btn {
+.view-btn {
   border: 1.5px solid var(--op-dark-green);
   background: var(--op-white);
   border-radius: var(--op-radius-md);
@@ -384,7 +384,7 @@ body {
   white-space: nowrap;
   transition: background-color .16s, color .16s;
 }
-.view-edit-btn:hover { background: var(--op-dark-green); color: var(--op-accent-lime); }
+.view-btn:hover { background: var(--op-dark-green); color: var(--op-accent-lime); }
 
 .table-empty {
   padding: 40px 16px;
@@ -470,6 +470,11 @@ body {
 .op-input-wrap.has-error { border: 2px solid var(--op-error); padding: 14px 13px; }
 .op-input-wrap.has-error .op-notch { color: var(--op-error); }
 
+.op-input-wrap.is-readonly { background: var(--op-chip-neutral-bg); border-color: var(--op-border-card); }
+.op-input-wrap.is-readonly:hover { border-color: var(--op-border-card); }
+.op-input-wrap.is-readonly .op-notch { background: var(--op-chip-neutral-bg); }
+.op-input-wrap.is-readonly:hover .op-notch { color: var(--op-silver-light); }
+
 .field input, .field select, .field textarea {
   border: none;
   outline: none;
@@ -482,6 +487,11 @@ body {
 .field input::placeholder, .field textarea::placeholder { color: var(--op-silver-light); }
 .field textarea { resize: vertical; }
 .field select { cursor: pointer; }
+.field input:disabled, .field select:disabled, .field textarea:disabled {
+  color: var(--op-silver-dark);
+  opacity: 1;
+  cursor: default;
+}
 
 .modal-actions {
   display: flex;

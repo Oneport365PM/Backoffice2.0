@@ -165,10 +165,10 @@
             <thead>
               <tr>
                 <th>Customer name</th>
-                <th>Date</th>
-                <th>Time</th>
                 <th>Sales owner</th>
                 <th>Meeting type</th>
+                <th>Date</th>
+                <th>Time</th>
                 <th>Status</th>
                 <th class="action-col">Action</th>
               </tr>
@@ -183,7 +183,7 @@
     </main>
   </div>
 
-  <!-- Add / View / Edit Activity Modal -->
+  <!-- Add / View / Edit Activity modal (view opens read-only, Edit unlocks it) -->
   <div class="modal-overlay" id="activityModalOverlay" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-head">
@@ -274,6 +274,7 @@
           <button type="button" class="btn btn-danger-text" id="deleteActivityBtn" hidden>Delete</button>
           <div class="modal-actions-right">
             <button type="button" class="btn btn-outline" id="cancelModalBtn">Cancel</button>
+            <button type="button" class="btn btn-primary" id="editModeBtn" hidden>Edit</button>
             <button type="submit" class="btn btn-primary" id="saveActivityBtn">Save Activity</button>
           </div>
         </div>
