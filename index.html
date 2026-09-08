@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OnePort365 CRM — Activity Log Prototype</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-icon active" title="CRM">
+        <svg viewBox="0 0 24 24"><path d="M4 19h4V10H4v9zm6 0h4V4h-4v15zm6 0h4v-7h-4v7z"/></svg>
+      </div>
+      <div class="sidebar-icon" title="Pipeline">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h12M3 18h6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div class="sidebar-icon" title="Contacts">
+        <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div class="sidebar-icon" title="Companies">
+        <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V6l7-3 7 3v15M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-icon" title="Notifications">
+        <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1112 0c0 4 2 5 2 5H4s2-1 2-5zM10 20a2 2 0 004 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div class="sidebar-avatar" id="currentUserAvatar" title="Current user">NK</div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <input type="checkbox" disabled />
+          <span>CRM</span>
+        </div>
+        <div class="brand">OnePort<span>365</span></div>
+      </header>
+
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="pipeline">
+          <svg viewBox="0 0 24 24" class="tab-icon"><path d="M4 19V9M12 19V5M20 19v-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          Pipeline
+        </button>
+        <button class="tab-btn" data-tab="companies">
+          <svg viewBox="0 0 24 24" class="tab-icon"><path d="M3 21h18M5 21V6l7-3 7 3v15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          Companies
+        </button>
+        <button class="tab-btn" data-tab="contacts">
+          <svg viewBox="0 0 24 24" class="tab-icon"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          Contacts
+        </button>
+        <button class="tab-btn" data-tab="activity">
+          <svg viewBox="0 0 24 24" class="tab-icon"><path d="M4 12h4l2-7 4 14 2-7h4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Activity log
+        </button>
+      </nav>
+
+      <!-- PIPELINE TAB (context stub, matches reference image) -->
+      <section class="tab-panel active" id="panel-pipeline">
+        <div class="stat-cards">
+          <div class="stat-card highlight">
+            <div class="stat-label">Active pipeline (USD)</div>
+            <div class="stat-value">$459,979</div>
+            <div class="stat-sub">16 deals in progress</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Deals won (USD)</div>
+            <div class="stat-value gold">$116,700</div>
+            <div class="stat-sub">7 deals won</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total deals</div>
+            <div class="stat-value">24</div>
+            <div class="stat-sub">All-time deals</div>
+          </div>
+        </div>
+        <div class="pipeline-toolbar">
+          <input class="search-input" placeholder="Search deals..." disabled />
+          <select disabled><option>All Owners</option></select>
+          <select disabled><option>Date created</option></select>
+          <button class="btn btn-outline" disabled>Board</button>
+          <button class="btn btn-primary" disabled>+ New deal</button>
+        </div>
+        <div class="pipeline-note">This is a static preview for context — the interactive prototype lives in the <strong>Activity log</strong> tab.</div>
+        <div class="board">
+          <div class="board-col">
+            <div class="board-col-head"><span class="dot dot-1"></span> Prospect <span class="board-col-count">5 · $110,930</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Srtc exim ltd</span><b>$3,330</b></div><span class="chip chip-owner">KA Kayode Akintade</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Autochek</span><b>$12,500</b></div></div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-head"><span class="dot dot-2"></span> Contacted <span class="board-col-count">0 · $0</span></div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-head"><span class="dot dot-3"></span> Qualified <span class="board-col-count">4 · $155,310</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Tamrose limited</span><b>$8,320</b></div><span class="chip chip-owner">BA Babatope Ayeni</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Alliance chemicals</span><b>$54,000</b></div></div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-head"><span class="dot dot-4"></span> Quote Issued <span class="board-col-count">7 · $193,739</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Quest hill</span><b>$85,000</b></div><span class="chip chip-owner">DO Deborah Oje</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Powerpro</span><b>$2,080</b></div></div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-head"><span class="dot dot-5"></span> Closed <span class="board-col-count">7 won · 1 lost</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Bioscape commodities afri...</span><b>$11,000</b></div><span class="chip chip-owner">AA Adeshewa Adelowo</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Quest hill</span><b>$25,000</b></div><span class="won-tag">✓ Won</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPANIES TAB (stub) -->
+      <section class="tab-panel" id="panel-companies">
+        <div class="empty-stub">
+          <h3>Companies</h3>
+          <p>Not part of this prototype. See the <strong>Activity log</strong> tab for the interactive flow.</p>
+        </div>
+      </section>
+
+      <!-- CONTACTS TAB (stub) -->
+      <section class="tab-panel" id="panel-contacts">
+        <div class="empty-stub">
+          <h3>Contacts</h3>
+          <p>Not part of this prototype. See the <strong>Activity log</strong> tab for the interactive flow.</p>
+        </div>
+      </section>
+
+      <!-- ACTIVITY LOG TAB -->
+      <section class="tab-panel" id="panel-activity">
+        <div class="activity-header">
+          <div>
+            <h2>Activity log</h2>
+            <p class="muted" id="activityCountLabel">Showing all activity</p>
+          </div>
+          <button class="btn btn-primary" id="openAddActivity">+ Add activity</button>
+        </div>
+
+        <div class="activity-toolbar">
+          <input type="search" id="activitySearch" class="search-input" placeholder="Search by customer, sales owner or meeting type..." />
+          <label class="field-inline">
+            <span>Sales team</span>
+            <select id="repFilter">
+              <option value="all">All reps (manager view)</option>
+            </select>
+          </label>
+          <label class="field-inline">
+            <span>Status</span>
+            <select id="statusFilter">
+              <option value="all">All statuses</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </label>
+          <button class="btn btn-ghost" id="resetDataBtn" title="Reset prototype data">Reset demo data</button>
+        </div>
+
+        <div class="table-wrap">
+          <table class="activity-table">
+            <thead>
+              <tr>
+                <th>Customer name</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Sales owner</th>
+                <th>Meeting type</th>
+                <th>Status</th>
+                <th class="action-col">Action</th>
+              </tr>
+            </thead>
+            <tbody id="activityTableBody">
+              <!-- rendered by app.js -->
+            </tbody>
+          </table>
+          <div class="table-empty" id="tableEmptyState" hidden>No activity logged yet — click “Add activity” to log the first one.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add / View / Edit Activity Modal -->
+  <div class="modal-overlay" id="activityModalOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="modalTitle">Add Activity</h3>
+          <p class="muted" id="modalSubtitle">Enter the details below to add a new activity</p>
+        </div>
+        <button class="modal-close" id="closeModalBtn" aria-label="Close">&times;</button>
+      </div>
+
+      <form id="activityForm">
+        <div class="field">
+          <label for="fCustomer">Customer / Company <span class="req">*</span></label>
+          <input list="companyList" id="fCustomer" required placeholder="Select or type a company name" />
+          <datalist id="companyList"></datalist>
+        </div>
+
+        <div class="field">
+          <label for="fMeetingType">Meeting Type <span class="req">*</span></label>
+          <select id="fMeetingType" required>
+            <option value="Call">Call</option>
+            <option value="Email">Email</option>
+            <option value="In-Person Meeting">In-Person Meeting</option>
+            <option value="TBD">TBD</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label id="fPurposeLabel" for="fPurpose">Call Purpose <span class="req">*</span></label>
+          <input id="fPurpose" required placeholder="What is this call about" />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="fDate">Date <span class="req">*</span></label>
+            <input type="date" id="fDate" required />
+          </div>
+          <div class="field">
+            <label for="fTime">Time <span class="req">*</span></label>
+            <input type="time" id="fTime" required />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="fDuration">Duration (minutes)</label>
+            <input type="number" id="fDuration" min="0" placeholder="Eg 30" />
+          </div>
+          <div class="field">
+            <label for="fOwner">Sales owner <span class="req">*</span></label>
+            <select id="fOwner" required></select>
+          </div>
+        </div>
+
+        <div class="field" id="statusFieldWrap" hidden>
+          <label for="fStatus">Status</label>
+          <select id="fStatus">
+            <option value="Scheduled">Scheduled</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="fNotes">Notes <span class="req">*</span></label>
+          <textarea id="fNotes" required placeholder="Additional notes" rows="3"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-danger-text" id="deleteActivityBtn" hidden>Delete</button>
+          <div class="modal-actions-right">
+            <button type="button" class="btn btn-outline" id="cancelModalBtn">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="saveActivityBtn">Save Activity</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
