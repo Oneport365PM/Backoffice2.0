@@ -86,6 +86,11 @@
   var activities = loadActivities();
   var editingId = null;
 
+  // Only a Sales Manager may delete a logged activity — a Sales Rep can
+  // log, view and edit their own activity but never remove the record.
+  var currentRole = "rep";
+  function canDelete() { return currentRole === "manager"; }
+
   // ---------- DOM refs ----------
   var tabButtons = document.querySelectorAll(".tab-btn");
   var tabPanels = document.querySelectorAll(".tab-panel");
@@ -94,6 +99,7 @@
   var emptyState = document.getElementById("tableEmptyState");
   var countLabel = document.getElementById("activityCountLabel");
   var searchInput = document.getElementById("activitySearch");
+  var roleSelect = document.getElementById("roleSelect");
   var repFilter = document.getElementById("repFilter");
   var statusFilter = document.getElementById("statusFilter");
   var resetDataBtn = document.getElementById("resetDataBtn");
@@ -251,7 +257,7 @@
       modalTitle.textContent = "View / Edit Activity";
       modalSubtitle.textContent = "Update the details or change the status of this activity";
       statusFieldWrap.hidden = false;
-      deleteBtn.hidden = false;
+      deleteBtn.hidden = !canDelete();
 
       fCustomer.value = activity.customer;
       fMeetingType.value = activity.meetingType;
@@ -330,12 +336,19 @@
   });
 
   deleteBtn.addEventListener("click", function () {
-    if (!editingId) return;
+    if (!editingId || !canDelete()) return;
     activities = activities.filter(function (a) { return a.id !== editingId; });
     saveActivities();
     render();
     closeModal();
     showToast("Activity removed");
+  });
+
+  roleSelect.addEventListener("change", function () {
+    currentRole = roleSelect.value;
+    // A rep losing manager access mid-edit shouldn't leave the delete
+    // button visible underneath the open modal.
+    if (!overlay.hidden) deleteBtn.hidden = !editingId || !canDelete();
   });
 
   // ---------- Toolbar ----------
