@@ -6,7 +6,7 @@
   <title>OnePort365 CRM — Activity Log Prototype</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Public+Sans:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;500;700&display=swap" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -90,26 +90,26 @@
         <div class="pipeline-note">This is a static preview for context — the interactive prototype lives in the <strong>Activity log</strong> tab.</div>
         <div class="board">
           <div class="board-col">
-            <div class="board-col-head"><span class="dot dot-1"></span> Prospect <span class="board-col-count">5 · $110,930</span></div>
-            <div class="deal-card"><div class="deal-top"><span>Srtc exim ltd</span><b>$3,330</b></div><span class="chip chip-owner">KA Kayode Akintade</span></div>
+            <div class="board-col-head"><span class="stage-num">1</span> Prospect <span class="board-col-count">5 · $110,930</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Srtc exim ltd</span><b>$3,330</b></div><span class="chip-owner">KA Kayode Akintade</span></div>
             <div class="deal-card"><div class="deal-top"><span>Autochek</span><b>$12,500</b></div></div>
           </div>
           <div class="board-col">
-            <div class="board-col-head"><span class="dot dot-2"></span> Contacted <span class="board-col-count">0 · $0</span></div>
+            <div class="board-col-head"><span class="stage-num">2</span> Contacted <span class="board-col-count">0 · $0</span></div>
           </div>
           <div class="board-col">
-            <div class="board-col-head"><span class="dot dot-3"></span> Qualified <span class="board-col-count">4 · $155,310</span></div>
-            <div class="deal-card"><div class="deal-top"><span>Tamrose limited</span><b>$8,320</b></div><span class="chip chip-owner">BA Babatope Ayeni</span></div>
+            <div class="board-col-head"><span class="stage-num">3</span> Qualified <span class="board-col-count">4 · $155,310</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Tamrose limited</span><b>$8,320</b></div><span class="chip-owner">BA Babatope Ayeni</span></div>
             <div class="deal-card"><div class="deal-top"><span>Alliance chemicals</span><b>$54,000</b></div></div>
           </div>
           <div class="board-col">
-            <div class="board-col-head"><span class="dot dot-4"></span> Quote Issued <span class="board-col-count">7 · $193,739</span></div>
-            <div class="deal-card"><div class="deal-top"><span>Quest hill</span><b>$85,000</b></div><span class="chip chip-owner">DO Deborah Oje</span></div>
+            <div class="board-col-head"><span class="stage-num">4</span> Quote Issued <span class="board-col-count">7 · $193,739</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Quest hill</span><b>$85,000</b></div><span class="chip-owner">DO Deborah Oje</span></div>
             <div class="deal-card"><div class="deal-top"><span>Powerpro</span><b>$2,080</b></div></div>
           </div>
           <div class="board-col">
-            <div class="board-col-head"><span class="dot dot-5"></span> Closed <span class="board-col-count">7 won · 1 lost</span></div>
-            <div class="deal-card"><div class="deal-top"><span>Bioscape commodities afri...</span><b>$11,000</b></div><span class="chip chip-owner">AA Adeshewa Adelowo</span></div>
+            <div class="board-col-head"><span class="stage-num">5</span> Closed <span class="board-col-count">7 won · 1 lost</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Bioscape commodities afri...</span><b>$11,000</b></div><span class="chip-owner">AA Adeshewa Adelowo</span></div>
             <div class="deal-card"><div class="deal-top"><span>Quest hill</span><b>$25,000</b></div><span class="won-tag">✓ Won</span></div>
           </div>
         </div>
@@ -197,60 +197,78 @@
 
       <form id="activityForm">
         <div class="field">
-          <label for="fCustomer">Customer / Company <span class="req">*</span></label>
-          <input list="companyList" id="fCustomer" required placeholder="Select or type a company name" />
-          <datalist id="companyList"></datalist>
+          <label class="op-input-wrap" for="fCustomer">
+            <span class="op-notch">Customer / Company <span class="req">*</span></span>
+            <input list="companyList" id="fCustomer" required placeholder="Select or type a company name" />
+            <datalist id="companyList"></datalist>
+          </label>
         </div>
 
         <div class="field">
-          <label for="fMeetingType">Meeting Type <span class="req">*</span></label>
-          <select id="fMeetingType" required>
-            <option value="Call">Call</option>
-            <option value="Email">Email</option>
-            <option value="In-Person Meeting">In-Person Meeting</option>
-            <option value="TBD">TBD</option>
-          </select>
+          <label class="op-input-wrap" for="fMeetingType">
+            <span class="op-notch">Meeting Type <span class="req">*</span></span>
+            <select id="fMeetingType" required>
+              <option value="Call">Call</option>
+              <option value="Email">Email</option>
+              <option value="In-Person Meeting">In-Person Meeting</option>
+              <option value="TBD">TBD</option>
+            </select>
+          </label>
         </div>
 
         <div class="field">
-          <label id="fPurposeLabel" for="fPurpose">Call Purpose <span class="req">*</span></label>
-          <input id="fPurpose" required placeholder="What is this call about" />
+          <label class="op-input-wrap" for="fPurpose">
+            <span class="op-notch" id="fPurposeLabel">Call Purpose <span class="req">*</span></span>
+            <input id="fPurpose" required placeholder="What is this call about" />
+          </label>
         </div>
 
         <div class="field-row">
           <div class="field">
-            <label for="fDate">Date <span class="req">*</span></label>
-            <input type="date" id="fDate" required />
+            <label class="op-input-wrap" for="fDate">
+              <span class="op-notch">Date <span class="req">*</span></span>
+              <input type="date" id="fDate" required />
+            </label>
           </div>
           <div class="field">
-            <label for="fTime">Time <span class="req">*</span></label>
-            <input type="time" id="fTime" required />
+            <label class="op-input-wrap" for="fTime">
+              <span class="op-notch">Time <span class="req">*</span></span>
+              <input type="time" id="fTime" required />
+            </label>
           </div>
         </div>
 
         <div class="field-row">
           <div class="field">
-            <label for="fDuration">Duration (minutes)</label>
-            <input type="number" id="fDuration" min="0" placeholder="Eg 30" />
+            <label class="op-input-wrap" for="fDuration">
+              <span class="op-notch">Duration (minutes)</span>
+              <input type="number" id="fDuration" min="0" placeholder="Eg 30" />
+            </label>
           </div>
           <div class="field">
-            <label for="fOwner">Sales owner <span class="req">*</span></label>
-            <select id="fOwner" required></select>
+            <label class="op-input-wrap" for="fOwner">
+              <span class="op-notch">Sales owner <span class="req">*</span></span>
+              <select id="fOwner" required></select>
+            </label>
           </div>
         </div>
 
         <div class="field" id="statusFieldWrap" hidden>
-          <label for="fStatus">Status</label>
-          <select id="fStatus">
-            <option value="Scheduled">Scheduled</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
+          <label class="op-input-wrap" for="fStatus">
+            <span class="op-notch">Status</span>
+            <select id="fStatus">
+              <option value="Scheduled">Scheduled</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </label>
         </div>
 
         <div class="field">
-          <label for="fNotes">Notes <span class="req">*</span></label>
-          <textarea id="fNotes" required placeholder="Additional notes" rows="3"></textarea>
+          <label class="op-input-wrap" for="fNotes">
+            <span class="op-notch">Notes <span class="req">*</span></span>
+            <textarea id="fNotes" required placeholder="Additional notes" rows="3"></textarea>
+          </label>
         </div>
 
         <div class="modal-actions">

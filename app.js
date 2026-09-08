@@ -3,12 +3,28 @@
 
   var STORAGE_KEY = "op365_activity_log_prototype_v1";
 
+  // Avatar fills cycle deterministically through the 4 OnePort 365 brand
+  // fills (design/DESIGN_SYSTEM.md, "Avatars & owner chips") — never a
+  // random or per-developer color.
+  var AVATAR_FILLS = [
+    { bg: "var(--op-avatar-1-bg)", text: "var(--op-avatar-1-text)" },
+    { bg: "var(--op-avatar-2-bg)", text: "var(--op-avatar-2-text)" },
+    { bg: "var(--op-avatar-3-bg)", text: "var(--op-avatar-3-text)" },
+    { bg: "var(--op-avatar-4-bg)", text: "var(--op-avatar-4-text)" }
+  ];
+
+  function avatarFillForName(name) {
+    var hash = 0;
+    for (var i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    return AVATAR_FILLS[hash % AVATAR_FILLS.length];
+  }
+
   var REPS = [
-    { id: "michael", name: "Michael Adeyemi", initials: "MI", color: "#e07b2f" },
-    { id: "sarah", name: "Sarah Adamu", initials: "SA", color: "#d9536f" },
-    { id: "james", name: "James Okafor", initials: "JA", color: "#123a27" },
-    { id: "kayode", name: "Kayode Akintade", initials: "KA", color: "#6a4fc0" },
-    { id: "deborah", name: "Deborah Oje", initials: "DO", color: "#1f7a3d" }
+    { id: "michael", name: "Michael Adeyemi", initials: "MI" },
+    { id: "sarah", name: "Sarah Adamu", initials: "SA" },
+    { id: "james", name: "James Okafor", initials: "JA" },
+    { id: "kayode", name: "Kayode Akintade", initials: "KA" },
+    { id: "deborah", name: "Deborah Oje", initials: "DO" }
   ];
 
   var COMPANIES = [
@@ -187,13 +203,14 @@
 
     list.forEach(function (a) {
       var owner = repById(a.ownerId);
+      var fill = avatarFillForName(owner ? owner.name : "Unassigned");
       var tr = document.createElement("tr");
 
       tr.innerHTML =
         '<td class="customer-name">' + escapeHtml(a.customer) + "</td>" +
         "<td>" + formatDate(a.date) + "</td>" +
         "<td>" + formatTime(a.time) + "</td>" +
-        '<td><div class="owner-cell"><span class="owner-avatar" style="background:' + (owner ? owner.color : "#999") + '">' + (owner ? owner.initials : "?") + "</span>" + (owner ? owner.name : "Unassigned") + "</div></td>" +
+        '<td><div class="owner-cell"><span class="owner-avatar" style="background:' + fill.bg + ";color:" + fill.text + '">' + (owner ? owner.initials : "?") + "</span>" + (owner ? owner.name : "Unassigned") + "</div></td>" +
         '<td><span class="meeting-badge">' + escapeHtml(a.meetingType) + (a.purpose ? " · " + escapeHtml(a.purpose) : "") + "</span></td>" +
         '<td><span class="status-badge status-' + a.status + '">' + a.status + "</span></td>" +
         '<td class="action-col"><button class="view-edit-btn" data-id="' + a.id + '">View / Edit</button></td>';

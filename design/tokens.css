@@ -1,0 +1,91 @@
+/*
+  OnePort 365 — design tokens.
+  Source of truth: design/DESIGN_SYSTEM.md
+  Extracted from the OnePort 365 design system reference. Do not hand-roll
+  new colors/fonts elsewhere — import or copy these into every build.
+*/
+
+:root {
+  /* ---- Brand colour ---- */
+  --op-dark-green: #023819;
+  --op-light-green: #D1DBBD;
+  --op-accent-lime: #BFFB4F;
+  --op-accent-lime-hover: #a9e83a;
+  --op-gold: #FFCC1A;
+  --op-white: #FFFFFF;
+  --op-cream: #FDFBF1;
+  --op-silver-light: #808080;
+  --op-silver-dark: #383838;
+  --op-error: #FF1A1A;
+  --op-error-dark-surface: #FF6B6B;
+  --op-success: #1F8A5B;
+
+  /* ---- Semantic chip pairs (bg / text) ---- */
+  --op-chip-neutral-bg: #EDEFE8;
+  --op-chip-neutral-text: #4a5a3f;
+  --op-chip-success-bg: #E1F1E8;
+  --op-chip-success-text: #0f7a45;
+  --op-chip-warning-bg: #FFF3CC;
+  --op-chip-warning-text: #8a6a00;
+  --op-chip-error-bg: #FDE0E0;
+  --op-chip-error-text: #cc1414;
+  --op-chip-primary-bg: var(--op-accent-lime);
+  --op-chip-primary-text: var(--op-dark-green);
+  --op-chip-enterprise-bg: var(--op-dark-green);
+  --op-chip-enterprise-text: var(--op-accent-lime);
+  --op-chip-mode-bg: var(--op-light-green);
+  --op-chip-mode-text: var(--op-dark-green);
+
+  /* ---- Borders (dark-green tinted, never flat grey) ---- */
+  --op-border-card: rgba(2, 56, 25, .12);
+  --op-border-divider: rgba(2, 56, 25, .07);
+  --op-border-input: rgba(2, 56, 25, .35);
+  --op-border-input-dark: rgba(253, 251, 241, .4);
+
+  /* ---- Categorical series (charts / stages, 6 steps) ---- */
+  --op-cat-1: #023819;
+  --op-cat-2: #2F7A3F;
+  --op-cat-3: #7FAE2E;
+  --op-cat-4: #BFFB4F;
+  --op-cat-5: #FFCC1A;
+  --op-cat-6: #D1DBBD;
+
+  /* ---- Avatar fills (deterministic 4-cycle) ---- */
+  --op-avatar-1-bg: #023819;
+  --op-avatar-1-text: #BFFB4F;
+  --op-avatar-2-bg: #BFFB4F;
+  --op-avatar-2-text: #023819;
+  --op-avatar-3-bg: #D1DBBD;
+  --op-avatar-3-text: #023819;
+  --op-avatar-4-bg: #FFCC1A;
+  --op-avatar-4-text: #023819;
+
+  /* ---- Typography ---- */
+  --op-font-display: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --op-font-body: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* ---- Spacing — 4px base ---- */
+  --op-space-1: 4px;
+  --op-space-2: 8px;
+  --op-space-3: 12px;
+  --op-space-4: 16px;
+  --op-space-6: 24px;
+  --op-space-8: 40px;
+  --op-space-10: 64px;
+
+  /* ---- Radius ---- */
+  --op-radius-sm: 6px;
+  --op-radius-md: 8px;
+  --op-radius-lg: 12px;
+  --op-radius-xl: 16px;
+  --op-radius-full: 999px;
+
+  /* ---- Elevation (soft green-tinted shadows) ---- */
+  --op-elevation-1: 0 1px 2px rgba(2, 56, 25, .05), 0 1px 3px rgba(2, 56, 25, .04);
+  --op-elevation-2: 0 2px 4px rgba(2, 56, 25, .05), 0 8px 20px -8px rgba(2, 56, 25, .14);
+  --op-elevation-3: 0 4px 8px rgba(2, 56, 25, .06), 0 18px 40px -16px rgba(2, 56, 25, .22);
+  --op-elevation-hero: 0 20px 45px -22px rgba(2, 56, 25, .8);
+
+  /* ---- Focus ring (lime, used on active/focused inputs) ---- */
+  --op-focus-ring: 0 0 0 3px rgba(191, 251, 79, .4);
+}
