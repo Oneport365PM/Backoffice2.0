@@ -144,13 +144,6 @@
         <div class="activity-toolbar">
           <input type="search" id="activitySearch" class="search-input" placeholder="Search by customer, sales owner or meeting type..." />
           <label class="field-inline">
-            <span>Viewing as</span>
-            <select id="roleSelect">
-              <option value="rep">Sales Rep</option>
-              <option value="manager">Sales Manager</option>
-            </select>
-          </label>
-          <label class="field-inline">
             <span>Sales team</span>
             <select id="repFilter">
               <option value="all">All reps (manager view)</option>
@@ -165,7 +158,6 @@
               <option value="Cancelled">Cancelled</option>
             </select>
           </label>
-          <button class="btn btn-ghost" id="resetDataBtn" title="Reset prototype data">Reset demo data</button>
         </div>
 
         <div class="table-wrap">
@@ -260,7 +252,7 @@
           </div>
         </div>
 
-        <div class="field" id="statusFieldWrap" hidden>
+        <div class="field">
           <label class="op-input-wrap" for="fStatus">
             <span class="op-notch">Status</span>
             <select id="fStatus">

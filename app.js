@@ -86,10 +86,9 @@
   var activities = loadActivities();
   var editingId = null;
 
-  // Only a Sales Manager may delete a logged activity — a Sales Rep can
-  // log, view and edit their own activity but never remove the record.
-  var currentRole = "rep";
-  function canDelete() { return currentRole === "manager"; }
+  // A sales rep can log, view and edit activity but never delete a
+  // record — deleting is not available in this prototype.
+  function canDelete() { return false; }
 
   // ---------- DOM refs ----------
   var tabButtons = document.querySelectorAll(".tab-btn");
@@ -99,10 +98,8 @@
   var emptyState = document.getElementById("tableEmptyState");
   var countLabel = document.getElementById("activityCountLabel");
   var searchInput = document.getElementById("activitySearch");
-  var roleSelect = document.getElementById("roleSelect");
   var repFilter = document.getElementById("repFilter");
   var statusFilter = document.getElementById("statusFilter");
-  var resetDataBtn = document.getElementById("resetDataBtn");
 
   var overlay = document.getElementById("activityModalOverlay");
   var form = document.getElementById("activityForm");
@@ -112,7 +109,6 @@
   var closeModalBtn = document.getElementById("closeModalBtn");
   var cancelModalBtn = document.getElementById("cancelModalBtn");
   var deleteBtn = document.getElementById("deleteActivityBtn");
-  var statusFieldWrap = document.getElementById("statusFieldWrap");
 
   var fCustomer = document.getElementById("fCustomer");
   var companyList = document.getElementById("companyList");
@@ -245,10 +241,10 @@
     if (mode === "add") {
       modalTitle.textContent = "Add Activity";
       modalSubtitle.textContent = "Enter the details below to add a new activity";
-      statusFieldWrap.hidden = true;
       deleteBtn.hidden = true;
       fMeetingType.value = "Call";
       fOwner.value = REPS[0].id;
+      fStatus.value = "Scheduled";
       updatePurposeLabel();
       var today = new Date();
       fDate.value = today.toISOString().slice(0, 10);
@@ -256,7 +252,6 @@
       editingId = activity.id;
       modalTitle.textContent = "View / Edit Activity";
       modalSubtitle.textContent = "Update the details or change the status of this activity";
-      statusFieldWrap.hidden = false;
       deleteBtn.hidden = !canDelete();
 
       fCustomer.value = activity.customer;
@@ -317,7 +312,7 @@
       duration: fDuration.value ? parseInt(fDuration.value, 10) : null,
       ownerId: fOwner.value,
       notes: fNotes.value.trim(),
-      status: editingId ? fStatus.value : "Scheduled"
+      status: fStatus.value
     };
 
     if (editingId) {
@@ -344,27 +339,10 @@
     showToast("Activity removed");
   });
 
-  roleSelect.addEventListener("change", function () {
-    currentRole = roleSelect.value;
-    // A rep losing manager access mid-edit shouldn't leave the delete
-    // button visible underneath the open modal.
-    if (!overlay.hidden) deleteBtn.hidden = !editingId || !canDelete();
-  });
-
   // ---------- Toolbar ----------
   searchInput.addEventListener("input", render);
   repFilter.addEventListener("change", render);
   statusFilter.addEventListener("change", render);
-
-  resetDataBtn.addEventListener("click", function () {
-    activities = seedData();
-    saveActivities();
-    searchInput.value = "";
-    repFilter.value = "all";
-    statusFilter.value = "all";
-    render();
-    showToast("Demo data reset");
-  });
 
   function showToast(message) {
     toast.textContent = message;
