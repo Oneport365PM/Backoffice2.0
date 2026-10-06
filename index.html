@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OnePort365 CRM — Activity Log Prototype</title>
+  <title>OnePort365 CRM — Lead &amp; Activity Prototype</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;500;700&display=swap" />
@@ -54,6 +54,10 @@
         <button class="tab-btn" data-tab="contacts">
           <svg viewBox="0 0 24 24" class="tab-icon"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
           Contacts
+        </button>
+        <button class="tab-btn" data-tab="lead">
+          <svg viewBox="0 0 24 24" class="tab-icon"><path d="M4 5h16l-6 8v5l-4 2v-7L4 5z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>
+          Lead
         </button>
         <button class="tab-btn" data-tab="activity">
           <svg viewBox="0 0 24 24" class="tab-icon"><path d="M4 12h4l2-7 4 14 2-7h4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -128,6 +132,116 @@
         <div class="empty-stub">
           <h3>Contacts</h3>
           <p>Not part of this prototype. See the <strong>Activity log</strong> tab for the interactive flow.</p>
+        </div>
+      </section>
+
+      <!-- LEAD TAB -->
+      <section class="tab-panel" id="panel-lead">
+        <!-- Lead list -->
+        <div id="leadListView">
+          <div class="stat-cards">
+            <div class="stat-card highlight">
+              <div class="stat-label">New leads</div>
+              <div class="stat-value" id="leadStatTotal">0</div>
+              <div class="stat-sub">From website enquiries</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Awaiting assignment</div>
+              <div class="stat-value gold" id="leadStatUnassigned">0</div>
+              <div class="stat-sub">Not yet with a sales team member</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Assigned</div>
+              <div class="stat-value" id="leadStatAssigned">0</div>
+              <div class="stat-sub">With the sales team</div>
+            </div>
+          </div>
+
+          <div class="activity-toolbar">
+            <input type="search" id="leadSearch" class="search-input" placeholder="Search by name, company, email or phone..." />
+            <label class="field-inline">
+              <span>Shipment mode</span>
+              <select id="leadModeFilter">
+                <option value="all">All modes</option>
+              </select>
+            </label>
+            <label class="field-inline">
+              <span>Assigned to</span>
+              <select id="leadAssigneeFilter">
+                <option value="all">Everyone</option>
+                <option value="unassigned">Unassigned</option>
+              </select>
+            </label>
+          </div>
+
+          <p class="muted table-count" id="leadCountLabel">Showing all leads</p>
+
+          <div class="table-wrap">
+            <table class="activity-table lead-table">
+              <thead>
+                <tr>
+                  <th>Customer full name</th>
+                  <th>Company name</th>
+                  <th>Company address</th>
+                  <th>Phone number</th>
+                  <th>Email</th>
+                  <th>Country</th>
+                  <th>Shipment mode</th>
+                  <th>Assigned to</th>
+                  <th class="action-col">Action</th>
+                </tr>
+              </thead>
+              <tbody id="leadTableBody">
+                <!-- rendered by leads.js -->
+              </tbody>
+            </table>
+            <div class="table-empty" id="leadEmptyState" hidden>No leads match your search or filters.</div>
+          </div>
+        </div>
+
+        <!-- Lead view page -->
+        <div id="leadDetailView" hidden>
+          <button type="button" class="back-link" id="leadBackBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back to leads
+          </button>
+
+          <div class="lead-hero">
+            <span class="lead-hero-avatar" id="leadDetailAvatar"></span>
+            <div class="lead-hero-text">
+              <h2 id="leadDetailName"></h2>
+              <p class="muted" id="leadDetailCompany"></p>
+            </div>
+            <div class="lead-hero-chips" id="leadDetailChips"></div>
+          </div>
+
+          <div class="lead-detail-grid">
+            <div class="panel-card">
+              <div class="eyebrow">Lead details</div>
+              <dl class="detail-list" id="leadDetailList">
+                <!-- rendered by leads.js -->
+              </dl>
+            </div>
+
+            <div class="panel-card assign-card">
+              <div class="eyebrow">Assign to sales team</div>
+              <p class="muted assign-help">Pick a sales team member to own this lead. They'll see it in their queue.</p>
+
+              <div class="assign-current" id="leadAssignCurrent"></div>
+
+              <div class="field">
+                <label class="op-input-wrap" for="leadAssignSelect">
+                  <span class="op-notch">Sales team <span class="req">*</span></span>
+                  <select id="leadAssignSelect">
+                    <option value="">Select a sales team member</option>
+                  </select>
+                </label>
+                <p class="field-error" id="leadAssignError" hidden>Select a sales team member to assign this lead.</p>
+              </div>
+
+              <button type="button" class="btn btn-primary btn-block" id="leadAssignBtn">Assign lead</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -285,5 +399,6 @@
   <div class="toast" id="toast" hidden></div>
 
   <script src="app.js"></script>
+  <script src="leads.js"></script>
 </body>
 </html>
