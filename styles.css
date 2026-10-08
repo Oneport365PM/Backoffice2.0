@@ -547,24 +547,6 @@ body {
 .back-link svg { width: 16px; height: 16px; }
 .back-link:hover { color: var(--op-success); }
 
-.lead-hero {
-  display: flex; align-items: center; gap: var(--op-space-4);
-  background: var(--op-dark-green); color: var(--op-cream);
-  border-radius: var(--op-radius-xl); padding: var(--op-space-6);
-  box-shadow: var(--op-elevation-hero);
-  margin-bottom: var(--op-space-4);
-  flex-wrap: wrap;
-}
-.lead-hero-avatar {
-  width: 62px; height: 62px; border-radius: var(--op-radius-xl);
-  display: grid; place-items: center; flex-shrink: 0;
-  font-family: var(--op-font-display); font-weight: 600; font-size: 20px;
-}
-.lead-hero-text { flex: 1; min-width: 200px; }
-.lead-hero h2 { margin: 0 0 4px; font-family: var(--op-font-display); font-weight: 600; font-size: 24px; color: var(--op-cream); }
-.lead-hero .muted { color: var(--op-light-green); font-size: 14px; }
-.lead-hero-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-
 .lead-detail-grid {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);

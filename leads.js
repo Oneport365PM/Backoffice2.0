@@ -76,10 +76,6 @@
 
 
   var backBtn = document.getElementById("leadBackBtn");
-  var detailAvatar = document.getElementById("leadDetailAvatar");
-  var detailName = document.getElementById("leadDetailName");
-  var detailCompany = document.getElementById("leadDetailCompany");
-  var detailChips = document.getElementById("leadDetailChips");
   var detailList = document.getElementById("leadDetailList");
   var assignCurrent = document.getElementById("leadAssignCurrent");
   var assignSelect = document.getElementById("leadAssignSelect");
@@ -185,19 +181,6 @@
     if (!lead) return;
     currentLeadId = id;
 
-    var fill = avatarFillForName(lead.fullName);
-    detailAvatar.style.background = fill.bg;
-    detailAvatar.style.color = fill.text;
-    // A dark-green avatar would vanish on the dark hero; use lime-on-green inverse there.
-    if (fill.bg === AVATAR_FILLS[0].bg) {
-      detailAvatar.style.background = AVATAR_FILLS[1].bg;
-      detailAvatar.style.color = AVATAR_FILLS[1].text;
-    }
-    detailAvatar.textContent = initials(lead.fullName);
-    detailName.textContent = lead.fullName;
-    detailCompany.textContent = lead.company + " · Lead received " + formatDate(lead.createdAt);
-    detailChips.innerHTML = '<span class="meeting-badge">' + escapeHtml(lead.shipmentMode) + "</span>" + statusChip(assigneeOf(lead));
-
     detailList.innerHTML =
       detailItem("Customer full name", escapeHtml(lead.fullName)) +
       detailItem("Company name", escapeHtml(lead.company)) +
@@ -227,12 +210,6 @@
   function setAssignError(on) {
     assignError.hidden = !on;
     assignSelect.closest(".op-input-wrap").classList.toggle("has-error", on);
-  }
-
-  function formatDate(iso) {
-    var d = new Date(iso + "T00:00:00");
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
   }
 
   function showToast(message) {
