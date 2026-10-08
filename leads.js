@@ -26,8 +26,6 @@
   // The sales team a lead can be assigned to.
   var SALES_TEAM = ["Tobi", "Shewa", "Grace", "Blessing", "Kayode"];
 
-  var SHIPMENT_MODES = ["Ocean Freight", "Air Freight", "Haulage"];
-
   var LEADS = [
     { id: "lead_01", fullName: "Adaeze Okonkwo", company: "Okonkwo Agro Exports Ltd", address: "14 Creek Road, Apapa, Lagos", phone: "+234 803 412 7781", email: "adaeze@okonkwoagro.ng", country: "Nigeria", shipmentMode: "Ocean Freight", queryType: "Export", shipmentVolume: "2 x 40ft containers", item: "Sesame seeds", heardFrom: "LinkedIn", createdAt: "2026-10-05" },
     { id: "lead_02", fullName: "Tunde Bakare", company: "Bakare Pharma Distributors", address: "Plot 22, Oregun Industrial Estate, Ikeja, Lagos", phone: "+234 806 220 1934", email: "t.bakare@bakarepharma.com", country: "Nigeria", shipmentMode: "Air Freight", queryType: "Import", shipmentVolume: "850 kg", item: "Pharmaceutical supplies", heardFrom: "Google search", createdAt: "2026-10-05" },
@@ -74,12 +72,8 @@
   var emptyState = document.getElementById("leadEmptyState");
   var countLabel = document.getElementById("leadCountLabel");
   var searchInput = document.getElementById("leadSearch");
-  var modeFilter = document.getElementById("leadModeFilter");
   var assigneeFilter = document.getElementById("leadAssigneeFilter");
 
-  var statTotal = document.getElementById("leadStatTotal");
-  var statUnassigned = document.getElementById("leadStatUnassigned");
-  var statAssigned = document.getElementById("leadStatAssigned");
 
   var backBtn = document.getElementById("leadBackBtn");
   var detailAvatar = document.getElementById("leadDetailAvatar");
@@ -112,13 +106,6 @@
   }
 
   // ---------- Populate selects ----------
-  SHIPMENT_MODES.forEach(function (mode) {
-    var opt = document.createElement("option");
-    opt.value = mode;
-    opt.textContent = mode;
-    modeFilter.appendChild(opt);
-  });
-
   SALES_TEAM.forEach(function (name) {
     var opt = document.createElement("option");
     opt.value = name;
@@ -130,12 +117,10 @@
   // ---------- List ----------
   function getFilteredLeads() {
     var q = searchInput.value.trim().toLowerCase();
-    var mode = modeFilter.value;
     var who = assigneeFilter.value;
 
     return LEADS.filter(function (lead) {
       var assignee = assigneeOf(lead);
-      if (mode !== "all" && lead.shipmentMode !== mode) return false;
       if (who === "unassigned" && assignee) return false;
       if (who !== "all" && who !== "unassigned" && assignee !== who) return false;
       if (q) {
@@ -144,13 +129,6 @@
       }
       return true;
     });
-  }
-
-  function renderStats() {
-    var assigned = LEADS.filter(function (l) { return !!assigneeOf(l); }).length;
-    statTotal.textContent = LEADS.length;
-    statAssigned.textContent = assigned;
-    statUnassigned.textContent = LEADS.length - assigned;
   }
 
   function renderList() {
@@ -178,7 +156,6 @@
     });
 
     countLabel.innerHTML = "Showing <strong>" + list.length + "</strong> of " + LEADS.length + " leads";
-    renderStats();
   }
 
   // ---------- View page ----------
@@ -304,7 +281,6 @@
   });
 
   searchInput.addEventListener("input", renderList);
-  modeFilter.addEventListener("change", renderList);
   assigneeFilter.addEventListener("change", renderList);
 
   renderList();
