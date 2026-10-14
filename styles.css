@@ -546,7 +546,6 @@ body {
   color: var(--op-silver-light);
 }
 .pp-muted { color: var(--op-silver-light); font-size: 12px; }
-.pp-stats .stat-value { font-size: 28px; }
 
 /* Payables / Receivables segmented filter — tab/filter-chip pattern */
 .pp-segmented { display: flex; gap: 6px; }

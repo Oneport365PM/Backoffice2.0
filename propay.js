@@ -175,20 +175,6 @@
     });
   }
 
-  function statsHtml() {
-    var payables = records.filter(function (r) { return r.type === "payable" && r.status !== "Rejected"; });
-    var receivables = records.filter(function (r) { return r.type === "receivable"; });
-    var payOut = payables.reduce(function (s, r) { return s + outstanding(r); }, 0);
-    var recOut = receivables.reduce(function (s, r) { return s + outstanding(r); }, 0);
-    var over = payables.filter(overBudget);
-    var awaiting = records.filter(function (r) { return r.status === "Awaiting approval"; }).length;
-    return '<div class="stat-cards pp-stats">' +
-      '<div class="stat-card highlight"><div class="stat-label">Payables outstanding</div><div class="stat-value">' + money(payOut) + '</div><div class="stat-sub">' + payables.filter(function (r) { return outstanding(r) > 0; }).length + " open payables</div></div>" +
-      '<div class="stat-card"><div class="stat-label">Receivables outstanding</div><div class="stat-value gold">' + money(recOut) + '</div><div class="stat-sub">' + receivables.filter(function (r) { return outstanding(r) > 0; }).length + " open invoices</div></div>" +
-      '<div class="stat-card"><div class="stat-label">Over budget</div><div class="stat-value">' + over.length + '</div><div class="stat-sub">' + awaiting + " awaiting approval</div></div>" +
-      "</div>";
-  }
-
   function renderRegister() {
     var list = filtered();
     var typeChips = [["all", "All"], ["payable", "Payables"], ["receivable", "Receivables"]].map(function (t) {
@@ -230,7 +216,6 @@
         "<div><p class=\"pp-eyebrow\">Centralised payment tracking</p><h2>ProPay</h2>" +
         '<p class="muted">Showing ' + list.length + " of " + records.length + " records</p></div>" +
       "</div>" +
-      statsHtml() +
       '<div class="activity-toolbar">' +
         '<input type="search" id="ppSearch" class="search-input" placeholder="Search PO #, vendor, category or shipment #..." value="' + esc(state.search) + '" />' +
         '<div class="pp-segmented" role="group" aria-label="Record type">' + typeChips + "</div>" +
