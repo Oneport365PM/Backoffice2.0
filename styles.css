@@ -643,10 +643,6 @@ body {
 .pp-clip svg, .pp-file svg { width: 15px; height: 15px; }
 .pp-table .action-col { width: 110px; }
 
-/* Shipment detail */
-.pp-crumbs { display: flex; gap: 8px; align-items: center; font-size: 12.5px; color: var(--op-silver-light); margin-bottom: var(--op-space-4); }
-.pp-back { text-decoration: none; padding: 9px 14px; font-size: 13px; }
-.pp-ship-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: var(--op-space-4); margin-bottom: var(--op-space-6); }
 .pp-card {
   background: var(--op-white);
   border: 1px solid var(--op-border-card);
@@ -655,10 +651,73 @@ body {
   box-shadow: var(--op-elevation-2);
 }
 .pp-card-flat { box-shadow: none; background: #F4F6EF; border-radius: var(--op-radius-lg); margin-bottom: var(--op-space-4); }
-.pp-dl { display: grid; grid-template-columns: 110px 1fr; gap: 10px 12px; margin: 8px 0 0; font-size: 13.5px; }
-.pp-dl dt { color: var(--op-silver-light); }
-.pp-dl dd { margin: 0; color: var(--op-dark-green); font-weight: 600; }
-.pp-h3 { font-family: var(--op-font-display); font-weight: 600; font-size: 18px; color: var(--op-dark-green); margin: 0 0 var(--op-space-3); }
+/* Shipment detail page ("sd") — follows the Shipments module layout */
+.sd { display: flex; flex-direction: column; gap: 20px; }
+.sd-back { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; font-size: 13.5px; color: var(--op-silver-dark); text-decoration: none; }
+.sd-back svg { width: 16px; height: 16px; }
+.sd-back:hover { color: var(--op-dark-green); }
+.sd-card { background: var(--op-white); border: 1px solid var(--op-border-card); border-radius: var(--op-radius-xl); box-shadow: var(--op-elevation-1); min-width: 0; }
+.sd-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 24px 28px; border-bottom: 1px solid var(--op-border-divider); }
+.sd-hero-title { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; min-width: 0; }
+.sd-hero-title h2 { margin: 0; font-family: var(--op-font-display); font-size: 32px; font-weight: 700; letter-spacing: -.015em; color: var(--op-dark-green); overflow-wrap: anywhere; }
+.sd-pill { padding: 4px 12px; border-radius: var(--op-radius-sm); font-size: 12px; font-weight: 700; }
+.sd-pill.is-active { background: var(--op-chip-success-bg); color: var(--op-chip-success-text); }
+.sd-pill.is-done { background: var(--op-chip-enterprise-bg); color: var(--op-chip-enterprise-text); }
+.sd-actions { position: relative; }
+.sd-actions-btn { display: inline-flex; align-items: center; gap: 8px; }
+.sd-actions-btn svg { width: 16px; height: 16px; }
+.sd-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; min-width: 220px; padding: 6px; background: var(--op-white); border: 1px solid var(--op-border-card); border-radius: var(--op-radius-lg); box-shadow: var(--op-elevation-3); }
+.sd-menu button { display: block; width: 100%; text-align: left; padding: 9px 12px; border: none; background: none; border-radius: var(--op-radius-sm); font-family: var(--op-font-body); font-size: 13.5px; color: var(--op-dark-green); cursor: pointer; }
+.sd-menu button:hover { background: var(--op-chip-neutral-bg); }
+.sd-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 22px 28px; row-gap: 16px; }
+.sd-facts > div { min-width: 0; padding: 0 20px; border-left: 1px solid var(--op-border-card); }
+.sd-facts > div:first-child { padding-left: 0; border-left: none; }
+.sd dt { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--op-silver-dark); margin-bottom: 6px; }
+.sd dd { margin: 0; font-size: 15px; color: var(--op-silver-dark); overflow-wrap: anywhere; }
+.sd-tabs { display: flex; gap: 4px; padding: 0 20px; overflow-x: auto; }
+.sd-tab { padding: 18px 20px 16px; font-family: var(--op-font-display); font-size: 15px; color: var(--op-silver-dark); text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+.sd-tab:hover { color: var(--op-dark-green); }
+.sd-tab.active { color: var(--op-dark-green); font-weight: 600; border-bottom-color: var(--op-dark-green); }
+.sd-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 400px); gap: 20px; align-items: start; }
+.sd-card-head { padding: 22px 28px 18px; border-bottom: 1px solid var(--op-border-divider); }
+.sd-card-head h3 { margin: 0 0 4px; font-family: var(--op-font-display); font-size: 20px; font-weight: 600; color: var(--op-dark-green); }
+.sd-card-head p { margin: 0; font-size: 13.5px; color: var(--op-silver-light); }
+.sd-card-body { padding: 20px 28px 24px; }
+.sd-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 24px; margin: 0; padding: 22px 28px 26px; }
+.sd-link { color: var(--op-dark-green); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.sd-team { list-style: none; margin: 0; padding: 8px 20px 12px; }
+.sd-team li { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+.sd-team li + li { border-top: 1px solid var(--op-border-divider); }
+.sd-team div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sd-team strong { font-family: var(--op-font-display); font-weight: 600; font-size: 15px; color: var(--op-dark-green); }
+.sd-team span:not(.sd-avatar) { font-size: 13px; color: var(--op-silver-light); }
+.sd-avatar { width: 46px; height: 46px; flex-shrink: 0; border-radius: var(--op-radius-lg); display: grid; place-items: center; font-family: var(--op-font-display); font-weight: 600; font-size: 14px; }
+.sd-timeline { list-style: none; margin: 0; padding: 22px 28px 26px; }
+.sd-timeline li { position: relative; display: flex; gap: 16px; padding-bottom: 22px; }
+.sd-timeline li:last-child { padding-bottom: 0; }
+.sd-timeline li:not(:last-child)::before { content: ""; position: absolute; left: 8px; top: 20px; bottom: 0; width: 2px; background: var(--op-border-card); }
+.sd-timeline li.is-done:not(:last-child)::before { background: var(--op-success); }
+.sd-dot { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; border-radius: 50%; border: 2px solid var(--op-border-input); background: var(--op-white); }
+.is-done .sd-dot { background: var(--op-success); border-color: var(--op-success); }
+.is-current .sd-dot { background: var(--op-accent-lime); border-color: var(--op-dark-green); }
+.sd-timeline div { display: flex; flex-direction: column; gap: 2px; }
+.sd-timeline strong { font-size: 14px; color: var(--op-dark-green); }
+.is-todo strong { color: var(--op-silver-light); font-weight: 600; }
+.sd-timeline span:not(.sd-dot) { font-size: 12.5px; color: var(--op-silver-light); }
+.sd-docs { list-style: none; margin: 0; padding: 6px 28px 12px; }
+.sd-docs li { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+.sd-docs li + li { border-top: 1px solid var(--op-border-divider); }
+.sd-docs div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sd-docs strong { font-size: 14px; color: var(--op-dark-green); overflow-wrap: anywhere; }
+.sd-docs div span { font-size: 12.5px; color: var(--op-silver-light); }
+.sd-doc-icon { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; border-radius: var(--op-radius-md); background: var(--op-chip-neutral-bg); color: var(--op-dark-green); }
+.sd-doc-icon svg { width: 16px; height: 16px; }
+.sd-empty { margin: 0; padding: 24px 28px; color: var(--op-silver-light); font-size: 13.5px; }
+.sd-table { overflow-x: auto; border-radius: 0 0 var(--op-radius-xl) var(--op-radius-xl); }
+.sd-chart-wide { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 28px; align-items: center; }
+.sd-chart-wide .pp-chart-metrics { margin-top: 0; padding-top: 0; border-top: none; }
+.sd-pp-table { min-width: 760px; }
+.sd-pp-table th:first-child, .sd-pp-table td:first-child { padding-left: 28px; }
 
 /* Comparison chart */
 .pp-chart { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
@@ -816,7 +875,11 @@ body {
 .modal .status-badge { vertical-align: middle; }
 
 @media (max-width: 900px) {
-  .pp-ship-grid { grid-template-columns: 1fr; }
+  .sd-split { grid-template-columns: 1fr; }
+  .sd-chart-wide { grid-template-columns: 1fr; }
+  .sd-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sd-facts > div:nth-child(3) { border-left: none; padding-left: 0; }
+  .sd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   .board { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .stat-cards { grid-template-columns: 1fr; }

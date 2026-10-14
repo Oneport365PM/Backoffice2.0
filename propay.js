@@ -22,11 +22,28 @@
   };
 
   var SHIPMENTS = {
-    "ZIL0312": { id: "ZIL0312", customer: "Dangote Industries", mode: "Ocean Freight", route: "Shanghai → Apapa, Lagos", container: "2 × 40ft HC", eta: "2026-10-22", quoteRef: "QT-26-0918", stage: "In transit" },
-    "ZIL0298": { id: "ZIL0298", customer: "Flour Mills of Nigeria", mode: "Ocean Freight", route: "Antwerp → Tin Can, Lagos", container: "1 × 20ft", eta: "2026-10-09", quoteRef: "QT-26-0874", stage: "Clearing" },
-    "ZIL0305": { id: "ZIL0305", customer: "Honeywell Group", mode: "Air Freight", route: "Dubai → Lagos (LOS)", container: "1,240 kg", eta: "2026-10-12", quoteRef: "QT-26-0901", stage: "Delivered" },
-    "ZIL0321": { id: "ZIL0321", customer: "MTN Nigeria", mode: "Ocean Freight", route: "Mersin → Onne, Rivers", container: "3 × 40ft", eta: "2026-11-02", quoteRef: "QT-26-0933", stage: "Booked" }
+    "ZIL0312": { id: "ZIL0312", status: "Active", customer: "Dangote Industries", mode: "Ocean Freight", pol: "CNSHA", pod: "NGAPP", origin: "Shanghai, China (CNSHA)", destination: "Apapa, Lagos (NGAPP)",
+      bookingContact: "Fidelia Aluku", quoteRef: "QT-26-0918", bl: "MAEU264418230", shipmentType: "Import", serviceType: "FCL", incoterm: "FOB", load: "2 × 40ft HC", eta: "2026-10-22",
+      team: [{ name: "Kimeen Ugwu", role: "Operations Manager" }, { name: "Manuel Akin", role: "Operations Officer" }, { name: "Nkechi M.", role: "Finance" }],
+      progress: [["Booking confirmed", "2026-09-18"], ["Cargo received at origin", "2026-09-24"], ["Departed port of loading", "2026-09-29"], ["Arrived port of discharge", null], ["Customs cleared", null], ["Delivered", null]], step: 3,
+      documents: [["Bill of lading", "MAEU264418230.pdf", "2026-09-29"], ["Commercial invoice", "dangote-ci-0912.pdf", "2026-09-20"], ["Packing list", "dangote-pl-0912.pdf", "2026-09-20"]] },
+    "ZIL0298": { id: "ZIL0298", status: "Active", customer: "Flour Mills of Nigeria", mode: "Ocean Freight", pol: "BEANR", pod: "NGTIN", origin: "Antwerp, Belgium (BEANR)", destination: "Tin Can, Lagos (NGTIN)",
+      bookingContact: "Tobi Adewale", quoteRef: "QT-26-0874", bl: "CMDU883120447", shipmentType: "Import", serviceType: "FCL", incoterm: "CIF", load: "1 × 20ft", eta: "2026-10-09",
+      team: [{ name: "Kimeen Ugwu", role: "Operations Manager" }, { name: "Ugwu Neny", role: "Operations Officer" }],
+      progress: [["Booking confirmed", "2026-09-02"], ["Cargo received at origin", "2026-09-06"], ["Departed port of loading", "2026-09-10"], ["Arrived port of discharge", "2026-10-09"], ["Customs cleared", null], ["Delivered", null]], step: 4,
+      documents: [["Bill of lading", "CMDU883120447.pdf", "2026-09-10"], ["Form M", "formm-fmn-2209.pdf", "2026-08-30"]] },
+    "ZIL0305": { id: "ZIL0305", status: "Completed", customer: "Honeywell Group", mode: "Air Freight", pol: "AEDXB", pod: "NGLOS", origin: "Dubai, UAE (AEDXB)", destination: "Lagos, Nigeria (NGLOS)",
+      bookingContact: "Ifeoma Obi", quoteRef: "QT-26-0901", bl: "176-55320914 (AWB)", shipmentType: "Import", serviceType: "Air consolidation", incoterm: "EXW", load: "1,240 kg", eta: "2026-10-12",
+      team: [{ name: "Manuel Akin", role: "Operations Officer" }, { name: "Ada Okoro", role: "Operations Officer" }],
+      progress: [["Booking confirmed", "2026-10-02"], ["Cargo received at origin", "2026-10-05"], ["Departed port of loading", "2026-10-07"], ["Arrived port of discharge", "2026-10-08"], ["Customs cleared", "2026-10-10"], ["Delivered", "2026-10-12"]], step: 6,
+      documents: [["Air waybill", "awb-176-55320914.pdf", "2026-10-07"], ["Delivery note", "honeywell-dn-1012.pdf", "2026-10-12"]] },
+    "ZIL0321": { id: "ZIL0321", status: "Active", customer: "MTN Nigeria", mode: "Ocean Freight", pol: "TRMER", pod: "NGONN", origin: "Mersin, Turkey (TRMER)", destination: "Onne, Rivers (NGONN)",
+      bookingContact: "Chidi Nwosu", quoteRef: "QT-26-0933", bl: "Pending", shipmentType: "Import", serviceType: "FCL", incoterm: "FOB", load: "3 × 40ft", eta: "2026-11-02",
+      team: [{ name: "Kimeen Ugwu", role: "Operations Manager" }, { name: "Ugwu Neny", role: "Operations Officer" }],
+      progress: [["Booking confirmed", "2026-10-11"], ["Cargo received at origin", null], ["Departed port of loading", null], ["Arrived port of discharge", null], ["Customs cleared", null], ["Delivered", null]], step: 1,
+      documents: [] }
   };
+
 
   function seedData() {
     return [
@@ -156,7 +173,7 @@
     topbarTitle.textContent = mod === "propay" ? "ProPay" : "CRM";
 
     if (mod !== "propay") return;
-    if (parts[1] === "shipment" && SHIPMENTS[parts[2]]) renderShipment(parts[2]);
+    if (parts[1] === "shipment" && SHIPMENTS[parts[2]]) renderShipment(parts[2], parts[3]);
     else renderRegister();
     window.scrollTo(0, 0);
   }
@@ -240,48 +257,118 @@
   }
 
   // ---------- Shipment detail page ----------
-  function renderShipment(id) {
+  // Mirrors the Shipments module's detail layout: header card with key
+  // facts, then tabs. Arriving from ProPay lands on the Propay tab.
+  var SHIP_TABS = [["overview", "Overview"], ["progress", "Progress"], ["documents", "Documents"], ["propay", "Propay"]];
+
+  function renderShipment(id, tab) {
     var s = SHIPMENTS[id];
+    tab = tab || "propay";
     var lines = records.filter(function (r) { return r.shipmentId === id; });
-    var payables = lines.filter(function (r) { return r.type === "payable"; });
-    var budget = payables.reduce(function (t, r) { return t + (r.budget || 0); }, 0);
-    var actual = payables.reduce(function (t, r) { return t + r.actual; }, 0);
-    var sell = payables.reduce(function (t, r) { return t + (r.sell || 0); }, 0);
+    var clip = '<svg viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.5-8.5a3.3 3.3 0 014.7 4.7L9.7 17.2a1.7 1.7 0 01-2.4-2.4L15 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
 
-    var rows = lines.map(function (r) {
-      return "<tr>" +
-        '<td class="pp-po">' + esc(r.id) + "</td>" +
-        '<td class="customer-name">' + esc(r.party) + "</td>" +
-        '<td><span class="meeting-badge">' + esc(r.category) + "</span></td>" +
-        '<td class="pp-num">' + money(r.actual) + "</td>" +
-        "<td>" + budgetCheckHtml(r) + "</td>" +
-        '<td class="pp-num">' + money(r.sell) + "</td>" +
-        "<td>" + statusHtml(r.status) + "</td>" +
-        '<td class="action-col"><button type="button" class="view-btn" data-more="' + esc(r.id) + '">View more</button></td>' +
-        "</tr>";
-    }).join("");
+    var head =
+      '<a class="sd-back" href="#propay"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to ProPay</a>' +
+      '<section class="sd-card sd-hero">' +
+        '<div class="sd-hero-top">' +
+          '<div class="sd-hero-title"><h2>' + esc(s.id) + '</h2><span class="sd-pill ' + (s.status === "Active" ? "is-active" : "is-done") + '">' + esc(s.status) + "</span></div>" +
+          '<div class="sd-actions">' +
+            '<button type="button" class="btn btn-primary sd-actions-btn" id="sdActionsBtn" aria-expanded="false">Actions <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>' +
+            '<div class="sd-menu" id="sdMenu" hidden>' +
+              '<button type="button" data-sd-action="Status update sent to customer">Send status update</button>' +
+              '<button type="button" data-sd-action="Document request sent">Request documents</button>' +
+              '<button type="button" data-sd-action="Shipment link copied">Copy shipment link</button>' +
+            "</div>" +
+          "</div>" +
+        "</div>" +
+        '<dl class="sd-facts">' +
+          "<div><dt>Customer</dt><dd>" + esc(s.customer) + "</dd></div>" +
+          "<div><dt>Transport mode</dt><dd>" + esc(s.mode) + "</dd></div>" +
+          "<div><dt>Port of loading</dt><dd>" + esc(s.pol) + "</dd></div>" +
+          "<div><dt>Port of discharge</dt><dd>" + esc(s.pod) + "</dd></div>" +
+        "</dl>" +
+      "</section>" +
+      '<nav class="sd-card sd-tabs" aria-label="Shipment sections">' +
+        SHIP_TABS.map(function (t) {
+          return '<a href="#propay/shipment/' + encodeURIComponent(id) + "/" + t[0] + '" class="sd-tab' + (t[0] === tab ? " active" : "") + '"' + (t[0] === tab ? ' aria-current="page"' : "") + ">" + t[1] + "</a>";
+        }).join("") +
+      "</nav>";
 
-    root.innerHTML =
-      '<nav class="pp-crumbs" aria-label="Breadcrumb"><a class="pp-link" href="#propay">ProPay</a><span aria-hidden="true">/</span><span>Shipment ' + esc(s.id) + "</span></nav>" +
-      '<div class="activity-header"><div><p class="pp-eyebrow">Shipment detail</p><h2>' + esc(s.id) + '</h2><p class="muted">' + esc(s.customer) + " · " + esc(s.route) + "</p></div>" +
-        '<a class="btn btn-outline pp-back" href="#propay">← Back to ProPay</a></div>' +
-      '<div class="pp-ship-grid">' +
-        '<section class="pp-card"><p class="pp-eyebrow">Shipment</p><dl class="pp-dl">' +
-          "<dt>Customer</dt><dd>" + esc(s.customer) + "</dd>" +
-          '<dt>Mode</dt><dd><span class="meeting-badge">' + esc(s.mode) + "</span></dd>" +
-          "<dt>Route</dt><dd>" + esc(s.route) + "</dd>" +
-          "<dt>Load</dt><dd>" + esc(s.container) + "</dd>" +
-          "<dt>ETA</dt><dd>" + formatDate(s.eta) + "</dd>" +
-          "<dt>Quote ref</dt><dd>" + esc(s.quoteRef) + "</dd>" +
-          '<dt>Stage</dt><dd><span class="status-badge pp-st-approved">' + esc(s.stage) + "</span></dd>" +
-        "</dl></section>" +
-        '<section class="pp-card"><p class="pp-eyebrow">Cost vs. sell (payables)</p>' + compareChart(sell, budget, actual) +
-          "</section>" +
-      "</div>" +
-      '<h3 class="pp-h3">Payment lines on this shipment</h3>' +
-      '<div class="table-wrap"><table class="activity-table pp-table">' +
-        "<thead><tr><th>PO #</th><th>Vendor / Customer</th><th>Category</th><th>Amount</th><th>Budget check</th><th>Sell price</th><th>Status</th><th class=\"action-col\">Action</th></tr></thead>" +
-        "<tbody>" + rows + "</tbody></table></div>";
+    var body = "";
+
+    if (tab === "overview") {
+      var detail = [
+        ["Customer", '<span class="sd-link">' + esc(s.customer) + "</span>"],
+        ["Booking contact", esc(s.bookingContact)],
+        ["Quote reference", '<span class="sd-link">' + esc(s.quoteRef) + "</span>"],
+        [s.mode === "Air Freight" ? "Air waybill" : "Bill of lading", esc(s.bl)],
+        ["Shipment type", esc(s.shipmentType)],
+        ["Transport mode", esc(s.mode)],
+        ["Service type", esc(s.serviceType)],
+        ["Incoterm", esc(s.incoterm)],
+        ["Origin", esc(s.origin)],
+        ["Destination", esc(s.destination)],
+        ["Load", esc(s.load)],
+        ["ETA", formatDate(s.eta)]
+      ].map(function (d) { return "<div><dt>" + d[0] + "</dt><dd>" + d[1] + "</dd></div>"; }).join("");
+
+      body =
+        '<div class="sd-split">' +
+          '<section class="sd-card"><div class="sd-card-head"><h3>Shipment Details</h3><p>Core reference data for this job.</p></div>' +
+            '<dl class="sd-grid">' + detail + "</dl></section>" +
+          '<section class="sd-card"><div class="sd-card-head"><h3>Shipment Team</h3><p>Who’s assigned to this shipment.</p></div>' +
+            '<ul class="sd-team">' + s.team.map(function (m, i) {
+              // Cycle the brand fills down the list so neighbours never match.
+              var fill = ["1", "3", "4", "2"][i % 4];
+              return '<li><span class="sd-avatar" style="background:var(--op-avatar-' + fill + '-bg);color:var(--op-avatar-' + fill + '-text)">' + initials(m.name) + '</span><div><strong>' + esc(m.name) + "</strong><span>" + esc(m.role) + "</span></div></li>";
+            }).join("") + "</ul></section>" +
+        "</div>";
+    } else if (tab === "progress") {
+      body =
+        '<section class="sd-card"><div class="sd-card-head"><h3>Progress</h3><p>Milestones from booking to delivery.</p></div>' +
+          '<ol class="sd-timeline">' + s.progress.map(function (m, i) {
+            var state = i < s.step ? "done" : i === s.step ? "current" : "todo";
+            return '<li class="is-' + state + '"><span class="sd-dot" aria-hidden="true"></span><div><strong>' + esc(m[0]) + "</strong><span>" +
+              (m[1] ? formatDate(m[1]) : state === "current" ? "In progress" : "Pending") + "</span></div></li>";
+          }).join("") + "</ol></section>";
+    } else if (tab === "documents") {
+      var docs = s.documents.map(function (d) { return { type: d[0], file: d[1], at: d[2] }; })
+        .concat(lines.filter(function (r) { return r.attachment; }).map(function (r) { return { type: r.category + " · " + r.id, file: r.attachment, at: null }; }));
+      body =
+        '<section class="sd-card"><div class="sd-card-head"><h3>Documents</h3><p>Shipping documents and payment attachments.</p></div>' +
+          (docs.length
+            ? '<ul class="sd-docs">' + docs.map(function (d) {
+                return '<li><span class="sd-doc-icon">' + clip + '</span><div><strong>' + esc(d.file) + "</strong><span>" + esc(d.type) + "</span></div>" +
+                  '<span class="pp-muted">' + (d.at ? formatDate(d.at) : "From ProPay") + "</span></li>";
+              }).join("") + "</ul>"
+            : '<p class="sd-empty">No documents uploaded yet.</p>') +
+        "</section>";
+    } else {
+      var payables = lines.filter(function (r) { return r.type === "payable"; });
+      var budget = payables.reduce(function (t, r) { return t + (r.budget || 0); }, 0);
+      var actual = payables.reduce(function (t, r) { return t + r.actual; }, 0);
+      var sell = payables.reduce(function (t, r) { return t + (r.sell || 0); }, 0);
+      var rows = lines.map(function (r) {
+        return "<tr>" +
+          '<td class="pp-po">' + esc(r.id) + "</td>" +
+          '<td class="customer-name">' + esc(r.party) + "</td>" +
+          '<td><span class="meeting-badge">' + esc(r.category) + "</span></td>" +
+          '<td class="pp-num">' + money(r.actual) + "</td>" +
+          "<td>" + budgetCheckHtml(r) + "</td>" +
+          "<td>" + statusHtml(r.status) + "</td>" +
+          '<td class="action-col"><button type="button" class="view-btn" data-more="' + esc(r.id) + '">View more</button></td>' +
+          "</tr>";
+      }).join("");
+      body =
+        '<section class="sd-card"><div class="sd-card-head"><h3>Cost overview</h3><p>Payables on this shipment against the quote.</p></div>' +
+          '<div class="sd-card-body sd-chart-wide">' + compareChart(sell, budget, actual) + "</div></section>" +
+        '<section class="sd-card"><div class="sd-card-head"><h3>Payment lines</h3><p>Payables and receivables raised on this shipment.</p></div>' +
+          '<div class="sd-table"><table class="activity-table pp-table sd-pp-table">' +
+            "<thead><tr><th>PO #</th><th>Vendor / Customer</th><th>Category</th><th>Amount</th><th>Budget check</th><th>Status</th><th class=\"action-col\">Action</th></tr></thead>" +
+            "<tbody>" + rows + "</tbody></table></div></section>";
+    }
+
+    root.innerHTML = '<div class="sd">' + head + body + "</div>";
   }
 
   // Horizontal bars: sell price (markup to customer), budgeted cost (from
@@ -507,6 +594,16 @@
   document.addEventListener("click", function (e) {
     var t = e.target;
 
+    var menu = document.getElementById("sdMenu");
+    if (t.closest("#sdActionsBtn")) {
+      menu.hidden = !menu.hidden;
+      t.closest("#sdActionsBtn").setAttribute("aria-expanded", String(!menu.hidden));
+      return;
+    }
+    var act = t.closest("[data-sd-action]");
+    if (act) { menu.hidden = true; toast(act.dataset.sdAction); return; }
+    if (menu && !menu.hidden) { menu.hidden = true; document.getElementById("sdActionsBtn").setAttribute("aria-expanded", "false"); }
+
     if (t.closest("#ppFilterBtn")) { state.filterOpen = !state.filterOpen; renderRegister(); return; }
 
     var opt = t.closest(".pp-filter-opt");
@@ -604,7 +701,7 @@
   function refreshPage() {
     if (!moduleEls.propay.classList.contains("active")) return;
     var parts = location.hash.replace(/^#/, "").split("/");
-    if (parts[1] === "shipment" && SHIPMENTS[parts[2]]) renderShipment(parts[2]);
+    if (parts[1] === "shipment" && SHIPMENTS[parts[2]]) renderShipment(parts[2], parts[3]);
     else renderRegister();
   }
 
