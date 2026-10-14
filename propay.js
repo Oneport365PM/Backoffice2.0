@@ -296,7 +296,8 @@
       { label: "Sell price", value: sell, color: "var(--op-cat-1)" },
       { label: "Budgeted cost", value: budget, color: "var(--op-cat-3)" },
       { label: "Actual cost", value: actual, color: over ? "var(--op-error)" : "var(--op-cat-5)", actual: true }
-    ];
+
+    ].filter(function (b) { return b.value != null; });
     var max = Math.max.apply(null, bars.map(function (b) { return b.value || 0; })) || 1;
     function pos(v) { return v / max * 100; }
 
@@ -361,61 +362,72 @@
     var noteNeeded = overBudget(r) && (r.status === "Approved" || r.status === "Part paid" || r.status === "Paid");
 
     var clip = '<svg viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.5-8.5a3.3 3.3 0 014.7 4.7L9.7 17.2a1.7 1.7 0 01-2.4-2.4L15 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
-    var facts = [
-      [isPayable ? "Vendor" : "Customer", esc(r.party)],
+
+    // Vendor, status and PO live in the header and the money lives in the
+    // chart, so the detail rows only carry what isn't shown elsewhere.
+    var rows = [
+      ["Shipment #", '<a class="pp-link" href="#propay/shipment/' + encodeURIComponent(r.shipmentId) + '">' + esc(r.shipmentId) + "</a>" + (ship ? '<span class="pp-muted">' + esc(ship.customer) + "</span>" : "")],
       ["Category", esc(r.category)],
-      ["Shipment #", '<a class="pp-link" href="#propay/shipment/' + encodeURIComponent(r.shipmentId) + '">' + esc(r.shipmentId) + "</a>"],
-      ["Sell price", money(r.sell)],
-      ["Attachment", r.attachment ? '<span class="pp-file">' + clip + esc(r.attachment) + "</span>" : '<span class="pp-muted">None</span>', "wide"]
+      ["Budget check", isPayable ? budgetCheckHtml(r) : '<span class="pp-muted">Not applicable</span>'],
+      ["Attachment", r.attachment ? '<span class="pp-file">' + clip + esc(r.attachment) + "</span>" : '<span class="pp-muted">None</span>']
     ].map(function (d) {
-      return '<div class="pp-fact' + (d[2] ? " pp-fact-wide" : "") + '"><dt>' + d[0] + "</dt><dd>" + d[1] + "</dd></div>";
+      return '<div class="pd-row"><dt>' + d[0] + "</dt><dd>" + d[1] + "</dd></div>";
     }).join("");
 
-    var details =
-      '<div class="pp-summary">' +
-        '<div><span class="pp-summary-label">Amount</span><span class="pp-summary-amount">' + money(r.actual) + "</span></div>" +
-        statusHtml(r.status) +
-      "</div>" +
-      (isPayable && r.budget != null
-        ? '<div class="pp-budget-line">' + budgetCheckHtml(r) + '<span class="pp-muted">Budget ' + money(r.budget) + "</span></div>"
-        : "") +
-      '<dl class="pp-facts">' + facts + "</dl>";
-
     var history = r.payments.length
-      ? '<ul class="pp-history">' + r.payments.map(function (p) {
-          return "<li><span><strong>" + money(p.amount) + "</strong> · " + esc(p.kind) + " payment</span><span class=\"pp-muted\">" + formatDate(p.at) + " · " + esc(p.by) + "</span></li>";
+      ? '<ul class="pd-history">' + r.payments.map(function (p) {
+          return '<li><span class="pd-history-amt">' + money(p.amount) + '</span><span class="pp-muted">' + esc(p.kind) + " · " + formatDate(p.at) + " · " + esc(p.by) + "</span></li>";
         }).join("") + "</ul>"
-      : '<p class="pp-muted pp-empty-note">No payments recorded yet.</p>';
+      : "";
 
     var payForm = canPay
-      ? '<form class="pp-pay-form" id="ppPayForm">' +
-          '<div class="pp-radio-row" role="radiogroup" aria-label="Payment type">' +
-            '<label class="pp-radio"><input type="radio" name="ppKind" value="Full" checked /> <span>Full payment</span></label>' +
-            '<label class="pp-radio"><input type="radio" name="ppKind" value="Partial" /> <span>Partial payment</span></label>' +
+      ? '<form class="pd-pay" id="ppPayForm">' +
+          '<div class="pd-toggle" role="radiogroup" aria-label="Payment type">' +
+            '<label><input type="radio" name="ppKind" value="Full" checked /><span>Full payment</span></label>' +
+            '<label><input type="radio" name="ppKind" value="Partial" /><span>Partial payment</span></label>' +
           "</div>" +
-          '<div class="field"><label class="op-input-wrap" for="ppAmount"><span class="op-notch">Amount paid (₦) <span class="req">*</span></span>' +
-            '<input type="number" id="ppAmount" min="1" max="' + due + '" step="1" value="' + due + '" readonly required /></label>' +
-            '<p class="pp-help" id="ppAmountHelp">Clears the full outstanding balance.</p></div>' +
-          '<div class="field"><label class="op-input-wrap" for="ppDate"><span class="op-notch">Payment date <span class="req">*</span></span>' +
-            '<input type="date" id="ppDate" required value="' + new Date().toISOString().slice(0, 10) + '" /></label></div>' +
+          '<div class="field-row">' +
+            '<div class="field"><label class="op-input-wrap" for="ppAmount"><span class="op-notch">Amount (₦) <span class="req">*</span></span>' +
+              '<input type="number" id="ppAmount" min="1" max="' + due + '" step="1" value="' + due + '" readonly required /></label></div>' +
+            '<div class="field"><label class="op-input-wrap" for="ppDate"><span class="op-notch">Date <span class="req">*</span></span>' +
+              '<input type="date" id="ppDate" required value="' + new Date().toISOString().slice(0, 10) + '" /></label></div>' +
+          "</div>" +
+          '<p class="pp-help" id="ppAmountHelp">Clears the full outstanding balance.</p>' +
           '<button type="submit" class="btn btn-primary pp-block">' + (isPayable ? "Record payment" : "Record receipt") + "</button>" +
         "</form>"
-      : '<p class="pp-muted pp-empty-note">' + (due === 0 ? "Fully settled." : r.status === "Rejected" ? "Rejected — no payment can be recorded." : "Payments can be recorded once approved.") + "</p>";
+      : '<p class="pd-note">' + (due === 0 ? "Fully settled." : r.status === "Rejected" ? "Rejected. No payment can be recorded." : "Payments can be recorded once approved.") + "</p>";
 
     drawer.innerHTML =
-      '<div class="modal-head"><div><p class="pp-eyebrow">' + (isPayable ? "Payable" : "Receivable") + '</p><h3 id="ppDrawerTitle">' + esc(r.id) + '</h3></div>' +
-        '<button type="button" class="modal-close" data-close-drawer aria-label="Close">&times;</button></div>' +
-      '<section><p class="pp-eyebrow">Sell vs. budget vs. actual</p>' + compareChart(r.sell, isPayable ? r.budget : null, r.actual) + "</section>" +
-      '<section class="pp-section pp-details-block">' + details + "</section>" +
-      '<section class="pp-section"><div class="pp-section-head"><p class="pp-eyebrow">Payments</p><span class="pp-muted">Paid ' + money(paid) + " · Outstanding <strong class=\"pp-due\">" + money(due) + "</strong></span></div>" +
+      '<header class="pd-head">' +
+        "<div>" +
+          '<p class="pp-eyebrow">' + (isPayable ? "Payable" : "Receivable") + "</p>" +
+          '<div class="pd-title"><h3 id="ppDrawerTitle">' + esc(r.id) + "</h3>" + statusHtml(r.status) + "</div>" +
+          '<p class="pd-sub">' + esc(r.party) + "</p>" +
+        "</div>" +
+        '<button type="button" class="modal-close" data-close-drawer aria-label="Close">&times;</button>' +
+      "</header>" +
+
+      '<section class="pd-section">' + compareChart(r.sell, isPayable ? r.budget : null, r.actual) + "</section>" +
+
+      '<section class="pd-section"><h4 class="pd-h">Details</h4><dl class="pd-rows">' + rows + "</dl></section>" +
+
+      '<section class="pd-section">' +
+        '<div class="pd-h-row"><h4 class="pd-h">Payments</h4><span class="pp-muted"><strong class="pp-due">' + money(paid) + "</strong> of " + money(r.actual) + " paid</span></div>" +
         '<div class="pp-progress" aria-hidden="true"><div style="width:' + (r.actual ? Math.min(100, paid / r.actual * 100) : 0) + '%"></div></div>' +
-        history + payForm + "</section>" +
-      '<section class="pp-section"><div class="pp-section-head"><p class="pp-eyebrow">Comments (' + r.comments.length + ')</p>' +
-        '<button type="button" class="btn-ghost" data-comments="' + esc(r.id) + '">Open thread</button></div>' +
-        (noteNeeded ? '<div class="pp-callout">Approved above budget by ' + money(r.actual - r.budget) + ". Add a comment to update the record with the reason.</div>" : "") +
-        commentsListHtml(r, 2) +
-        '<form class="pp-comment-form" data-comment-form="' + esc(r.id) + '"><div class="field"><label class="op-input-wrap"><span class="op-notch">Add a comment</span><textarea rows="2" required placeholder="' + (noteNeeded ? "Why was this approved above budget?" : "Write a comment…") + '"></textarea></label></div>' +
-        '<button type="submit" class="btn btn-outline pp-sm">Post comment</button></form>' +
+        (due > 0 && paid > 0 ? '<p class="pd-note">' + money(due) + " outstanding</p>" : "") +
+        history + payForm +
+      "</section>" +
+
+      '<section class="pd-section">' +
+        '<div class="pd-h-row"><h4 class="pd-h">Comments</h4>' +
+          (r.comments.length > 2 ? '<button type="button" class="btn-ghost" data-comments="' + esc(r.id) + '">View all ' + r.comments.length + "</button>" : '<button type="button" class="btn-ghost" data-comments="' + esc(r.id) + '">Open thread</button>') +
+        "</div>" +
+        (noteNeeded ? '<div class="pp-callout">Approved ' + money(r.actual - r.budget) + " over budget. Add a comment with the reason.</div>" : "") +
+        (r.comments.length ? commentsListHtml(r, 2) : "") +
+        '<form class="pd-composer" data-comment-form="' + esc(r.id) + '">' +
+          '<textarea rows="2" required aria-label="Add a comment" placeholder="' + (noteNeeded ? "Why was this approved above budget?" : "Add a comment…") + '"></textarea>' +
+          '<button type="submit" class="btn btn-outline pp-sm">Post</button>' +
+        "</form>" +
       "</section>";
   }
 
