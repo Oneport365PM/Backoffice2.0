@@ -311,15 +311,15 @@
   // actual cost turns error-red only when it is over budget.
   function compareChart(sell, budget, actual) {
     var bars = [
-      { label: "Sell price", sub: "Markup price to customer", value: sell, color: "var(--op-cat-1)" },
-      { label: "Budgeted cost", sub: "From quote", value: budget, color: "var(--op-cat-3)" },
-      { label: "Actual cost", sub: "Spent", value: actual, color: budget != null && actual > budget ? "var(--op-error)" : "var(--op-cat-5)" }
+      { label: "Sell price", value: sell, color: "var(--op-cat-1)" },
+      { label: "Budgeted cost", value: budget, color: "var(--op-cat-3)" },
+      { label: "Actual cost", value: actual, color: budget != null && actual > budget ? "var(--op-error)" : "var(--op-cat-5)" }
     ];
     var max = Math.max.apply(null, bars.map(function (b) { return b.value || 0; })) || 1;
     return '<div class="pp-chart" role="img" aria-label="' + bars.map(function (b) { return b.label + " " + money(b.value); }).join(", ") + '">' +
       bars.map(function (b) {
         var pct = b.value == null ? 0 : Math.max(2, b.value / max * 100);
-        return '<div class="pp-bar-row"><div class="pp-bar-meta"><span class="pp-bar-label">' + b.label + ' <span class="pp-muted">· ' + b.sub + '</span></span><span class="pp-bar-value">' + money(b.value) + "</span></div>" +
+        return '<div class="pp-bar-row"><div class="pp-bar-meta"><span class="pp-bar-label">' + b.label + '</span><span class="pp-bar-value">' + money(b.value) + "</span></div>" +
           '<div class="pp-bar-track"><div class="pp-bar" style="width:' + pct + "%;background:" + b.color + '"></div></div></div>';
       }).join("") + "</div>";
   }
@@ -351,30 +351,32 @@
     var isPayable = r.type === "payable";
     var noteNeeded = overBudget(r) && (r.status === "Approved" || r.status === "Part paid" || r.status === "Paid");
 
-    var details = [
-      ["PO #", esc(r.id)],
+    var clip = '<svg viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.5-8.5a3.3 3.3 0 014.7 4.7L9.7 17.2a1.7 1.7 0 01-2.4-2.4L15 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+    var facts = [
       [isPayable ? "Vendor" : "Customer", esc(r.party)],
-      ["Category", '<span class="meeting-badge">' + esc(r.category) + "</span>"],
-      ["Shipment #", '<a class="pp-link" href="#propay/shipment/' + encodeURIComponent(r.shipmentId) + '">' + esc(r.shipmentId) + "</a>" + (ship ? ' <span class="pp-muted">· ' + esc(ship.customer) + "</span>" : "")],
-      ["Amount", money(r.actual)],
-      ["Budget check", budgetCheckHtml(r) + (isPayable && r.budget != null ? ' <span class="pp-muted">Budget ' + money(r.budget) + "</span>" : "")],
+      ["Category", esc(r.category)],
+      ["Shipment #", '<a class="pp-link" href="#propay/shipment/' + encodeURIComponent(r.shipmentId) + '">' + esc(r.shipmentId) + "</a>"],
       ["Sell price", money(r.sell)],
-      ["Status", statusHtml(r.status)],
-      ["Attachment", r.attachment ? '<span class="pp-file"><svg viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.5-8.5a3.3 3.3 0 014.7 4.7L9.7 17.2a1.7 1.7 0 01-2.4-2.4L15 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>' + esc(r.attachment) + "</span>" : '<span class="pp-muted">No attachment</span>']
-    ].map(function (d, i) {
-      return '<li><span class="pp-idx">' + (i + 1) + "</span><span class=\"pp-dk\">" + d[0] + '</span><span class="pp-dv">' + d[1] + "</span></li>";
+      ["Attachment", r.attachment ? '<span class="pp-file">' + clip + esc(r.attachment) + "</span>" : '<span class="pp-muted">None</span>', "wide"]
+    ].map(function (d) {
+      return '<div class="pp-fact' + (d[2] ? " pp-fact-wide" : "") + '"><dt>' + d[0] + "</dt><dd>" + d[1] + "</dd></div>";
     }).join("");
+
+    var details =
+      '<div class="pp-summary">' +
+        '<div><span class="pp-summary-label">Amount</span><span class="pp-summary-amount">' + money(r.actual) + "</span></div>" +
+        statusHtml(r.status) +
+      "</div>" +
+      (isPayable && r.budget != null
+        ? '<div class="pp-budget-line">' + budgetCheckHtml(r) + '<span class="pp-muted">Budget ' + money(r.budget) + "</span></div>"
+        : "") +
+      '<dl class="pp-facts">' + facts + "</dl>";
 
     var history = r.payments.length
       ? '<ul class="pp-history">' + r.payments.map(function (p) {
           return "<li><span><strong>" + money(p.amount) + "</strong> · " + esc(p.kind) + " payment</span><span class=\"pp-muted\">" + formatDate(p.at) + " · " + esc(p.by) + "</span></li>";
         }).join("") + "</ul>"
       : '<p class="pp-muted pp-empty-note">No payments recorded yet.</p>';
-
-    var approvalActions = r.status === "Awaiting approval"
-      ? '<div class="pp-approve"><span class="pp-muted">This ' + (isPayable ? "payable" : "invoice") + " is awaiting approval.</span>" +
-        '<div class="modal-actions-right"><button type="button" class="btn btn-outline pp-sm" data-set-status="Rejected">Reject</button><button type="button" class="btn btn-solid pp-sm" data-set-status="Approved">Approve</button></div></div>'
-      : "";
 
     var payForm = canPay
       ? '<form class="pp-pay-form" id="ppPayForm">' +
@@ -392,11 +394,10 @@
       : '<p class="pp-muted pp-empty-note">' + (due === 0 ? "Fully settled." : r.status === "Rejected" ? "Rejected — no payment can be recorded." : "Payments can be recorded once approved.") + "</p>";
 
     drawer.innerHTML =
-      '<div class="modal-head"><div><p class="pp-eyebrow">' + (isPayable ? "Payable" : "Receivable") + '</p><h3 id="ppDrawerTitle">' + esc(r.id) + '</h3><p class="muted">' + esc(r.party) + " · " + esc(r.category) + '</p></div>' +
+      '<div class="modal-head"><div><p class="pp-eyebrow">' + (isPayable ? "Payable" : "Receivable") + '</p><h3 id="ppDrawerTitle">' + esc(r.id) + '</h3></div>' +
         '<button type="button" class="modal-close" data-close-drawer aria-label="Close">&times;</button></div>' +
-      approvalActions +
-      '<section class="pp-card pp-card-flat"><p class="pp-eyebrow">Sell vs. budget vs. actual</p>' + compareChart(r.sell, isPayable ? r.budget : null, r.actual) + "</section>" +
-      '<section class="pp-section"><p class="pp-eyebrow">Details</p><ol class="pp-details">' + details + "</ol></section>" +
+      '<section class="pp-details-block">' + details + "</section>" +
+      '<section class="pp-section"><p class="pp-eyebrow">Sell vs. budget vs. actual</p>' + compareChart(r.sell, isPayable ? r.budget : null, r.actual) + "</section>" +
       '<section class="pp-section"><div class="pp-section-head"><p class="pp-eyebrow">Payments</p><span class="pp-muted">Paid ' + money(paid) + " · Outstanding <strong class=\"pp-due\">" + money(due) + "</strong></span></div>" +
         '<div class="pp-progress" aria-hidden="true"><div style="width:' + (r.actual ? Math.min(100, paid / r.actual * 100) : 0) + '%"></div></div>' +
         history + payForm + "</section>" +
@@ -517,16 +518,6 @@
       return;
     }
     if (t.closest("[data-cancel-reply]")) { state.replyTo = null; renderComments(); return; }
-
-    var setStatus = t.closest("[data-set-status]");
-    if (setStatus) {
-      var rec = byId(state.drawerId);
-      rec.status = setStatus.dataset.setStatus;
-      save();
-      renderDrawer();
-      refreshPage();
-      toast(rec.id + " " + rec.status.toLowerCase());
-    }
   });
 
   document.addEventListener("change", function (e) {

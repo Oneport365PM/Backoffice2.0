@@ -703,27 +703,20 @@ body {
 }
 .pp-section { border-top: 1px solid var(--op-border-divider); padding-top: var(--op-space-4); margin-top: var(--op-space-4); }
 .pp-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.pp-details { list-style: none; margin: 8px 0 0; padding: 0; }
-.pp-details li { display: grid; grid-template-columns: 24px 110px 1fr; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--op-border-divider); font-size: 13.5px; }
-.pp-details li:last-child { border-bottom: none; }
-.pp-idx {
-  width: 22px; height: 22px; border-radius: var(--op-radius-sm);
-  background: var(--op-dark-green); color: #fff;
-  display: grid; place-items: center;
-  font-family: var(--op-font-display); font-size: 11px; font-weight: 600;
-}
-.pp-dk { color: var(--op-silver-light); }
-.pp-dv { color: var(--op-dark-green); font-weight: 600; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pp-details-block { display: flex; flex-direction: column; gap: 12px; }
+.pp-summary { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pp-summary > div { display: flex; flex-direction: column; gap: 2px; }
+.pp-summary-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--op-silver-light); }
+.pp-summary-amount { font-family: var(--op-font-display); font-size: 26px; font-weight: 600; line-height: 1.1; color: var(--op-dark-green); }
+.pp-budget-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pp-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; margin: 4px 0 0; }
+.pp-fact { min-width: 0; }
+.pp-fact-wide { grid-column: 1 / -1; }
+.pp-fact dt { font-size: 11.5px; color: var(--op-silver-light); margin-bottom: 2px; }
+.pp-fact dd { margin: 0; font-size: 13.5px; font-weight: 700; color: var(--op-dark-green); overflow-wrap: anywhere; }
 .pp-file { display: inline-flex; align-items: center; gap: 5px; }
 .pp-due { color: var(--op-dark-green); }
 
-.pp-approve {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
-  background: var(--op-chip-warning-bg);
-  border-radius: var(--op-radius-lg);
-  padding: 10px 12px;
-  margin-bottom: var(--op-space-4);
-}
 .btn.pp-sm { padding: 8px 14px; font-size: 13px; }
 .pp-block { width: 100%; }
 
