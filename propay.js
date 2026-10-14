@@ -100,7 +100,8 @@
     filterOpen: false,
     drawerId: null,
     commentsId: null,
-    replyTo: null
+    replyTo: null,
+    currency: "NGN"
   };
 
   // ---------- Helpers ----------
@@ -375,7 +376,7 @@
       }).join("");
       body =
         '<section class="sd-card"><div class="sd-card-head"><h3>Cost overview</h3><p>Payables on this shipment against the quote.</p></div>' +
-          '<div class="sd-card-body sd-chart-wide">' + compareChart(sell, budget, actual) + "</div></section>" +
+          '<div class="sd-card-body">' + compareChart(sell, budget, actual) + "</div></section>" +
         '<section class="sd-card"><div class="sd-card-head"><h3>Payment lines</h3><p>Payables and receivables raised on this shipment.</p></div>' +
           '<div class="sd-table"><table class="activity-table pp-table sd-pp-table">' +
             "<thead><tr><th>PO #</th><th>Vendor / Customer</th><th>Category</th><th>Amount</th><th>Budget check</th><th>Status</th><th class=\"action-col\">Action</th></tr></thead>" +
@@ -385,54 +386,59 @@
     root.innerHTML = '<div class="sd">' + head + body + "</div>";
   }
 
-  // Horizontal bars: sell price (markup to customer), budgeted cost (from
-  // quote), actual cost spent. Colours come from the categorical series;
-  // actual cost turns error-red only when it is over budget. The actual
-  // bar also carries the margin (gap up to sell price) and a budget tick,
-  // and the footer spells out margin and variance.
+  // Cost chart: thick bars on one scale (sell price, budgeted cost, actual
+  // cost) with a gold "variance threshold" line at the budget, then a row
+  // of keyed figures. Actual cost past the threshold turns error-red. The
+  // currency picker converts the chart only, at a fixed prototype rate.
+  var CHART_RATES = { NGN: 1, USD: 1 / 1550 };
+  var chartFmt = {
+    NGN: new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }),
+    USD: new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })
+  };
+  function chartMoney(n) { return chartFmt[state.currency].format(n * CHART_RATES[state.currency]); }
+
   function compareChart(sell, budget, actual) {
     var hasBudget = budget != null;
-    var over = hasBudget && actual > budget;
-    var bars = [
-      { label: "Sell price", value: sell, color: "var(--op-cat-1)" },
-      { label: "Budgeted cost", value: budget, color: "var(--op-cat-3)" },
-      { label: "Actual cost", value: actual, color: over ? "var(--op-error)" : "var(--op-cat-5)", actual: true }
+    var max = Math.max(sell || 0, budget || 0, actual || 0) || 1;
+    function pos(v) { return Math.round(v / max * 1000) / 10; }
 
-    ].filter(function (b) { return b.value != null; });
-    var max = Math.max.apply(null, bars.map(function (b) { return b.value || 0; })) || 1;
-    function pos(v) { return v / max * 100; }
+    var actualBar = hasBudget && actual > budget
+      ? '<div class="cc-bar cc-actual" style="width:' + pos(budget) + '%"></div><div class="cc-bar cc-over" style="left:' + pos(budget) + "%;width:" + (pos(actual) - pos(budget)) + '%"></div>'
+      : '<div class="cc-bar cc-actual" style="width:' + Math.max(1, pos(actual)) + '%"></div>';
 
-    var margin = sell - actual;
-    var marginPct = sell ? Math.round(margin / sell * 100) : 0;
-    var variance = hasBudget ? budget - actual : null;
+    var bars =
+      '<div class="cc-row" title="Sell price ' + chartMoney(sell) + '"><div class="cc-bar cc-sell" style="width:' + pos(sell) + '%"></div></div>' +
+      (hasBudget ? '<div class="cc-row" title="Budgeted cost ' + chartMoney(budget) + '"><div class="cc-bar cc-budget" style="width:' + pos(budget) + '%"></div></div>' : "") +
+      '<div class="cc-row" title="Actual cost ' + chartMoney(actual) + '">' + actualBar + "</div>";
 
-    var rows = bars.map(function (b) {
-      var pct = b.value == null ? 0 : Math.max(2, pos(b.value));
-      var extras = "";
-      if (b.actual && hasBudget) {
-        if (margin > 0) {
-          extras += '<div class="pp-bar-margin" style="left:' + pos(actual) + "%;width:" + (pos(sell) - pos(actual)) + '%" title="Margin ' + money(margin) + '"></div>';
-        }
-        extras += '<div class="pp-bar-tick" style="left:' + pos(budget) + '%" title="Budget ' + money(budget) + '"></div>';
-      }
-      return '<div class="pp-bar-row"><div class="pp-bar-meta"><span class="pp-bar-label">' + b.label + '</span><span class="pp-bar-value">' + money(b.value) + "</span></div>" +
-        '<div class="pp-bar-track"><div class="pp-bar" style="width:' + pct + "%;background:" + b.color + '"></div>' + extras + "</div></div>";
-    }).join("");
+    var stats =
+      '<div class="cc-stat"><span class="cc-key"><i class="cc-sell"></i>Sell price</span><strong>' + chartMoney(sell) + "</strong></div>" +
+      (hasBudget ? '<div class="cc-stat"><span class="cc-key"><i class="cc-budget"></i>Budgeted cost</span><strong>' + chartMoney(budget) + "</strong></div>" : "") +
+      '<div class="cc-stat"><span class="cc-key"><i class="cc-actual"></i>Actual cost</span><strong>' + chartMoney(actual) + "</strong></div>";
 
-    var legend = hasBudget
-      ? '<div class="pp-chart-legend"><span><i class="pp-key pp-key-margin"></i>Margin</span><span><i class="pp-key pp-key-tick"></i>Budget</span></div>'
-      : "";
+    if (hasBudget) {
+      var margin = sell - actual;
+      var variance = actual - budget;
+      var vSign = variance > 0 ? "+" : variance < 0 ? "−" : "";
+      stats +=
+        '<div class="cc-stat"><span class="cc-key">Margin</span><strong class="' + (margin < 0 ? "is-neg" : "") + '">' + (sell ? Math.round(margin / sell * 100) : 0) + "%</strong>" +
+          "<small>" + chartMoney(margin) + " of sell price</small></div>" +
+        '<div class="cc-stat"><span class="cc-key">Variance</span><strong class="' + (variance > 0 ? "is-neg" : "") + '">' + vSign + Math.abs(budget ? Math.round(variance / budget * 100) : 0) + "%</strong>" +
+          "<small>" + chartMoney(Math.abs(variance)) + (variance > 0 ? " over budget" : variance < 0 ? " under budget" : " on budget") + "</small></div>";
+    }
 
-    var metrics = hasBudget
-      ? '<div class="pp-chart-metrics">' +
-          '<div class="pp-metric"><span class="pp-metric-label">Margin</span><span class="pp-metric-value ' + (margin < 0 ? "is-neg" : "is-pos") + '">' + money(margin) + '</span><span class="pp-metric-sub">' + marginPct + "% of sell price</span></div>" +
-          '<div class="pp-metric"><span class="pp-metric-label">Variance</span><span class="pp-metric-value ' + (variance < 0 ? "is-neg" : "is-pos") + '">' + (variance < 0 ? "−" : variance > 0 ? "+" : "") + money(Math.abs(variance)) + '</span><span class="pp-metric-sub">' + (variance < 0 ? "Over budget" : variance > 0 ? "Under budget" : "On budget") + (budget ? " · " + Math.round(Math.abs(variance) / budget * 100) + "%" : "") + "</span></div>" +
-        "</div>"
-      : "";
+    var currency =
+      '<label class="cc-currency"><span class="sr-only">Chart currency</span><select data-chart-currency>' +
+        ["NGN", "USD"].map(function (c) { return '<option value="' + c + '"' + (c === state.currency ? " selected" : "") + ">" + c + "</option>"; }).join("") +
+      "</select></label>";
 
-    var aria = bars.map(function (b) { return b.label + " " + money(b.value); }).join(", ") +
-      (hasBudget ? ", margin " + money(margin) + ", variance " + money(variance) : "");
-    return '<div class="pp-chart" role="img" aria-label="' + aria + '">' + rows + legend + "</div>" + metrics;
+    return '<div class="cc">' +
+      '<div class="cc-top">' + currency + (hasBudget ? '<span class="cc-threshold-label">Variance threshold</span>' : "") + "</div>" +
+      '<div class="cc-plot">' + bars +
+        (hasBudget ? '<i class="cc-threshold" style="left:' + pos(budget) + '%" aria-hidden="true"></i>' : "") +
+      "</div>" +
+      '<div class="cc-stats">' + stats + "</div>" +
+    "</div>";
   }
 
   // ---------- View more drawer ----------
@@ -670,6 +676,12 @@
   });
 
   document.addEventListener("change", function (e) {
+    if (e.target.matches("[data-chart-currency]")) {
+      state.currency = e.target.value;
+      if (state.drawerId) renderDrawer();
+      refreshPage();
+      return;
+    }
     if (e.target.name !== "ppKind") return;
     var r = byId(state.drawerId);
     var amount = document.getElementById("ppAmount");
