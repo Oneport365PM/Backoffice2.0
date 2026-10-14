@@ -361,7 +361,7 @@
       }).join("");
       body =
         '<section class="sd-card"><div class="sd-card-head"><h3>Cost overview</h3><p>Payables on this shipment against the quote.</p></div>' +
-          '<div class="sd-card-body">' + compareChart(sell, budget, actual) + "</div></section>" +
+          '<div class="sd-card-body sd-chart-wide">' + compareChart(sell, budget, actual) + "</div></section>" +
         '<section class="sd-card"><div class="sd-card-head"><h3>Payment lines</h3><p>Payables and receivables raised on this shipment.</p></div>' +
           '<div class="sd-table"><table class="activity-table pp-table sd-pp-table">' +
             "<thead><tr><th>PO #</th><th>Vendor / Customer</th><th>Category</th><th>Amount</th><th>Budget check</th><th>Status</th><th class=\"action-col\">Action</th></tr></thead>" +
@@ -371,55 +371,54 @@
     root.innerHTML = '<div class="sd">' + head + body + "</div>";
   }
 
-  // Stacked horizontal bars, drawn to one scale: sell price, budgeted
-  // cost (from the quote) and actual cost. Hovering or focusing the chart
-  // reveals two dimension arrows, as in the ProPay sketch:
-  //   Margin   = sell price − budgeted cost, on the budget row
-  //   Variance = actual cost − budgeted cost, in a lane under actual cost
-  // Without a budget (receivables) only the bars are drawn.
+  // Horizontal bars: sell price (markup to customer), budgeted cost (from
+  // quote), actual cost spent. Colours come from the categorical series;
+  // actual cost turns error-red only when it is over budget. The actual
+  // bar also carries the margin (gap up to sell price) and a budget tick,
+  // and the footer spells out margin and variance.
   function compareChart(sell, budget, actual) {
     var hasBudget = budget != null;
     var over = hasBudget && actual > budget;
-    var max = Math.max(sell || 0, budget || 0, actual || 0) || 1;
-    function pos(v) { return Math.round(v / max * 1000) / 10; }
-    function pct(n, d) { return d ? Math.round(n / d * 100) : 0; }
+    var bars = [
+      { label: "Sell price", value: sell, color: "var(--op-cat-1)" },
+      { label: "Budgeted cost", value: budget, color: "var(--op-cat-3)" },
+      { label: "Actual cost", value: actual, color: over ? "var(--op-error)" : "var(--op-cat-5)", actual: true }
 
-    function bar(cls, label, value) {
-      return '<div class="pc-row"><div class="pc-bar ' + cls + '" style="width:' + Math.max(2, pos(value)) + '%">' +
-        '<span class="pc-label">' + label + '</span><span class="pc-value">' + money(value) + "</span></div>";
-    }
+    ].filter(function (b) { return b.value != null; });
+    var max = Math.max.apply(null, bars.map(function (b) { return b.value || 0; })) || 1;
+    function pos(v) { return v / max * 100; }
 
-    if (!hasBudget) {
-      return '<div class="pc">' + bar("pc-sell", "Sell price", sell) + "</div>" + bar("pc-actual", "Actual cost", actual) + "</div></div>";
-    }
+    var margin = sell - actual;
+    var marginPct = sell ? Math.round(margin / sell * 100) : 0;
+    var variance = hasBudget ? budget - actual : null;
 
-    var margin = sell - budget;
-    var marginPct = pct(margin, sell);
-    var variance = actual - budget;
-    var variancePct = pct(variance, budget);
-    var sign = variance > 0 ? "+" : variance < 0 ? "−" : "";
-    var lo = Math.min(budget, sell), hi = Math.max(budget, sell);
-    var vlo = Math.min(budget, actual), vhi = Math.max(budget, actual);
+    var rows = bars.map(function (b) {
+      var pct = b.value == null ? 0 : Math.max(2, pos(b.value));
+      var extras = "";
+      if (b.actual && hasBudget) {
+        if (margin > 0) {
+          extras += '<div class="pp-bar-margin" style="left:' + pos(actual) + "%;width:" + (pos(sell) - pos(actual)) + '%" title="Margin ' + money(margin) + '"></div>';
+        }
+        extras += '<div class="pp-bar-tick" style="left:' + pos(budget) + '%" title="Budget ' + money(budget) + '"></div>';
+      }
+      return '<div class="pp-bar-row"><div class="pp-bar-meta"><span class="pp-bar-label">' + b.label + '</span><span class="pp-bar-value">' + money(b.value) + "</span></div>" +
+        '<div class="pp-bar-track"><div class="pp-bar" style="width:' + pct + "%;background:" + b.color + '"></div>' + extras + "</div></div>";
+    }).join("");
 
-    var marginAnn =
-      '<div class="pc-ann pc-ann-margin ' + (margin < 0 ? "is-neg" : "is-pos") + '" style="left:' + pos(lo) + "%;width:" + (pos(hi) - pos(lo)) + '%">' +
-        '<span class="pc-ann-text" title="' + money(margin) + '">Margin ' + marginPct + "%</span><i class=\"pc-arrow\"></i></div>";
-    var varianceAnn =
-      '<div class="pc-ann pc-ann-var ' + (over ? "is-neg" : "is-pos") + '" style="left:' + pos(vlo) + "%;width:" + (pos(vhi) - pos(vlo)) + '%">' +
-        '<i class="pc-arrow"></i><span class="pc-ann-text" title="' + sign + money(Math.abs(variance)) + '">Variance ' + sign + Math.abs(variancePct) + "%</span></div>";
+    var legend = hasBudget
+      ? '<div class="pp-chart-legend"><span><i class="pp-key pp-key-margin"></i>Margin</span><span><i class="pp-key pp-key-tick"></i>Budget</span></div>'
+      : "";
 
-    var aria = "Sell price " + money(sell) + ", budgeted cost " + money(budget) + ", actual cost " + money(actual) +
-      ". Margin " + marginPct + "%, " + money(margin) + ". Variance " + sign + Math.abs(variancePct) + "%, " + (over ? "over" : "under") + " budget by " + money(Math.abs(variance)) + ".";
+    var metrics = hasBudget
+      ? '<div class="pp-chart-metrics">' +
+          '<div class="pp-metric"><span class="pp-metric-label">Margin</span><span class="pp-metric-value ' + (margin < 0 ? "is-neg" : "is-pos") + '">' + money(margin) + '</span><span class="pp-metric-sub">' + marginPct + "% of sell price</span></div>" +
+          '<div class="pp-metric"><span class="pp-metric-label">Variance</span><span class="pp-metric-value ' + (variance < 0 ? "is-neg" : "is-pos") + '">' + (variance < 0 ? "−" : variance > 0 ? "+" : "") + money(Math.abs(variance)) + '</span><span class="pp-metric-sub">' + (variance < 0 ? "Over budget" : variance > 0 ? "Under budget" : "On budget") + (budget ? " · " + Math.round(Math.abs(variance) / budget * 100) + "%" : "") + "</span></div>" +
+        "</div>"
+      : "";
 
-    return '<div class="pc pc-annotated" tabindex="0" role="img" aria-label="' + aria + '">' +
-      '<i class="pc-guide" style="left:' + pos(sell) + '%;top:0;height:var(--pc-guide-sell)"></i>' +
-      '<i class="pc-guide" style="left:' + pos(budget) + '%;top:var(--pc-row-2);bottom:0"></i>' +
-      '<i class="pc-guide" style="left:' + pos(actual) + '%;top:var(--pc-row-3);bottom:0"></i>' +
-      bar("pc-sell", "Sell price", sell) + "</div>" +
-      bar("pc-budget", "Budgeted cost", budget) + marginAnn + "</div>" +
-      bar("pc-actual" + (over ? " is-over" : ""), "Actual cost", actual) + "</div>" +
-      '<div class="pc-lane">' + varianceAnn + "</div>" +
-      "</div>";
+    var aria = bars.map(function (b) { return b.label + " " + money(b.value); }).join(", ") +
+      (hasBudget ? ", margin " + money(margin) + ", variance " + money(variance) : "");
+    return '<div class="pp-chart" role="img" aria-label="' + aria + '">' + rows + legend + "</div>" + metrics;
   }
 
   // ---------- View more drawer ----------
