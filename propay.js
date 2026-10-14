@@ -488,9 +488,7 @@
       field("Date submitted", r.submittedAt ? formatDate(r.submittedAt) : "—") +
       field("Date approved", r.approvedAt ? formatDate(r.approvedAt) : '<span class="pp-muted">Pending</span>') +
       field("Approved by", r.approvedBy ? esc(r.approvedBy) : '<span class="pp-muted">Pending</span>') +
-      field("Budget", isPayable && r.budget != null ? money(r.budget) : '<span class="pp-muted">Not applicable</span>') +
       field("Budget check", isPayable ? budgetCheckHtml(r) : '<span class="pp-muted">Not applicable</span>') +
-      field("Sell price", money(r.sell)) +
       field("Payment status", '<span class="status-badge ' + payClass + '">' + payStatus + "</span>") +
       field("Amount paid", money(paid)) +
       field("Outstanding", '<strong class="rd-strong">' + money(due) + "</strong>") +
