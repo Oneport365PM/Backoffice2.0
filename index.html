@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OnePort365 CRM — Activity Log Prototype</title>
+  <title>OnePort365 Backoffice — CRM &amp; ProPay Prototype</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;500;700&display=swap" />
@@ -12,19 +12,15 @@
 <body>
   <div class="app">
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-icon active" title="CRM">
+    <aside class="sidebar" aria-label="Modules">
+      <a class="sidebar-icon active" href="#crm" data-module="crm" title="CRM" aria-label="CRM">
         <svg viewBox="0 0 24 24"><path d="M4 19h4V10H4v9zm6 0h4V4h-4v15zm6 0h4v-7h-4v7z"/></svg>
-      </div>
-      <div class="sidebar-icon" title="Pipeline">
-        <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h12M3 18h6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-      </div>
-      <div class="sidebar-icon" title="Contacts">
-        <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-      </div>
-      <div class="sidebar-icon" title="Companies">
-        <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V6l7-3 7 3v15M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-      </div>
+        <span class="sidebar-label">CRM</span>
+      </a>
+      <a class="sidebar-icon" href="#propay" data-module="propay" title="ProPay — payment tracking" aria-label="ProPay">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><path d="M14.8 9.2c-.5-.8-1.5-1.3-2.8-1.3-1.6 0-2.7.8-2.7 2s1.1 1.7 2.7 2.1c1.7.4 2.9.9 2.9 2.2s-1.2 2.1-2.9 2.1c-1.4 0-2.5-.6-3-1.5M12 6.3v1.6M12 16.3v1.5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+        <span class="sidebar-label">ProPay</span>
+      </a>
       <div class="sidebar-spacer"></div>
       <div class="sidebar-icon" title="Notifications">
         <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1112 0c0 4 2 5 2 5H4s2-1 2-5zM10 20a2 2 0 004 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
@@ -36,12 +32,12 @@
     <main class="main">
       <header class="topbar">
         <div class="topbar-title">
-          <input type="checkbox" disabled />
-          <span>CRM</span>
+          <span id="topbarTitle">CRM</span>
         </div>
         <div class="brand">OnePort<span>365</span></div>
       </header>
 
+      <div class="module active" id="module-crm">
       <nav class="tabs">
         <button class="tab-btn active" data-tab="pipeline">
           <svg viewBox="0 0 24 24" class="tab-icon"><path d="M4 19V9M12 19V5M20 19v-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
@@ -180,6 +176,10 @@
           <div class="table-empty" id="tableEmptyState" hidden>No activity logged yet — click “Add activity” to log the first one.</div>
         </div>
       </section>
+      </div>
+
+      <!-- PROPAY MODULE (rendered by propay.js) -->
+      <div class="module" id="module-propay"></div>
     </main>
   </div>
 
@@ -284,6 +284,17 @@
 
   <div class="toast" id="toast" hidden></div>
 
+  <!-- ProPay: View more drawer -->
+  <div class="drawer-overlay" id="ppDrawerOverlay" hidden>
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="ppDrawerTitle" id="ppDrawer"></aside>
+  </div>
+
+  <!-- ProPay: comments modal -->
+  <div class="modal-overlay" id="ppCommentsOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ppCommentsTitle" id="ppCommentsModal"></div>
+  </div>
+
   <script src="app.js"></script>
+  <script src="propay.js"></script>
 </body>
 </html>
