@@ -396,8 +396,8 @@
     drawer.innerHTML =
       '<div class="modal-head"><div><p class="pp-eyebrow">' + (isPayable ? "Payable" : "Receivable") + '</p><h3 id="ppDrawerTitle">' + esc(r.id) + '</h3></div>' +
         '<button type="button" class="modal-close" data-close-drawer aria-label="Close">&times;</button></div>' +
-      '<section class="pp-details-block">' + details + "</section>" +
-      '<section class="pp-section"><p class="pp-eyebrow">Sell vs. budget vs. actual</p>' + compareChart(r.sell, isPayable ? r.budget : null, r.actual) + "</section>" +
+      '<section><p class="pp-eyebrow">Sell vs. budget vs. actual</p>' + compareChart(r.sell, isPayable ? r.budget : null, r.actual) + "</section>" +
+      '<section class="pp-section pp-details-block">' + details + "</section>" +
       '<section class="pp-section"><div class="pp-section-head"><p class="pp-eyebrow">Payments</p><span class="pp-muted">Paid ' + money(paid) + " · Outstanding <strong class=\"pp-due\">" + money(due) + "</strong></span></div>" +
         '<div class="pp-progress" aria-hidden="true"><div style="width:' + (r.actual ? Math.min(100, paid / r.actual * 100) : 0) + '%"></div></div>' +
         history + payForm + "</section>" +
