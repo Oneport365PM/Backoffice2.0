@@ -1,0 +1,2460 @@
+<title>OnePort365 ProPay Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;500;700&display=swap" />
+<style>
+/* OnePort 365 design system is a single light theme by design (design/DESIGN_SYSTEM.md). */
+:root{color-scheme:light}
+/*
+  OnePort 365 — design tokens.
+  Source of truth: design/DESIGN_SYSTEM.md
+  Extracted from the OnePort 365 design system reference. Do not hand-roll
+  new colors/fonts elsewhere — import or copy these into every build.
+*/
+
+:root {
+  /* ---- Brand colour ---- */
+  --op-dark-green: #023819;
+  --op-light-green: #D1DBBD;
+  --op-accent-lime: #BFFB4F;
+  --op-accent-lime-hover: #a9e83a;
+  --op-gold: #FFCC1A;
+  --op-white: #FFFFFF;
+  --op-cream: #FDFBF1;
+  --op-silver-light: #808080;
+  --op-silver-dark: #383838;
+  --op-error: #FF1A1A;
+  --op-error-dark-surface: #FF6B6B;
+  --op-success: #1F8A5B;
+
+  /* ---- Semantic chip pairs (bg / text) ---- */
+  --op-chip-neutral-bg: #EDEFE8;
+  --op-chip-neutral-text: #4a5a3f;
+  --op-chip-success-bg: #E1F1E8;
+  --op-chip-success-text: #0f7a45;
+  --op-chip-warning-bg: #FFF3CC;
+  --op-chip-warning-text: #8a6a00;
+  --op-chip-error-bg: #FDE0E0;
+  --op-chip-error-text: #cc1414;
+  --op-chip-primary-bg: var(--op-accent-lime);
+  --op-chip-primary-text: var(--op-dark-green);
+  --op-chip-enterprise-bg: var(--op-dark-green);
+  --op-chip-enterprise-text: var(--op-accent-lime);
+  --op-chip-mode-bg: var(--op-light-green);
+  --op-chip-mode-text: var(--op-dark-green);
+
+  /* ---- Borders (dark-green tinted, never flat grey) ---- */
+  --op-border-card: rgba(2, 56, 25, .12);
+  --op-border-divider: rgba(2, 56, 25, .07);
+  --op-border-input: rgba(2, 56, 25, .35);
+  --op-border-input-dark: rgba(253, 251, 241, .4);
+
+  /* ---- Categorical series (charts / stages, 6 steps) ---- */
+  --op-cat-1: #023819;
+  --op-cat-2: #2F7A3F;
+  --op-cat-3: #7FAE2E;
+  --op-cat-4: #BFFB4F;
+  --op-cat-5: #FFCC1A;
+  --op-cat-6: #D1DBBD;
+
+  /* ---- Avatar fills (deterministic 4-cycle) ---- */
+  --op-avatar-1-bg: #023819;
+  --op-avatar-1-text: #BFFB4F;
+  --op-avatar-2-bg: #BFFB4F;
+  --op-avatar-2-text: #023819;
+  --op-avatar-3-bg: #D1DBBD;
+  --op-avatar-3-text: #023819;
+  --op-avatar-4-bg: #FFCC1A;
+  --op-avatar-4-text: #023819;
+
+  /* ---- Typography ---- */
+  --op-font-display: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --op-font-body: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* ---- Spacing — 4px base ---- */
+  --op-space-1: 4px;
+  --op-space-2: 8px;
+  --op-space-3: 12px;
+  --op-space-4: 16px;
+  --op-space-6: 24px;
+  --op-space-8: 40px;
+  --op-space-10: 64px;
+
+  /* ---- Radius ---- */
+  --op-radius-sm: 6px;
+  --op-radius-md: 8px;
+  --op-radius-lg: 12px;
+  --op-radius-xl: 16px;
+  --op-radius-full: 999px;
+
+  /* ---- Elevation (soft green-tinted shadows) ---- */
+  --op-elevation-1: 0 1px 2px rgba(2, 56, 25, .05), 0 1px 3px rgba(2, 56, 25, .04);
+  --op-elevation-2: 0 2px 4px rgba(2, 56, 25, .05), 0 8px 20px -8px rgba(2, 56, 25, .14);
+  --op-elevation-3: 0 4px 8px rgba(2, 56, 25, .06), 0 18px 40px -16px rgba(2, 56, 25, .22);
+  --op-elevation-hero: 0 20px 45px -22px rgba(2, 56, 25, .8);
+
+  /* ---- Focus ring (lime, used on active/focused inputs) ---- */
+  --op-focus-ring: 0 0 0 3px rgba(191, 251, 79, .4);
+}
+
+
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--op-cream);
+  color: var(--op-silver-dark);
+  font-family: var(--op-font-body);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--op-dark-green);
+  outline-offset: 2px;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 64px;
+  background: var(--op-dark-green);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--op-space-6) 0;
+  gap: var(--op-space-2);
+  flex-shrink: 0;
+}
+
+.sidebar-icon {
+  width: 48px;
+  min-height: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 0;
+  border-radius: var(--op-radius-md);
+  color: var(--op-light-green);
+  cursor: pointer;
+  text-decoration: none;
+}
+.sidebar-label {
+  font-family: var(--op-font-body);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  line-height: 1;
+}
+
+.sidebar-icon svg { width: 20px; height: 20px; }
+.sidebar-icon.active { background: var(--op-accent-lime); color: var(--op-dark-green); }
+.sidebar-icon:hover:not(.active) { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.sidebar-spacer { flex: 1; }
+
+.sidebar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--op-radius-lg);
+  background: var(--op-avatar-1-bg);
+  color: var(--op-avatar-1-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--op-font-display);
+  font-weight: 600;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Main */
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: var(--op-space-6) 28px 40px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.topbar-title {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-2);
+  font-weight: 600;
+  color: var(--op-silver-light);
+}
+
+.brand {
+  font-family: var(--op-font-display);
+  font-weight: 700;
+  color: var(--op-dark-green);
+  font-size: 15px;
+}
+.brand span { color: var(--op-accent-lime); -webkit-text-stroke: 0.4px var(--op-dark-green); }
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--op-border-card);
+  margin-bottom: var(--op-space-6);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  padding: 10px var(--op-space-4);
+  font-family: var(--op-font-display);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--op-silver-light);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tab-icon { width: 15px; height: 15px; }
+
+.tab-btn:hover { color: var(--op-dark-green); }
+.tab-btn.active {
+  color: var(--op-dark-green);
+  border-bottom-color: var(--op-accent-lime);
+  font-weight: 600;
+}
+
+.module { display: none; }
+.module.active { display: block; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.empty-stub {
+  background: var(--op-white);
+  border: 1px dashed var(--op-border-card);
+  border-radius: var(--op-radius-xl);
+  padding: 48px;
+  text-align: center;
+  color: var(--op-silver-light);
+}
+.empty-stub h3 { margin-top: 0; color: var(--op-dark-green); font-family: var(--op-font-display); }
+
+/* Pipeline stub */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--op-space-4);
+  margin-bottom: var(--op-space-4);
+}
+.stat-card {
+  background: var(--op-white);
+  border: 1px solid var(--op-border-card);
+  border-radius: var(--op-radius-xl);
+  padding: var(--op-space-4);
+  box-shadow: var(--op-elevation-2);
+}
+.stat-card.highlight { background: var(--op-light-green); border-color: var(--op-border-card); box-shadow: none; }
+.stat-label { font-size: 12px; font-weight: 600; color: var(--op-silver-light); margin-bottom: var(--op-space-3); }
+.stat-value { font-family: var(--op-font-display); font-size: 38px; font-weight: 600; line-height: 1; color: var(--op-dark-green); }
+.stat-value.gold { color: var(--op-gold); }
+.stat-sub { font-size: 12.5px; color: var(--op-silver-light); margin-top: 10px; }
+
+.pipeline-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: var(--op-space-2);
+  flex-wrap: wrap;
+}
+.pipeline-toolbar select { padding: 8px 10px; border-radius: var(--op-radius-md); border: 1.5px solid var(--op-border-input); background: var(--op-white); color: var(--op-dark-green); font-family: inherit; }
+.pipeline-note {
+  font-size: 12.5px;
+  color: var(--op-silver-light);
+  background: var(--op-white);
+  border: 1px solid var(--op-border-card);
+  border-radius: var(--op-radius-xl);
+  padding: 10px 14px;
+  margin-bottom: var(--op-space-4);
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--op-space-3);
+}
+.board-col {
+  background: var(--op-white);
+  border: 1px solid var(--op-border-card);
+  border-radius: var(--op-radius-xl);
+  padding: 10px;
+  min-height: 120px;
+}
+.board-col-head {
+  font-size: 12.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: var(--op-dark-green);
+}
+.board-col-head .stage-num {
+  width: 22px; height: 22px; border-radius: var(--op-radius-sm);
+  background: var(--op-dark-green); color: #fff;
+  display: grid; place-items: center;
+  font-family: var(--op-font-display); font-weight: 600; font-size: 11px;
+  flex-shrink: 0;
+}
+.board-col-count { margin-left: auto; font-weight: 400; color: var(--op-silver-light); font-size: 11px; }
+
+.deal-card {
+  background: var(--op-white);
+  border: 1px solid var(--op-border-card);
+  border-radius: var(--op-radius-lg);
+  padding: 10px;
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  box-shadow: var(--op-elevation-1);
+}
+.deal-top { display: flex; justify-content: space-between; margin-bottom: 6px; gap: 8px; font-family: var(--op-font-display); font-weight: 600; color: var(--op-dark-green); }
+.deal-top b { color: var(--op-gold); }
+.chip-owner { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: var(--op-radius-sm); background: var(--op-chip-neutral-bg); color: var(--op-chip-neutral-text); }
+.won-tag { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: var(--op-radius-full); background: var(--op-chip-success-bg); color: var(--op-chip-success-text); }
+
+/* Activity log */
+.activity-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--op-space-4);
+  gap: var(--op-space-3);
+}
+.activity-header h2 { margin: 0 0 4px; font-family: var(--op-font-display); font-weight: 600; color: var(--op-dark-green); text-wrap: balance; }
+.muted { color: var(--op-silver-light); margin: 0; font-size: 12.5px; }
+
+.activity-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--op-space-3);
+  margin-bottom: var(--op-space-4);
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 220px;
+  padding: 9px 12px;
+  border-radius: var(--op-radius-md);
+  border: 1.5px solid var(--op-border-input);
+  font-size: 13.5px;
+  font-family: inherit;
+  background: var(--op-white);
+  color: var(--op-dark-green);
+}
+.search-input:hover { border-color: var(--op-dark-green); }
+.search-input:focus-visible { border-color: var(--op-dark-green); border-width: 2px; box-shadow: var(--op-focus-ring); outline: none; }
+.search-input::placeholder { color: var(--op-silver-light); }
+
+.field-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--op-silver-light);
+}
+.field-inline select {
+  padding: 8px 10px;
+  border-radius: var(--op-radius-md);
+  border: 1.5px solid var(--op-border-input);
+  background: var(--op-white);
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--op-dark-green);
+}
+
+.btn {
+  border: none;
+  border-radius: var(--op-radius-md);
+  padding: 13px 18px;
+  font-family: var(--op-font-display);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .16s, color .16s;
+}
+.btn-primary { background: var(--op-accent-lime); color: var(--op-dark-green); }
+.btn-primary:hover { background: var(--op-accent-lime-hover); }
+.btn-solid { background: var(--op-dark-green); color: var(--op-accent-lime); }
+.btn-solid:hover { background: #03571f; }
+.btn-outline { background: var(--op-white); border: 1.5px solid var(--op-dark-green); color: var(--op-dark-green); }
+.btn-outline:hover { background: var(--op-dark-green); color: var(--op-accent-lime); }
+.btn-ghost { background: transparent; color: var(--op-dark-green); border: none; text-decoration: underline; text-underline-offset: 2px; font-family: var(--op-font-body); font-weight: 700; padding: 9px 4px; }
+.btn-ghost:hover { color: var(--op-success); }
+.btn-danger-text { background: none; color: var(--op-chip-error-text); font-family: var(--op-font-body); font-weight: 700; padding: 9px 4px; border: none; cursor: pointer; }
+
+.table-wrap {
+  background: var(--op-white);
+  border: 1px solid var(--op-border-card);
+  border-radius: var(--op-radius-xl);
+  overflow-x: auto;
+  box-shadow: var(--op-elevation-1);
+}
+
+.activity-table { width: 100%; min-width: 720px; border-collapse: collapse; }
+.activity-table th {
+  text-align: left;
+  font-family: var(--op-font-body);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  font-weight: 700;
+  color: var(--op-silver-light);
+  background: var(--op-chip-neutral-bg);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--op-border-card);
+  white-space: nowrap;
+}
+.activity-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--op-border-divider);
+  font-size: 13.5px;
+  vertical-align: middle;
+}
+.activity-table tbody tr:last-child td { border-bottom: none; }
+.activity-table tbody tr:hover { background: var(--op-chip-neutral-bg); }
+.action-col { width: 90px; }
+
+.customer-name { font-weight: 700; color: var(--op-dark-green); }
+
+.owner-cell { display: flex; align-items: center; gap: 8px; }
+.owner-avatar {
+  width: 28px; height: 28px; border-radius: var(--op-radius-sm);
+  font-family: var(--op-font-display); font-size: 11px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.meeting-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  border-radius: var(--op-radius-sm);
+  background: var(--op-chip-mode-bg);
+  color: var(--op-chip-mode-text);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: var(--op-radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.status-badge::before {
+  content: "";
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.status-Scheduled { background: var(--op-chip-warning-bg); color: var(--op-chip-warning-text); }
+.status-Completed { background: var(--op-chip-success-bg); color: var(--op-chip-success-text); }
+.status-Cancelled { background: var(--op-chip-error-bg); color: var(--op-chip-error-text); }
+
+.view-btn {
+  border: 1.5px solid var(--op-dark-green);
+  background: var(--op-white);
+  border-radius: var(--op-radius-md);
+  padding: 6px 12px;
+  font-family: var(--op-font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--op-dark-green);
+  white-space: nowrap;
+  transition: background-color .16s, color .16s;
+}
+.view-btn:hover { background: var(--op-dark-green); color: var(--op-accent-lime); }
+
+.table-empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--op-silver-light);
+  font-size: 13.5px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 56, 25, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: var(--op-space-4);
+}
+
+.modal {
+  background: var(--op-white);
+  border-radius: var(--op-radius-xl);
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--op-space-6);
+  box-shadow: var(--op-elevation-3);
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--op-space-4);
+  gap: var(--op-space-3);
+}
+.modal-head h3 { margin: 0 0 4px; font-family: var(--op-font-display); font-weight: 600; color: var(--op-dark-green); }
+.modal-close {
+  border: none;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--op-silver-light);
+}
+
+/* Floating notched-label input — the OnePort 365 input foundation */
+.field { margin-bottom: var(--op-space-4); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--op-space-3); margin-bottom: var(--op-space-4); }
+.field-row .field { margin-bottom: 0; }
+.req { color: var(--op-error); }
+
+.op-input-wrap {
+  position: relative;
+  display: block;
+  border: 1.5px solid var(--op-border-input);
+  border-radius: var(--op-radius-md);
+  padding: 15px 14px;
+  background: var(--op-white);
+}
+.op-input-wrap:hover { border-color: var(--op-dark-green); }
+.op-input-wrap:focus-within {
+  border: 2px solid var(--op-dark-green);
+  padding: 14px 13px;
+  box-shadow: var(--op-focus-ring);
+}
+.op-notch {
+  position: absolute;
+  top: -8px;
+  left: 11px;
+  background: var(--op-white);
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--op-silver-light);
+  pointer-events: none;
+}
+.op-input-wrap:hover .op-notch { color: var(--op-dark-green); }
+.op-input-wrap:focus-within .op-notch { color: var(--op-dark-green); }
+
+.op-input-wrap.has-error { border: 2px solid var(--op-error); padding: 14px 13px; }
+.op-input-wrap.has-error .op-notch { color: var(--op-error); }
+
+.op-input-wrap.is-readonly { background: var(--op-chip-neutral-bg); border-color: var(--op-border-card); }
+.op-input-wrap.is-readonly:hover { border-color: var(--op-border-card); }
+.op-input-wrap.is-readonly .op-notch { background: var(--op-chip-neutral-bg); }
+.op-input-wrap.is-readonly:hover .op-notch { color: var(--op-silver-light); }
+
+.field input, .field select, .field textarea {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  font-family: var(--op-font-body);
+  color: var(--op-dark-green);
+  background: transparent;
+}
+.field input::placeholder, .field textarea::placeholder { color: var(--op-silver-light); }
+.field textarea { resize: vertical; }
+.field select { cursor: pointer; }
+.field input:disabled, .field select:disabled, .field textarea:disabled {
+  color: var(--op-silver-dark);
+  opacity: 1;
+  cursor: default;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--op-space-4);
+  gap: 10px;
+}
+.modal-actions-right { display: flex; gap: 10px; margin-left: auto; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--op-dark-green);
+  color: var(--op-cream);
+  padding: 10px 18px;
+  border-radius: var(--op-radius-md);
+  font-family: var(--op-font-body);
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: var(--op-elevation-hero);
+  z-index: 60;
+}
+
+/* ---------- ProPay ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.pp-eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--op-silver-light);
+}
+.pp-muted { color: var(--op-silver-light); font-size: 12px; }
+
+.pp-filter { position: relative; }
+.pp-filter-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--op-radius-md);
+  border: 1.5px solid var(--op-border-input);
+  background: var(--op-white);
+  color: var(--op-dark-green);
+  font-family: var(--op-font-body);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+}
+.pp-filter-btn svg { width: 16px; height: 16px; }
+.pp-filter-btn:hover, .pp-filter-btn.is-on { border-color: var(--op-dark-green); }
+.pp-filter-btn.is-on { background: var(--op-light-green); }
+.pp-filter-pop {
+  position: absolute; right: 0; top: calc(100% + 6px);
+  z-index: 20;
+  min-width: 200px;
+  background: var(--op-white);
+  border: 1px solid var(--op-border-card);
+  border-radius: var(--op-radius-lg);
+  box-shadow: var(--op-elevation-3);
+  padding: 8px;
+}
+.pp-pop-label { margin: 4px 8px 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--op-silver-light); }
+.pp-filter-opt {
+  display: block; width: 100%; text-align: left;
+  border: none; background: none;
+  padding: 8px 10px;
+  border-radius: var(--op-radius-sm);
+  font-family: var(--op-font-body); font-size: 13px;
+  color: var(--op-dark-green);
+  cursor: pointer;
+}
+.pp-filter-opt:hover { background: var(--op-chip-neutral-bg); }
+.pp-filter-opt.active { background: var(--op-light-green); font-weight: 700; }
+
+/* Compact table */
+.pp-table { min-width: 1040px; }
+.pp-table th { padding: 10px 12px; font-size: 10.5px; }
+.pp-table td { padding: 10px 12px; font-size: 13px; }
+.pp-po { font-weight: 700; color: var(--op-silver-dark); white-space: nowrap; font-size: 12.5px; }
+.pp-num { white-space: nowrap; color: var(--op-dark-green); }
+.pp-amount { font-weight: 700; color: var(--op-dark-green); }
+.pp-sub { font-size: 11px; color: var(--op-silver-light); margin-top: 2px; }
+.pp-link {
+  font-weight: 700;
+  color: var(--op-dark-green);
+  text-decoration: none;
+  border-bottom: 1.5px solid var(--op-dark-green);
+}
+.pp-link:hover { color: var(--op-success); border-color: var(--op-success); }
+
+.pp-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 9px;
+  border-radius: var(--op-radius-sm);
+  font-size: 11.5px; font-weight: 700;
+  white-space: nowrap;
+}
+.pp-chip-success { background: var(--op-chip-success-bg); color: var(--op-chip-success-text); }
+.pp-chip-error { background: var(--op-chip-error-bg); color: var(--op-chip-error-text); }
+
+.pp-st-awaiting { background: var(--op-chip-warning-bg); color: var(--op-chip-warning-text); }
+.pp-st-approved { background: var(--op-chip-success-bg); color: var(--op-chip-success-text); }
+.pp-st-part { background: var(--op-chip-mode-bg); color: var(--op-chip-mode-text); }
+.pp-st-paid { background: var(--op-chip-enterprise-bg); color: var(--op-chip-enterprise-text); }
+.pp-st-rejected { background: var(--op-chip-error-bg); color: var(--op-chip-error-text); }
+
+.pp-icons { white-space: nowrap; }
+.pp-icon-btn {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px;
+  border: 1px solid var(--op-border-card);
+  border-radius: var(--op-radius-md);
+  background: var(--op-white);
+  color: var(--op-dark-green);
+  cursor: pointer;
+  vertical-align: middle;
+}
+.pp-icon-btn svg { width: 16px; height: 16px; }
+.pp-icon-btn:hover { border-color: var(--op-dark-green); }
+.pp-icon-btn.attention { border-color: var(--op-gold); background: var(--op-chip-warning-bg); }
+.pp-count {
+  position: absolute; top: -6px; right: -6px;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: var(--op-radius-full);
+  background: var(--op-dark-green); color: var(--op-accent-lime);
+  font-size: 10px; font-weight: 700; line-height: 16px; text-align: center;
+}
+.pp-clip { display: inline-flex; vertical-align: middle; margin-left: 6px; color: var(--op-silver-light); }
+.pp-clip svg, .pp-file svg { width: 15px; height: 15px; }
+.pp-table .action-col { width: 110px; }
+
+.pp-card {
+  background: var(--op-white);
+  border: 1px solid var(--op-border-card);
+  border-radius: var(--op-radius-xl);
+  padding: var(--op-space-4) 18px;
+  box-shadow: var(--op-elevation-2);
+}
+.pp-card-flat { box-shadow: none; background: #F4F6EF; border-radius: var(--op-radius-lg); margin-bottom: var(--op-space-4); }
+/* Shipment detail page ("sd") — follows the Shipments module layout */
+.sd { display: flex; flex-direction: column; gap: 20px; }
+.sd-back { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; font-size: 13.5px; color: var(--op-silver-dark); text-decoration: none; }
+.sd-back svg { width: 16px; height: 16px; }
+.sd-back:hover { color: var(--op-dark-green); }
+.sd-card { background: var(--op-white); border: 1px solid var(--op-border-card); border-radius: var(--op-radius-xl); box-shadow: var(--op-elevation-1); min-width: 0; }
+.sd-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 24px 28px; border-bottom: 1px solid var(--op-border-divider); }
+.sd-hero-title { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; min-width: 0; }
+.sd-hero-title h2 { margin: 0; font-family: var(--op-font-display); font-size: 32px; font-weight: 700; letter-spacing: -.015em; color: var(--op-dark-green); overflow-wrap: anywhere; }
+.sd-pill { padding: 4px 12px; border-radius: var(--op-radius-sm); font-size: 12px; font-weight: 700; }
+.sd-pill.is-active { background: var(--op-chip-success-bg); color: var(--op-chip-success-text); }
+.sd-pill.is-done { background: var(--op-chip-enterprise-bg); color: var(--op-chip-enterprise-text); }
+.sd-actions { position: relative; }
+.sd-actions-btn { display: inline-flex; align-items: center; gap: 8px; }
+.sd-actions-btn svg { width: 16px; height: 16px; }
+.sd-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; min-width: 220px; padding: 6px; background: var(--op-white); border: 1px solid var(--op-border-card); border-radius: var(--op-radius-lg); box-shadow: var(--op-elevation-3); }
+.sd-menu button { display: block; width: 100%; text-align: left; padding: 9px 12px; border: none; background: none; border-radius: var(--op-radius-sm); font-family: var(--op-font-body); font-size: 13.5px; color: var(--op-dark-green); cursor: pointer; }
+.sd-menu button:hover { background: var(--op-chip-neutral-bg); }
+.sd-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 22px 28px; row-gap: 16px; }
+.sd-facts > div { min-width: 0; padding: 0 20px; border-left: 1px solid var(--op-border-card); }
+.sd-facts > div:first-child { padding-left: 0; border-left: none; }
+.sd dt { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--op-silver-dark); margin-bottom: 6px; }
+.sd dd { margin: 0; font-size: 15px; color: var(--op-silver-dark); overflow-wrap: anywhere; }
+.sd-tabs { display: flex; gap: 4px; padding: 0 20px; overflow-x: auto; }
+.sd-tab { padding: 18px 20px 16px; font-family: var(--op-font-display); font-size: 15px; color: var(--op-silver-dark); text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+.sd-tab:hover { color: var(--op-dark-green); }
+.sd-tab.active { color: var(--op-dark-green); font-weight: 600; border-bottom-color: var(--op-dark-green); }
+.sd-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 400px); gap: 20px; align-items: start; }
+.sd-card-head { padding: 22px 28px 18px; border-bottom: 1px solid var(--op-border-divider); }
+.sd-card-head h3 { margin: 0 0 4px; font-family: var(--op-font-display); font-size: 20px; font-weight: 600; color: var(--op-dark-green); }
+.sd-card-head p { margin: 0; font-size: 13.5px; color: var(--op-silver-light); }
+.sd-card-body { padding: 20px 28px 24px; }
+.sd-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 24px; margin: 0; padding: 22px 28px 26px; }
+.sd-link { color: var(--op-dark-green); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.sd-team { list-style: none; margin: 0; padding: 8px 20px 12px; }
+.sd-team li { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+.sd-team li + li { border-top: 1px solid var(--op-border-divider); }
+.sd-team div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sd-team strong { font-family: var(--op-font-display); font-weight: 600; font-size: 15px; color: var(--op-dark-green); }
+.sd-team span:not(.sd-avatar) { font-size: 13px; color: var(--op-silver-light); }
+.sd-avatar { width: 46px; height: 46px; flex-shrink: 0; border-radius: var(--op-radius-lg); display: grid; place-items: center; font-family: var(--op-font-display); font-weight: 600; font-size: 14px; }
+.sd-timeline { list-style: none; margin: 0; padding: 22px 28px 26px; }
+.sd-timeline li { position: relative; display: flex; gap: 16px; padding-bottom: 22px; }
+.sd-timeline li:last-child { padding-bottom: 0; }
+.sd-timeline li:not(:last-child)::before { content: ""; position: absolute; left: 8px; top: 20px; bottom: 0; width: 2px; background: var(--op-border-card); }
+.sd-timeline li.is-done:not(:last-child)::before { background: var(--op-success); }
+.sd-dot { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; border-radius: 50%; border: 2px solid var(--op-border-input); background: var(--op-white); }
+.is-done .sd-dot { background: var(--op-success); border-color: var(--op-success); }
+.is-current .sd-dot { background: var(--op-accent-lime); border-color: var(--op-dark-green); }
+.sd-timeline div { display: flex; flex-direction: column; gap: 2px; }
+.sd-timeline strong { font-size: 14px; color: var(--op-dark-green); }
+.is-todo strong { color: var(--op-silver-light); font-weight: 600; }
+.sd-timeline span:not(.sd-dot) { font-size: 12.5px; color: var(--op-silver-light); }
+.sd-docs { list-style: none; margin: 0; padding: 6px 28px 12px; }
+.sd-docs li { display: flex; align-items: center; gap: 14px; padding: 14px 0; }
+.sd-docs li + li { border-top: 1px solid var(--op-border-divider); }
+.sd-docs div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sd-docs strong { font-size: 14px; color: var(--op-dark-green); overflow-wrap: anywhere; }
+.sd-docs div span { font-size: 12.5px; color: var(--op-silver-light); }
+.sd-doc-icon { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; border-radius: var(--op-radius-md); background: var(--op-chip-neutral-bg); color: var(--op-dark-green); }
+.sd-doc-icon svg { width: 16px; height: 16px; }
+.sd-empty { margin: 0; padding: 24px 28px; color: var(--op-silver-light); font-size: 13.5px; }
+.sd-table { overflow-x: auto; border-radius: 0 0 var(--op-radius-xl) var(--op-radius-xl); }
+.sd-pp-table { min-width: 760px; }
+.sd-pp-table th:first-child, .sd-pp-table td:first-child { padding-left: 28px; }
+
+/* Comparison chart */
+.cc { --cc-actual: #DBFB98; display: flex; flex-direction: column; }
+.cc-top { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-bottom: 8px; }
+.cc-currency select {
+  padding: 6px 28px 6px 10px;
+  border: 1px solid var(--op-border-card); border-radius: var(--op-radius-md);
+  background: var(--op-white); color: var(--op-dark-green);
+  font-family: var(--op-font-display); font-size: 12px; font-weight: 600;
+  cursor: pointer;
+}
+.cc-threshold-label { font-size: 12.5px; color: var(--op-silver-light); }
+.cc-plot { position: relative; display: flex; flex-direction: column; gap: 14px; padding: 2px 0; }
+.cc-row { position: relative; height: 44px; }
+.cc-bar { position: absolute; top: 0; left: 0; height: 100%; border-radius: var(--op-radius-md); }
+.cc-sell { background: var(--op-dark-green); }
+.cc-budget { background: var(--op-light-green); }
+.cc-actual { background: var(--cc-actual); }
+.cc-over { background: var(--op-error); border-radius: 0 var(--op-radius-md) var(--op-radius-md) 0; }
+.cc-row .cc-actual:has(+ .cc-over) { border-radius: var(--op-radius-md) 0 0 var(--op-radius-md); }
+.cc-threshold { position: absolute; top: -10px; bottom: -10px; width: 2px; margin-left: -1px; background: var(--op-gold); }
+.cc-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 20px; margin-top: 26px; }
+.cc-stat { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cc-key { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--op-silver-light); }
+.cc-key i { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.cc-stat strong { font-family: var(--op-font-display); font-size: 20px; font-weight: 600; line-height: 1.2; color: var(--op-dark-green); overflow-wrap: anywhere; }
+.cc-stat strong.is-neg { color: var(--op-error); }
+.cc-stat small { font-size: 11.5px; color: var(--op-silver-light); }
+.sd .cc-stat strong { font-size: 24px; }
+.sd .cc-stats { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 900px) { .sd .cc-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .cc-stats, .sd .cc-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* View-more drawer */
+.drawer-overlay {
+  position: fixed; inset: 0;
+  background: rgba(2, 56, 25, .45);
+  z-index: 45;
+  display: flex; justify-content: flex-end;
+}
+.drawer {
+  width: 100%; max-width: 680px; height: 100%;
+  overflow-y: auto;
+  background: var(--op-white);
+  padding: var(--op-space-6);
+  box-shadow: var(--op-elevation-3);
+}
+.pp-section { border-top: 1px solid var(--op-border-divider); padding-top: var(--op-space-4); margin-top: var(--op-space-4); }
+.pp-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.pp-details-block { display: flex; flex-direction: column; gap: 12px; }
+.pp-summary { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pp-summary > div { display: flex; flex-direction: column; gap: 2px; }
+.pp-summary-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--op-silver-light); }
+.pp-summary-amount { font-family: var(--op-font-display); font-size: 26px; font-weight: 600; line-height: 1.1; color: var(--op-dark-green); }
+.pp-budget-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pp-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; margin: 4px 0 0; }
+.pp-fact { min-width: 0; }
+.pp-fact-wide { grid-column: 1 / -1; }
+.pp-fact dt { font-size: 11.5px; color: var(--op-silver-light); margin-bottom: 2px; }
+.pp-fact dd { margin: 0; font-size: 13.5px; font-weight: 700; color: var(--op-dark-green); overflow-wrap: anywhere; }
+.pp-file { display: inline-flex; align-items: center; gap: 5px; }
+.pp-due { color: var(--op-dark-green); }
+
+.btn.pp-sm { padding: 8px 14px; font-size: 13px; }
+.pp-block { width: 100%; }
+
+.pp-progress { height: 8px; border-radius: var(--op-radius-full); background: var(--op-chip-neutral-bg); overflow: hidden; margin-bottom: 10px; }
+.pp-progress div { height: 100%; background: var(--op-success); border-radius: var(--op-radius-full); }
+.pp-history { list-style: none; margin: 0 0 12px; padding: 0; }
+.pp-history li { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--op-border-divider); font-size: 13px; color: var(--op-dark-green); }
+.pp-empty-note { margin: 4px 0 12px; }
+
+.pp-pay-form { margin-top: 8px; }
+.pp-radio-row { display: flex; gap: 18px; margin-bottom: var(--op-space-4); flex-wrap: wrap; }
+.pp-radio { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: var(--op-dark-green); cursor: pointer; }
+.pp-radio input {
+  appearance: none; -webkit-appearance: none;
+  width: 22px; height: 22px; margin: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--op-dark-green);
+  background: var(--op-white);
+  display: grid; place-items: center;
+  cursor: pointer;
+}
+.pp-radio input:checked { background: var(--op-accent-lime); border-color: var(--op-dark-green); }
+.pp-radio input:checked::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--op-dark-green); }
+.pp-help { margin: 6px 2px 0; font-size: 11.5px; color: var(--op-silver-light); }
+.pp-help.is-error { color: var(--op-error); }
+.field input[readonly] { color: var(--op-silver-dark); }
+
+.pp-callout {
+  background: var(--op-chip-warning-bg);
+  color: var(--op-chip-warning-text);
+  border-radius: var(--op-radius-md);
+  padding: 10px 12px;
+  font-size: 12.5px; font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* Comments */
+.pp-comments { list-style: none; margin: 0 0 12px; padding: 0; }
+.pp-comment { padding: 10px 0; border-bottom: 1px solid var(--op-border-divider); }
+.pp-comment.is-reply { margin-left: 24px; padding-left: 12px; border-left: 2px solid var(--op-light-green); }
+.pp-comment p { margin: 6px 0 0; font-size: 13.5px; color: var(--op-silver-dark); line-height: 1.5; }
+.pp-comment-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--op-dark-green); }
+.pp-av { width: 24px; height: 24px; font-size: 10px; }
+.pp-role { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: var(--op-radius-sm); background: var(--op-chip-neutral-bg); color: var(--op-chip-neutral-text); }
+.pp-quote { font-size: 12px !important; color: var(--op-silver-light) !important; }
+.pp-reply { padding: 4px 0; font-size: 12.5px; }
+.pp-replying { font-size: 12.5px; color: var(--op-silver-dark); margin: 0 0 10px; }
+.pp-comment-form { margin-top: 8px; }
+
+/* View more panel ("pd" = payment detail) */
+.drawer { padding: 0; }
+.pd-head {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  padding: 20px 24px 16px;
+  background: var(--op-white);
+  border-bottom: 1px solid var(--op-border-divider);
+}
+.pd-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pd-title h3 { margin: 0; font-family: var(--op-font-display); font-size: 20px; font-weight: 600; color: var(--op-dark-green); }
+.pd-sub { margin: 4px 0 0; font-size: 13.5px; color: var(--op-silver-dark); }
+.pd-section { padding: 20px 24px; }
+.pd-section + .pd-section { border-top: 1px solid var(--op-border-divider); }
+.pd-h { margin: 0 0 12px; font-family: var(--op-font-display); font-size: 14px; font-weight: 600; color: var(--op-dark-green); }
+.pd-h-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.pd-h-row .btn-ghost { padding: 0; font-size: 12.5px; }
+.pd-rows { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.pd-row { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; align-items: center; font-size: 13.5px; }
+.pd-row dt { color: var(--op-silver-light); }
+.pd-row dd { margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 600; color: var(--op-dark-green); overflow-wrap: anywhere; }
+.pd-note { margin: 0 0 12px; font-size: 12.5px; color: var(--op-silver-light); }
+.pd-history { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pd-history li { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.pd-history-amt { font-weight: 700; color: var(--op-dark-green); }
+.pd-pay { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+.pd-pay .field-row { margin: 0; }
+.pd-pay .pp-help { margin: -6px 2px 0; }
+.pd-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: var(--op-radius-md); background: var(--op-chip-neutral-bg); }
+.pd-toggle label { position: relative; cursor: pointer; }
+.pd-toggle input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.pd-toggle span { display: block; text-align: center; padding: 8px 10px; border-radius: var(--op-radius-sm); font-family: var(--op-font-display); font-size: 13px; font-weight: 600; color: var(--op-silver-light); }
+.pd-toggle input:checked + span { background: var(--op-white); color: var(--op-dark-green); box-shadow: var(--op-elevation-1); }
+.pd-toggle input:focus-visible + span { outline: 2px solid var(--op-dark-green); outline-offset: 1px; }
+.pd-composer { display: flex; gap: 8px; align-items: flex-end; margin-top: 12px; }
+.pd-composer textarea {
+  flex: 1; min-width: 0; resize: vertical;
+  padding: 10px 12px;
+  border: 1.5px solid var(--op-border-input); border-radius: var(--op-radius-md);
+  font-family: var(--op-font-body); font-size: 13.5px; color: var(--op-dark-green); background: var(--op-white);
+}
+.pd-composer textarea:hover { border-color: var(--op-dark-green); }
+.pd-composer textarea:focus { outline: none; border: 2px solid var(--op-dark-green); padding: 9.5px 11.5px; box-shadow: var(--op-focus-ring); }
+.pd-composer textarea::placeholder { color: var(--op-silver-light); }
+.drawer .pp-comments { margin: 4px 0 0; }
+
+/* Request details grid (View more panel) */
+.rd-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 24px; margin: 0; }
+.rd-field { min-width: 0; }
+.rd-field dt { margin-bottom: 6px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--op-silver-light); }
+.rd-field dd { margin: 0; font-size: 14.5px; color: var(--op-silver-dark); overflow-wrap: anywhere; }
+.rd-wide { grid-column: 1 / -1; }
+.rd-money { font-weight: 600; color: #a07a00; }
+.rd-strong { color: var(--op-silver-dark); }
+.rd-attach { margin-top: 20px; }
+.rd-file { display: inline-flex; align-items: center; gap: 14px; max-width: 100%; }
+.rd-file-icon { width: 50px; height: 50px; flex-shrink: 0; display: grid; place-items: center; border-radius: var(--op-radius-lg); background: #F3FBE3; color: var(--op-dark-green); }
+.rd-file-icon svg { width: 22px; height: 22px; }
+.rd-file-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rd-file-name strong { font-weight: 500; font-size: 15px; color: var(--op-silver-dark); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rd-file-name span { font-size: 12.5px; color: var(--op-silver-light); }
+.rd-file-dl { width: 34px; height: 34px; flex-shrink: 0; display: grid; place-items: center; border: none; background: none; border-radius: var(--op-radius-md); color: var(--op-dark-green); cursor: pointer; }
+.rd-file-dl:hover { background: var(--op-chip-neutral-bg); }
+.rd-file-dl svg { width: 20px; height: 20px; }
+.rd-none { margin: 0; }
+.rd-h { margin: 0 0 14px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--op-silver-light); font-family: var(--op-font-body); }
+.pd-h-row .rd-h { margin-bottom: 0; }
+.rd-payments { list-style: none; margin: 0 0 16px; padding: 0; }
+.rd-payments li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; }
+.rd-payments li + li { border-top: 1px solid var(--op-border-divider); }
+.rd-payments p { margin: 0 0 3px; display: flex; align-items: baseline; gap: 10px; }
+.rd-payments .rd-money { font-size: 16px; }
+.rd-kind { font-size: 13px; color: var(--op-silver-light); }
+@media (max-width: 600px) { .rd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.drawer .pp-comment:last-child { border-bottom: none; }
+.pp-comment-form .field { margin-bottom: 10px; }
+.modal .status-badge { vertical-align: middle; }
+
+@media (max-width: 900px) {
+  .sd-split { grid-template-columns: 1fr; }
+  .sd-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sd-facts > div:nth-child(3) { border-left: none; padding-left: 0; }
+  .sd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .board { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .stat-cards { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px){ .main{padding-left:16px;padding-right:16px} .activity-header{flex-wrap:wrap} }
+</style>
+
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" aria-label="Modules">
+      <a class="sidebar-icon active" href="#crm" data-module="crm" title="CRM" aria-label="CRM">
+        <svg viewBox="0 0 24 24"><path d="M4 19h4V10H4v9zm6 0h4V4h-4v15zm6 0h4v-7h-4v7z"/></svg>
+        <span class="sidebar-label">CRM</span>
+      </a>
+      <a class="sidebar-icon" href="#propay" data-module="propay" title="ProPay — payment tracking" aria-label="ProPay">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><path d="M14.8 9.2c-.5-.8-1.5-1.3-2.8-1.3-1.6 0-2.7.8-2.7 2s1.1 1.7 2.7 2.1c1.7.4 2.9.9 2.9 2.2s-1.2 2.1-2.9 2.1c-1.4 0-2.5-.6-3-1.5M12 6.3v1.6M12 16.3v1.5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+        <span class="sidebar-label">ProPay</span>
+      </a>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-icon" title="Notifications">
+        <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1112 0c0 4 2 5 2 5H4s2-1 2-5zM10 20a2 2 0 004 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div class="sidebar-avatar" id="currentUserAvatar" title="Current user">NK</div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <span id="topbarTitle">CRM</span>
+        </div>
+        <div class="brand">OnePort<span>365</span></div>
+      </header>
+
+      <div class="module active" id="module-crm">
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="pipeline">
+          <svg viewBox="0 0 24 24" class="tab-icon"><path d="M4 19V9M12 19V5M20 19v-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          Pipeline
+        </button>
+        <button class="tab-btn" data-tab="companies">
+          <svg viewBox="0 0 24 24" class="tab-icon"><path d="M3 21h18M5 21V6l7-3 7 3v15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          Companies
+        </button>
+        <button class="tab-btn" data-tab="contacts">
+          <svg viewBox="0 0 24 24" class="tab-icon"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+          Contacts
+        </button>
+        <button class="tab-btn" data-tab="activity">
+          <svg viewBox="0 0 24 24" class="tab-icon"><path d="M4 12h4l2-7 4 14 2-7h4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Activity log
+        </button>
+      </nav>
+
+      <!-- PIPELINE TAB (context stub, matches reference image) -->
+      <section class="tab-panel active" id="panel-pipeline">
+        <div class="stat-cards">
+          <div class="stat-card highlight">
+            <div class="stat-label">Active pipeline (USD)</div>
+            <div class="stat-value">$459,979</div>
+            <div class="stat-sub">16 deals in progress</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Deals won (USD)</div>
+            <div class="stat-value gold">$116,700</div>
+            <div class="stat-sub">7 deals won</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total deals</div>
+            <div class="stat-value">24</div>
+            <div class="stat-sub">All-time deals</div>
+          </div>
+        </div>
+        <div class="pipeline-toolbar">
+          <input class="search-input" placeholder="Search deals..." disabled />
+          <select disabled><option>All Owners</option></select>
+          <select disabled><option>Date created</option></select>
+          <button class="btn btn-outline" disabled>Board</button>
+          <button class="btn btn-primary" disabled>+ New deal</button>
+        </div>
+        <div class="pipeline-note">This is a static preview for context — the interactive prototype lives in the <strong>Activity log</strong> tab.</div>
+        <div class="board">
+          <div class="board-col">
+            <div class="board-col-head"><span class="stage-num">1</span> Prospect <span class="board-col-count">5 · $110,930</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Srtc exim ltd</span><b>$3,330</b></div><span class="chip-owner">KA Kayode Akintade</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Autochek</span><b>$12,500</b></div></div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-head"><span class="stage-num">2</span> Contacted <span class="board-col-count">0 · $0</span></div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-head"><span class="stage-num">3</span> Qualified <span class="board-col-count">4 · $155,310</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Tamrose limited</span><b>$8,320</b></div><span class="chip-owner">BA Babatope Ayeni</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Alliance chemicals</span><b>$54,000</b></div></div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-head"><span class="stage-num">4</span> Quote Issued <span class="board-col-count">7 · $193,739</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Quest hill</span><b>$85,000</b></div><span class="chip-owner">DO Deborah Oje</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Powerpro</span><b>$2,080</b></div></div>
+          </div>
+          <div class="board-col">
+            <div class="board-col-head"><span class="stage-num">5</span> Closed <span class="board-col-count">7 won · 1 lost</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Bioscape commodities afri...</span><b>$11,000</b></div><span class="chip-owner">AA Adeshewa Adelowo</span></div>
+            <div class="deal-card"><div class="deal-top"><span>Quest hill</span><b>$25,000</b></div><span class="won-tag">✓ Won</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPANIES TAB (stub) -->
+      <section class="tab-panel" id="panel-companies">
+        <div class="empty-stub">
+          <h3>Companies</h3>
+          <p>Not part of this prototype. See the <strong>Activity log</strong> tab for the interactive flow.</p>
+        </div>
+      </section>
+
+      <!-- CONTACTS TAB (stub) -->
+      <section class="tab-panel" id="panel-contacts">
+        <div class="empty-stub">
+          <h3>Contacts</h3>
+          <p>Not part of this prototype. See the <strong>Activity log</strong> tab for the interactive flow.</p>
+        </div>
+      </section>
+
+      <!-- ACTIVITY LOG TAB -->
+      <section class="tab-panel" id="panel-activity">
+        <div class="activity-header">
+          <div>
+            <h2>Activity log</h2>
+            <p class="muted" id="activityCountLabel">Showing all activity</p>
+          </div>
+          <button class="btn btn-primary" id="openAddActivity">+ Add activity</button>
+        </div>
+
+        <div class="activity-toolbar">
+          <input type="search" id="activitySearch" class="search-input" placeholder="Search by customer, sales owner or meeting type..." />
+          <label class="field-inline">
+            <span>Sales team</span>
+            <select id="repFilter">
+              <option value="all">All reps (manager view)</option>
+            </select>
+          </label>
+          <label class="field-inline">
+            <span>Status</span>
+            <select id="statusFilter">
+              <option value="all">All statuses</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="table-wrap">
+          <table class="activity-table">
+            <thead>
+              <tr>
+                <th>Customer name</th>
+                <th>Sales owner</th>
+                <th>Meeting type</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th class="action-col">Action</th>
+              </tr>
+            </thead>
+            <tbody id="activityTableBody">
+              <!-- rendered by app.js -->
+            </tbody>
+          </table>
+          <div class="table-empty" id="tableEmptyState" hidden>No activity logged yet — click “Add activity” to log the first one.</div>
+        </div>
+      </section>
+      </div>
+
+      <!-- PROPAY MODULE (rendered by propay.js) -->
+      <div class="module" id="module-propay"></div>
+    </main>
+  </div>
+
+  <!-- Add / View / Edit Activity modal (view opens read-only, Edit unlocks it) -->
+  <div class="modal-overlay" id="activityModalOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="modalTitle">Add Activity</h3>
+          <p class="muted" id="modalSubtitle">Enter the details below to add a new activity</p>
+        </div>
+        <button class="modal-close" id="closeModalBtn" aria-label="Close">&times;</button>
+      </div>
+
+      <form id="activityForm">
+        <div class="field">
+          <label class="op-input-wrap" for="fCustomer">
+            <span class="op-notch">Customer / Company <span class="req">*</span></span>
+            <input list="companyList" id="fCustomer" required placeholder="Select or type a company name" />
+            <datalist id="companyList"></datalist>
+          </label>
+        </div>
+
+        <div class="field">
+          <label class="op-input-wrap" for="fMeetingType">
+            <span class="op-notch">Meeting Type <span class="req">*</span></span>
+            <select id="fMeetingType" required>
+              <option value="Call">Call</option>
+              <option value="Email">Email</option>
+              <option value="In-Person Meeting">In-Person Meeting</option>
+              <option value="TBD">TBD</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="field">
+          <label class="op-input-wrap" for="fPurpose">
+            <span class="op-notch" id="fPurposeLabel">Call Purpose <span class="req">*</span></span>
+            <input id="fPurpose" required placeholder="What is this call about" />
+          </label>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="op-input-wrap" for="fDate">
+              <span class="op-notch">Date <span class="req">*</span></span>
+              <input type="date" id="fDate" required />
+            </label>
+          </div>
+          <div class="field">
+            <label class="op-input-wrap" for="fTime">
+              <span class="op-notch">Time <span class="req">*</span></span>
+              <input type="time" id="fTime" required />
+            </label>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="op-input-wrap" for="fDuration">
+              <span class="op-notch">Duration (minutes)</span>
+              <input type="number" id="fDuration" min="0" placeholder="Eg 30" />
+            </label>
+          </div>
+          <div class="field">
+            <label class="op-input-wrap" for="fOwner">
+              <span class="op-notch">Sales owner <span class="req">*</span></span>
+              <select id="fOwner" required></select>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="op-input-wrap" for="fStatus">
+            <span class="op-notch">Status</span>
+            <select id="fStatus">
+              <option value="Scheduled">Scheduled</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="field">
+          <label class="op-input-wrap" for="fNotes">
+            <span class="op-notch">Notes <span class="req">*</span></span>
+            <textarea id="fNotes" required placeholder="Additional notes" rows="3"></textarea>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-danger-text" id="deleteActivityBtn" hidden>Delete</button>
+          <div class="modal-actions-right">
+            <button type="button" class="btn btn-outline" id="cancelModalBtn">Cancel</button>
+            <button type="button" class="btn btn-primary" id="editModeBtn" hidden>Edit</button>
+            <button type="submit" class="btn btn-primary" id="saveActivityBtn">Save Activity</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- ProPay: View more drawer -->
+  <div class="drawer-overlay" id="ppDrawerOverlay" hidden>
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="ppDrawerTitle" id="ppDrawer"></aside>
+  </div>
+
+  <!-- ProPay: comments modal -->
+  <div class="modal-overlay" id="ppCommentsOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ppCommentsTitle" id="ppCommentsModal"></div>
+  </div>
+
+  <script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "op365_activity_log_prototype_v1";
+
+  // Avatar fills cycle deterministically through the 4 OnePort 365 brand
+  // fills (design/DESIGN_SYSTEM.md, "Avatars & owner chips") — never a
+  // random or per-developer color.
+  var AVATAR_FILLS = [
+    { bg: "var(--op-avatar-1-bg)", text: "var(--op-avatar-1-text)" },
+    { bg: "var(--op-avatar-2-bg)", text: "var(--op-avatar-2-text)" },
+    { bg: "var(--op-avatar-3-bg)", text: "var(--op-avatar-3-text)" },
+    { bg: "var(--op-avatar-4-bg)", text: "var(--op-avatar-4-text)" }
+  ];
+
+  function avatarFillForName(name) {
+    var hash = 0;
+    for (var i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    return AVATAR_FILLS[hash % AVATAR_FILLS.length];
+  }
+
+  var REPS = [
+    { id: "michael", name: "Michael Adeyemi", initials: "MI" },
+    { id: "sarah", name: "Sarah Adamu", initials: "SA" },
+    { id: "james", name: "James Okafor", initials: "JA" },
+    { id: "kayode", name: "Kayode Akintade", initials: "KA" },
+    { id: "deborah", name: "Deborah Oje", initials: "DO" }
+  ];
+
+  var COMPANIES = [
+    "Dangote Industries", "Flour Mills of Nigeria", "Honeywell Group", "MTN Nigeria",
+    "Srtc exim ltd", "Tamrose limited", "Quest hill", "Bioscape commodities afri...",
+    "Autochek", "Alliance chemicals", "Powerpro"
+  ];
+
+  var MEETING_TYPE_LABELS = {
+    "Call": "Call Purpose",
+    "Email": "Email Subject",
+    "In-Person Meeting": "Meeting Purpose",
+    "TBD": "Purpose"
+  };
+
+  var MEETING_TYPE_PLACEHOLDERS = {
+    "Call": "What is this call about",
+    "Email": "What is this email about",
+    "In-Person Meeting": "What is this meeting about",
+    "TBD": "What is this activity about"
+  };
+
+  function repById(id) {
+    for (var i = 0; i < REPS.length; i++) if (REPS[i].id === id) return REPS[i];
+    return null;
+  }
+
+  function seedData() {
+    return [
+      { id: uid(), customer: "Dangote Industries", date: "2026-07-28", time: "10:00", ownerId: "michael", meetingType: "Call", purpose: "Contract Review", duration: 30, notes: "Walk through renewal terms before signature.", status: "Scheduled" },
+      { id: uid(), customer: "Flour Mills of Nigeria", date: "2026-07-29", time: "14:30", ownerId: "sarah", meetingType: "Call", purpose: "Discovery Call", duration: 20, notes: "First call to understand procurement needs.", status: "Scheduled" },
+      { id: uid(), customer: "Honeywell Group", date: "2026-07-22", time: "11:00", ownerId: "james", meetingType: "In-Person Meeting", purpose: "Onboarding", duration: 60, notes: "Kickoff and onboarding walkthrough on-site.", status: "Completed" },
+      { id: uid(), customer: "MTN Nigeria", date: "2026-07-18", time: "09:00", ownerId: "james", meetingType: "In-Person Meeting", purpose: "Site Visit", duration: 45, notes: "Site visit rescheduled by client, then cancelled.", status: "Cancelled" }
+    ];
+  }
+
+  function uid() {
+    return "act_" + Math.random().toString(36).slice(2, 10);
+  }
+
+  function loadActivities() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return seedData();
+      var parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed) || !parsed.length) return seedData();
+      return parsed;
+    } catch (e) {
+      return seedData();
+    }
+  }
+
+  function saveActivities() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+    } catch (e) { /* storage unavailable, prototype still works in-memory */ }
+  }
+
+  var activities = loadActivities();
+  var editingId = null;
+
+  // A sales rep can log, view and edit activity but never delete a
+  // record — deleting is not available in this prototype.
+  function canDelete() { return false; }
+
+  // ---------- DOM refs ----------
+  var tabButtons = document.querySelectorAll(".tab-btn");
+  var tabPanels = document.querySelectorAll(".tab-panel");
+
+  var tableBody = document.getElementById("activityTableBody");
+  var emptyState = document.getElementById("tableEmptyState");
+  var countLabel = document.getElementById("activityCountLabel");
+  var searchInput = document.getElementById("activitySearch");
+  var repFilter = document.getElementById("repFilter");
+  var statusFilter = document.getElementById("statusFilter");
+
+  var overlay = document.getElementById("activityModalOverlay");
+  var form = document.getElementById("activityForm");
+  var modalTitle = document.getElementById("modalTitle");
+  var modalSubtitle = document.getElementById("modalSubtitle");
+  var openAddBtn = document.getElementById("openAddActivity");
+  var closeModalBtn = document.getElementById("closeModalBtn");
+  var cancelModalBtn = document.getElementById("cancelModalBtn");
+  var editModeBtn = document.getElementById("editModeBtn");
+  var saveActivityBtn = document.getElementById("saveActivityBtn");
+  var deleteBtn = document.getElementById("deleteActivityBtn");
+
+  var fCustomer = document.getElementById("fCustomer");
+  var companyList = document.getElementById("companyList");
+  var fMeetingType = document.getElementById("fMeetingType");
+  var fPurposeLabel = document.getElementById("fPurposeLabel");
+  var fPurpose = document.getElementById("fPurpose");
+  var fDate = document.getElementById("fDate");
+  var fTime = document.getElementById("fTime");
+  var fDuration = document.getElementById("fDuration");
+  var fOwner = document.getElementById("fOwner");
+  var fStatus = document.getElementById("fStatus");
+  var fNotes = document.getElementById("fNotes");
+
+  var FORM_FIELD_IDS = ["fCustomer", "fMeetingType", "fPurpose", "fDate", "fTime", "fDuration", "fOwner", "fStatus", "fNotes"];
+  function setFormReadOnly(readOnly) {
+    FORM_FIELD_IDS.forEach(function (id) {
+      var el = document.getElementById(id);
+      el.disabled = readOnly;
+      var wrap = el.closest(".op-input-wrap");
+      if (wrap) wrap.classList.toggle("is-readonly", readOnly);
+    });
+  }
+
+  var toast = document.getElementById("toast");
+  var toastTimer = null;
+
+  // ---------- Tabs ----------
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      tabButtons.forEach(function (b) { b.classList.remove("active"); });
+      tabPanels.forEach(function (p) { p.classList.remove("active"); });
+      btn.classList.add("active");
+      document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ---------- Populate static selects ----------
+  function populateReps() {
+    REPS.forEach(function (rep) {
+      var opt = document.createElement("option");
+      opt.value = rep.id;
+      opt.textContent = rep.name;
+      repFilter.appendChild(opt.cloneNode(true));
+      fOwner.appendChild(opt);
+    });
+  }
+
+  function populateCompanies() {
+    COMPANIES.forEach(function (name) {
+      var opt = document.createElement("option");
+      opt.value = name;
+      companyList.appendChild(opt);
+    });
+  }
+
+  // ---------- Rendering ----------
+  function formatDate(iso) {
+    var d = new Date(iso + "T00:00:00");
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  function formatTime(t) {
+    var parts = t.split(":");
+    var h = parseInt(parts[0], 10);
+    var m = parts[1];
+    var suffix = h >= 12 ? "PM" : "AM";
+    var h12 = h % 12;
+    if (h12 === 0) h12 = 12;
+    return h12 + ":" + m + " " + suffix;
+  }
+
+  function getFilteredActivities() {
+    var q = searchInput.value.trim().toLowerCase();
+    var rep = repFilter.value;
+    var status = statusFilter.value;
+
+    return activities.filter(function (a) {
+      if (rep !== "all" && a.ownerId !== rep) return false;
+      if (status !== "all" && a.status !== status) return false;
+      if (q) {
+        var owner = repById(a.ownerId);
+        var haystack = [a.customer, owner ? owner.name : "", a.meetingType, a.purpose].join(" ").toLowerCase();
+        if (haystack.indexOf(q) === -1) return false;
+      }
+      return true;
+    }).sort(function (a, b) {
+      return (b.date + b.time).localeCompare(a.date + a.time);
+    });
+  }
+
+  function render() {
+    var list = getFilteredActivities();
+    tableBody.innerHTML = "";
+
+    if (!list.length) {
+      emptyState.hidden = false;
+      emptyState.textContent = activities.length
+        ? "No activity matches your search or filters."
+        : "No activity logged yet — click “Add activity” to log the first one.";
+    } else {
+      emptyState.hidden = true;
+    }
+
+    list.forEach(function (a) {
+      var owner = repById(a.ownerId);
+      var fill = avatarFillForName(owner ? owner.name : "Unassigned");
+      var tr = document.createElement("tr");
+
+      tr.innerHTML =
+        '<td class="customer-name">' + escapeHtml(a.customer) + "</td>" +
+        '<td><div class="owner-cell"><span class="owner-avatar" style="background:' + fill.bg + ";color:" + fill.text + '">' + (owner ? owner.initials : "?") + "</span>" + (owner ? owner.name : "Unassigned") + "</div></td>" +
+        '<td><span class="meeting-badge">' + escapeHtml(a.meetingType) + (a.purpose ? " · " + escapeHtml(a.purpose) : "") + "</span></td>" +
+        "<td>" + formatDate(a.date) + "</td>" +
+        "<td>" + formatTime(a.time) + "</td>" +
+        '<td><span class="status-badge status-' + a.status + '">' + a.status + "</span></td>" +
+        '<td class="action-col"><button class="view-btn" data-id="' + a.id + '">View</button></td>';
+
+      tableBody.appendChild(tr);
+    });
+
+    var total = activities.length;
+    var shown = list.length;
+    countLabel.textContent = repFilter.value === "all"
+      ? "Showing " + shown + " of " + total + " activities"
+      : "Showing " + shown + " of " + total + " activities for " + (repById(repFilter.value) || {}).name;
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement("div");
+    div.textContent = String(str == null ? "" : str);
+    return div.innerHTML;
+  }
+
+  // ---------- Modal ----------
+  // Opening an existing activity always starts read-only ("view"); the
+  // user must explicitly click Edit to make the form editable. Adding a
+  // brand new activity is editable immediately, since there's nothing to
+  // view yet.
+  function openModal(mode, activity) {
+    form.reset();
+    editingId = null;
+
+    if (mode === "add") {
+      modalTitle.textContent = "Add Activity";
+      modalSubtitle.textContent = "Enter the details below to add a new activity";
+      deleteBtn.hidden = true;
+      setFormReadOnly(false);
+      cancelModalBtn.textContent = "Cancel";
+      editModeBtn.hidden = true;
+      saveActivityBtn.hidden = false;
+      fMeetingType.value = "Call";
+      fOwner.value = REPS[0].id;
+      fStatus.value = "Scheduled";
+      updatePurposeLabel();
+      var today = new Date();
+      fDate.value = today.toISOString().slice(0, 10);
+    } else {
+      editingId = activity.id;
+      modalTitle.textContent = "View Activity";
+      modalSubtitle.textContent = "Activity details";
+      deleteBtn.hidden = true;
+      setFormReadOnly(true);
+      cancelModalBtn.textContent = "Close";
+      editModeBtn.hidden = false;
+      saveActivityBtn.hidden = true;
+
+      fCustomer.value = activity.customer;
+      fMeetingType.value = activity.meetingType;
+      updatePurposeLabel();
+      fPurpose.value = activity.purpose || "";
+      fDate.value = activity.date;
+      fTime.value = activity.time;
+      fDuration.value = activity.duration || "";
+      fOwner.value = activity.ownerId;
+      fStatus.value = activity.status;
+      fNotes.value = activity.notes || "";
+    }
+
+    overlay.hidden = false;
+  }
+
+  function enterEditMode() {
+    modalTitle.textContent = "Edit Activity";
+    modalSubtitle.textContent = "Update the details of this activity";
+    setFormReadOnly(false);
+    cancelModalBtn.textContent = "Cancel";
+    editModeBtn.hidden = true;
+    saveActivityBtn.hidden = false;
+  }
+
+  function closeModal() {
+    overlay.hidden = true;
+    editingId = null;
+  }
+
+  function updatePurposeLabel() {
+    var type = fMeetingType.value;
+    var label = MEETING_TYPE_LABELS[type] || "Purpose";
+    fPurposeLabel.innerHTML = label + ' <span class="req">*</span>';
+    fPurpose.placeholder = MEETING_TYPE_PLACEHOLDERS[type] || "What is this about";
+  }
+
+  fMeetingType.addEventListener("change", updatePurposeLabel);
+
+  openAddBtn.addEventListener("click", function () { openModal("add"); });
+  closeModalBtn.addEventListener("click", closeModal);
+  cancelModalBtn.addEventListener("click", closeModal);
+  editModeBtn.addEventListener("click", enterEditMode);
+  overlay.addEventListener("click", function (e) {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !overlay.hidden) closeModal();
+  });
+
+  tableBody.addEventListener("click", function (e) {
+    var btn = e.target.closest(".view-btn");
+    if (!btn) return;
+    var activity = activities.find(function (a) { return a.id === btn.dataset.id; });
+    if (activity) openModal("view", activity);
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    var payload = {
+      customer: fCustomer.value.trim(),
+      meetingType: fMeetingType.value,
+      purpose: fPurpose.value.trim(),
+      date: fDate.value,
+      time: fTime.value,
+      duration: fDuration.value ? parseInt(fDuration.value, 10) : null,
+      ownerId: fOwner.value,
+      notes: fNotes.value.trim(),
+      status: fStatus.value
+    };
+
+    if (editingId) {
+      var idx = activities.findIndex(function (a) { return a.id === editingId; });
+      if (idx !== -1) activities[idx] = Object.assign({}, activities[idx], payload);
+      showToast("Activity updated");
+    } else {
+      payload.id = uid();
+      activities.push(payload);
+      showToast("Activity logged");
+    }
+
+    saveActivities();
+    render();
+    closeModal();
+  });
+
+  deleteBtn.addEventListener("click", function () {
+    if (!editingId || !canDelete()) return;
+    activities = activities.filter(function (a) { return a.id !== editingId; });
+    saveActivities();
+    render();
+    closeModal();
+    showToast("Activity removed");
+  });
+
+  // ---------- Toolbar ----------
+  searchInput.addEventListener("input", render);
+  repFilter.addEventListener("change", render);
+  statusFilter.addEventListener("change", render);
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.hidden = true; }, 2200);
+  }
+
+  // ---------- Init ----------
+  populateReps();
+  populateCompanies();
+  render();
+})();
+
+</script>
+  <script>try{if(!location.hash)history.replaceState(null,"","#propay");}catch(e){location.hash="propay";}</script>
+<script>
+(function () {
+  "use strict";
+
+  // ProPay — centralised payment tracking. Lives in its own sidebar module
+  // next to CRM. Routes are hash based so the clickthrough behaves like
+  // real navigation (back button, shareable links):
+  //   #crm                      CRM module (activity log prototype)
+  //   #propay                   ProPay register
+  //   #propay/shipment/<id>     Shipment detail page
+
+  var STORAGE_KEY = "op365_propay_prototype_v2";
+
+  var CURRENT_USER = { name: "Nkechi M.", initials: "NK", role: "Finance" };
+
+  var STATUSES = ["Awaiting approval", "Approved", "Part paid", "Paid", "Rejected"];
+  var STATUS_CLASS = {
+    "Awaiting approval": "pp-st-awaiting",
+    "Approved": "pp-st-approved",
+    "Part paid": "pp-st-part",
+    "Paid": "pp-st-paid",
+    "Rejected": "pp-st-rejected"
+  };
+
+  var SHIPMENTS = {
+    "ZIL0312": { id: "ZIL0312", status: "Active", customer: "Dangote Industries", mode: "Ocean Freight", pol: "CNSHA", pod: "NGAPP", origin: "Shanghai, China (CNSHA)", destination: "Apapa, Lagos (NGAPP)",
+      bookingContact: "Fidelia Aluku", quoteRef: "QT-26-0918", bl: "MAEU264418230", shipmentType: "Import", serviceType: "FCL", incoterm: "FOB", load: "2 × 40ft HC", eta: "2026-10-22",
+      team: [{ name: "Kimeen Ugwu", role: "Operations Manager" }, { name: "Manuel Akin", role: "Operations Officer" }, { name: "Nkechi M.", role: "Finance" }],
+      progress: [["Booking confirmed", "2026-09-18"], ["Cargo received at origin", "2026-09-24"], ["Departed port of loading", "2026-09-29"], ["Arrived port of discharge", null], ["Customs cleared", null], ["Delivered", null]], step: 3,
+      documents: [["Bill of lading", "MAEU264418230.pdf", "2026-09-29"], ["Commercial invoice", "dangote-ci-0912.pdf", "2026-09-20"], ["Packing list", "dangote-pl-0912.pdf", "2026-09-20"]] },
+    "ZIL0298": { id: "ZIL0298", status: "Active", customer: "Flour Mills of Nigeria", mode: "Ocean Freight", pol: "BEANR", pod: "NGTIN", origin: "Antwerp, Belgium (BEANR)", destination: "Tin Can, Lagos (NGTIN)",
+      bookingContact: "Tobi Adewale", quoteRef: "QT-26-0874", bl: "CMDU883120447", shipmentType: "Import", serviceType: "FCL", incoterm: "CIF", load: "1 × 20ft", eta: "2026-10-09",
+      team: [{ name: "Kimeen Ugwu", role: "Operations Manager" }, { name: "Ugwu Neny", role: "Operations Officer" }],
+      progress: [["Booking confirmed", "2026-09-02"], ["Cargo received at origin", "2026-09-06"], ["Departed port of loading", "2026-09-10"], ["Arrived port of discharge", "2026-10-09"], ["Customs cleared", null], ["Delivered", null]], step: 4,
+      documents: [["Bill of lading", "CMDU883120447.pdf", "2026-09-10"], ["Form M", "formm-fmn-2209.pdf", "2026-08-30"]] },
+    "ZIL0305": { id: "ZIL0305", status: "Completed", customer: "Honeywell Group", mode: "Air Freight", pol: "AEDXB", pod: "NGLOS", origin: "Dubai, UAE (AEDXB)", destination: "Lagos, Nigeria (NGLOS)",
+      bookingContact: "Ifeoma Obi", quoteRef: "QT-26-0901", bl: "176-55320914 (AWB)", shipmentType: "Import", serviceType: "Air consolidation", incoterm: "EXW", load: "1,240 kg", eta: "2026-10-12",
+      team: [{ name: "Manuel Akin", role: "Operations Officer" }, { name: "Ada Okoro", role: "Operations Officer" }],
+      progress: [["Booking confirmed", "2026-10-02"], ["Cargo received at origin", "2026-10-05"], ["Departed port of loading", "2026-10-07"], ["Arrived port of discharge", "2026-10-08"], ["Customs cleared", "2026-10-10"], ["Delivered", "2026-10-12"]], step: 6,
+      documents: [["Air waybill", "awb-176-55320914.pdf", "2026-10-07"], ["Delivery note", "honeywell-dn-1012.pdf", "2026-10-12"]] },
+    "ZIL0321": { id: "ZIL0321", status: "Active", customer: "MTN Nigeria", mode: "Ocean Freight", pol: "TRMER", pod: "NGONN", origin: "Mersin, Turkey (TRMER)", destination: "Onne, Rivers (NGONN)",
+      bookingContact: "Chidi Nwosu", quoteRef: "QT-26-0933", bl: "Pending", shipmentType: "Import", serviceType: "FCL", incoterm: "FOB", load: "3 × 40ft", eta: "2026-11-02",
+      team: [{ name: "Kimeen Ugwu", role: "Operations Manager" }, { name: "Ugwu Neny", role: "Operations Officer" }],
+      progress: [["Booking confirmed", "2026-10-11"], ["Cargo received at origin", null], ["Departed port of loading", null], ["Arrived port of discharge", null], ["Customs cleared", null], ["Delivered", null]], step: 1,
+      documents: [] }
+  };
+
+
+  function seedData() {
+    return [
+      { id: "PO-26-10-045", type: "payable", party: "Olgai Health Care", category: "Terminal charges", shipmentId: "ZIL0312", actual: 1450000, budget: 1200000, sell: 1680000, status: "Awaiting approval", attachment: "terminal-invoice-045.pdf",
+        comments: [{ author: "Tunde Bello", role: "Operations", text: "Terminal raised storage after vessel delay — 4 extra days.", at: "2026-10-10T09:12" }], payments: [] },
+      { id: "PO-26-10-047", type: "payable", party: "BOD Oneport", category: "THC", shipmentId: "ZIL0312", actual: 3000, budget: 3200, sell: 4500, status: "Approved", attachment: "thc-bod-047.pdf", comments: [], payments: [] },
+      { id: "PO-26-10-041", type: "payable", party: "Bindle by Desmit", category: "Haulage", shipmentId: "ZIL0298", actual: 820000, budget: 900000, sell: 1150000, status: "Approved", attachment: null, comments: [], payments: [] },
+      { id: "PO-26-10-040", type: "payable", party: "Bob's Burger Joint", category: "Clearance", shipmentId: "ZIL0298", actual: 495000, budget: 500000, sell: 640000, status: "Part paid", attachment: "clearance-040.pdf", comments: [],
+        payments: [{ amount: 250000, kind: "Partial", at: "2026-10-08", by: "Nkechi M." }] },
+      { id: "PO-26-10-053", type: "payable", party: "Maersk Nigeria Ltd", category: "Shipping line", shipmentId: "ZIL0305", actual: 4800000, budget: 4200000, sell: 5600000, status: "Approved", attachment: "maersk-do-053.pdf",
+        comments: [{ author: "Ada Okoro", role: "Operations", text: "Demurrage applied — consignee docs arrived late.", at: "2026-10-11T15:40" }], payments: [] },
+      { id: "PO-26-10-052", type: "payable", party: "Mainstream Haulage", category: "Haulage", shipmentId: "ZIL0305", actual: 610000, budget: 650000, sell: 780000, status: "Paid", attachment: "haulage-052.pdf", comments: [],
+        payments: [{ amount: 610000, kind: "Full", at: "2026-10-13", by: "Nkechi M." }] },
+      { id: "PO-26-10-058", type: "payable", party: "Nigeria Customs Service", category: "Customs duty", shipmentId: "ZIL0321", actual: 2350000, budget: 2350000, sell: 2350000, status: "Awaiting approval", attachment: null, comments: [], payments: [] },
+      { id: "INV-26-10-118", type: "receivable", party: "Dangote Industries", category: "Freight invoice", shipmentId: "ZIL0312", actual: 7900000, budget: null, sell: 7900000, status: "Approved", attachment: "inv-118.pdf", comments: [], payments: [] },
+      { id: "INV-26-10-112", type: "receivable", party: "Honeywell Group", category: "Freight invoice", shipmentId: "ZIL0305", actual: 6380000, budget: null, sell: 6380000, status: "Part paid", attachment: "inv-112.pdf", comments: [],
+        payments: [{ amount: 3000000, kind: "Partial", at: "2026-10-12", by: "Nkechi M." }] }
+    ].map(function (r) { return Object.assign(r, REQUEST_META[r.id]); });
+  }
+
+  // Who raised and approved each request, and why. Approval fields stay
+  // empty while a request is awaiting approval.
+  var REQUEST_META = {
+    "PO-26-10-045": { quantity: 1, raisedBy: "Tunde Bello", submittedAt: "2026-10-10", purpose: "Terminal storage charges after a 4-day vessel delay." },
+    "PO-26-10-047": { quantity: 2, raisedBy: "Manuel Akin", submittedAt: "2026-10-06", approvedAt: "2026-10-07", approvedBy: "Kimeen Ugwu", purpose: "Terminal handling for 2 × 40ft HC." },
+    "PO-26-10-041": { quantity: 1, raisedBy: "Ugwu Neny", submittedAt: "2026-10-03", approvedAt: "2026-10-04", approvedBy: "Kimeen Ugwu", purpose: "Haulage from Tin Can to the Agbara warehouse." },
+    "PO-26-10-040": { quantity: 1, raisedBy: "Ugwu Neny", submittedAt: "2026-10-02", approvedAt: "2026-10-03", approvedBy: "Kimeen Ugwu", purpose: "Customs clearance and documentation." },
+    "PO-26-10-053": { quantity: 1, raisedBy: "Ada Okoro", submittedAt: "2026-10-09", approvedAt: "2026-10-11", approvedBy: "Kimeen Ugwu", purpose: "Shipping line charges including demurrage." },
+    "PO-26-10-052": { quantity: 1, raisedBy: "Manuel Akin", submittedAt: "2026-10-08", approvedAt: "2026-10-09", approvedBy: "Kimeen Ugwu", purpose: "Last-mile delivery to Honeywell, Ikeja." },
+    "PO-26-10-058": { quantity: 1, raisedBy: "Ugwu Neny", submittedAt: "2026-10-13", purpose: "Import duty assessed on Form M." },
+    "INV-26-10-118": { quantity: 1, raisedBy: "Nkechi M.", submittedAt: "2026-10-05", approvedAt: "2026-10-05", approvedBy: "Kimeen Ugwu", purpose: "Door-to-door ocean freight, Shanghai to Lagos." },
+    "INV-26-10-112": { quantity: 1, raisedBy: "Nkechi M.", submittedAt: "2026-10-08", approvedAt: "2026-10-08", approvedBy: "Kimeen Ugwu", purpose: "Air freight Dubai to Lagos, 1,240 kg." }
+  };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      var parsed = raw ? JSON.parse(raw) : null;
+      if (Array.isArray(parsed) && parsed.length) return parsed;
+    } catch (e) { /* fall through to seed */ }
+    return seedData();
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); } catch (e) { /* in-memory only */ }
+  }
+
+  var records = load();
+
+  var state = {
+    type: "all",        // all | payable | receivable
+    status: "all",
+    search: "",
+    filterOpen: false,
+    drawerId: null,
+    commentsId: null,
+    replyTo: null,
+    currency: "NGN"
+  };
+
+  // ---------- Helpers ----------
+  var naira = new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 });
+  function money(n) { return n == null ? "—" : naira.format(n); }
+
+  function esc(str) {
+    var div = document.createElement("div");
+    div.textContent = String(str == null ? "" : str);
+    return div.innerHTML;
+  }
+
+  function byId(id) {
+    for (var i = 0; i < records.length; i++) if (records[i].id === id) return records[i];
+    return null;
+  }
+
+  function paidTotal(r) {
+    return r.payments.reduce(function (s, p) { return s + p.amount; }, 0);
+  }
+
+  function outstanding(r) { return Math.max(0, r.actual - paidTotal(r)); }
+
+  function overBudget(r) {
+    return r.type === "payable" && r.budget != null && r.actual > r.budget;
+  }
+
+  function budgetCheckHtml(r) {
+    if (r.type !== "payable" || r.budget == null) return '<span class="pp-muted">—</span>';
+    if (overBudget(r)) return '<span class="pp-chip pp-chip-error">▲ Exceeds by ' + money(r.actual - r.budget) + "</span>";
+    return '<span class="pp-chip pp-chip-success">✓ Within budget</span>';
+  }
+
+  function statusHtml(status) {
+    return '<span class="status-badge ' + STATUS_CLASS[status] + '">' + esc(status) + "</span>";
+  }
+
+  function formatDate(iso) {
+    var d = new Date(iso.length > 10 ? iso : iso + "T00:00:00");
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  function formatDateTime(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + ", " +
+      d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  }
+
+  function partyLabel() {
+    if (state.type === "payable") return "Vendor";
+    if (state.type === "receivable") return "Customer";
+    return "Vendor / Customer";
+  }
+
+  function toast(msg) {
+    var el = document.getElementById("toast");
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(toast.t);
+    toast.t = setTimeout(function () { el.hidden = true; }, 2200);
+  }
+
+  // ---------- Module routing ----------
+  var moduleEls = {
+    crm: document.getElementById("module-crm"),
+    propay: document.getElementById("module-propay")
+  };
+  var root = moduleEls.propay;
+  var topbarTitle = document.getElementById("topbarTitle");
+
+  function route() {
+    var hash = location.hash.replace(/^#/, "");
+    var parts = hash.split("/");
+    var mod = parts[0] === "propay" ? "propay" : "crm";
+
+    Object.keys(moduleEls).forEach(function (k) { moduleEls[k].classList.toggle("active", k === mod); });
+    document.querySelectorAll(".sidebar-icon[data-module]").forEach(function (a) {
+      var on = a.dataset.module === mod;
+      a.classList.toggle("active", on);
+      if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+    topbarTitle.textContent = mod === "propay" ? "ProPay" : "CRM";
+
+    if (mod !== "propay") return;
+    if (parts[1] === "shipment" && SHIPMENTS[parts[2]]) renderShipment(parts[2], parts[3]);
+    else renderRegister();
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- Register (main ProPay page) ----------
+  function filtered() {
+    var q = state.search.trim().toLowerCase();
+    return records.filter(function (r) {
+      if (state.type !== "all" && r.type !== state.type) return false;
+      if (state.status !== "all" && r.status !== state.status) return false;
+      if (q) {
+        var hay = [r.id, r.party, r.category, r.shipmentId].join(" ").toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderRegister() {
+    var list = filtered();
+    var statusOptions = ["all"].concat(STATUSES).map(function (s) {
+      var label = s === "all" ? "All statuses" : s;
+      return '<button type="button" class="pp-filter-opt' + (state.status === s ? " active" : "") + '" data-status="' + esc(s) + '">' + esc(label) + "</button>";
+    }).join("");
+
+    var rows = list.map(function (r) {
+      var ship = SHIPMENTS[r.shipmentId];
+      var commentCount = r.comments.length;
+      var needsNote = overBudget(r) && r.status !== "Awaiting approval" && r.status !== "Rejected" && !r.comments.some(function (c) { return c.role === "Finance"; });
+      return "<tr>" +
+        '<td class="pp-po">' + esc(r.id) + "</td>" +
+        '<td class="customer-name">' + esc(r.party) + "</td>" +
+        '<td><span class="meeting-badge">' + esc(r.category) + "</span></td>" +
+        '<td><a class="pp-link" href="#propay/shipment/' + encodeURIComponent(r.shipmentId) + '" title="Open shipment ' + esc(r.shipmentId) + (ship ? " — " + esc(ship.customer) : "") + '">' + esc(r.shipmentId) + "</a></td>" +
+        '<td class="pp-num"><div class="pp-amount">' + money(r.actual) + "</div>" +
+          (r.type === "payable" ? '<div class="pp-sub">Budget ' + money(r.budget) + "</div>" : '<div class="pp-sub">Invoice</div>') + "</td>" +
+        "<td>" + budgetCheckHtml(r) + "</td>" +
+        '<td class="pp-num">' + money(r.sell) + "</td>" +
+        "<td>" + statusHtml(r.status) + "</td>" +
+        '<td class="pp-icons">' +
+          '<button type="button" class="pp-icon-btn' + (needsNote ? " attention" : "") + '" data-comments="' + esc(r.id) + '" aria-label="Comments on ' + esc(r.id) + " (" + commentCount + ')" title="' + (needsNote ? "Over budget — add a finance note" : "Add or view comments") + '">' +
+            '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>' +
+            (commentCount ? '<span class="pp-count">' + commentCount + "</span>" : "") +
+          "</button>" +
+          (r.attachment ? '<span class="pp-clip" title="' + esc(r.attachment) + '" aria-label="Attachment: ' + esc(r.attachment) + '"><svg viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.5-8.5a3.3 3.3 0 014.7 4.7L9.7 17.2a1.7 1.7 0 01-2.4-2.4L15 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></span>' : "") +
+        "</td>" +
+        '<td class="action-col"><button type="button" class="view-btn" data-more="' + esc(r.id) + '">View more</button></td>' +
+        "</tr>";
+    }).join("");
+
+    root.innerHTML =
+      '<div class="activity-header">' +
+        "<div><p class=\"pp-eyebrow\">Centralised payment tracking</p><h2>ProPay</h2>" +
+        '<p class="muted">Showing ' + list.length + " of " + records.length + " records</p></div>" +
+      "</div>" +
+      '<div class="activity-toolbar">' +
+        '<input type="search" id="ppSearch" class="search-input" placeholder="Search PO #, vendor, category or shipment #..." value="' + esc(state.search) + '" />' +
+        '<div class="pp-filter">' +
+          '<button type="button" class="pp-filter-btn' + (state.status !== "all" ? " is-on" : "") + '" id="ppFilterBtn" aria-expanded="' + state.filterOpen + '" aria-label="Filter by status">' +
+            '<svg viewBox="0 0 24 24"><path d="M4 5h16l-6 8v5l-4 2v-7L4 5z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>' +
+            "<span>" + (state.status === "all" ? "Status" : esc(state.status)) + "</span>" +
+          "</button>" +
+          '<div class="pp-filter-pop" ' + (state.filterOpen ? "" : "hidden") + '><p class="pp-pop-label">Filter by status</p>' + statusOptions + "</div>" +
+        "</div>" +
+      "</div>" +
+      '<div class="table-wrap"><table class="activity-table pp-table">' +
+        "<thead><tr><th>PO #</th><th>" + partyLabel() + "</th><th>Category</th><th>Shipment #</th><th>Amount</th><th>Budget check</th><th>Sell price</th><th>Status</th><th><span class=\"sr-only\">Comments and attachments</span></th><th class=\"action-col\">Action</th></tr></thead>" +
+        "<tbody>" + rows + "</tbody></table>" +
+        (list.length ? "" : '<div class="table-empty">No records match your search or filters.</div>') +
+      "</div>";
+
+    var search = document.getElementById("ppSearch");
+    search.addEventListener("input", function () {
+      state.search = search.value;
+      var pos = search.selectionStart;
+      renderRegister();
+      var again = document.getElementById("ppSearch");
+      again.focus();
+      again.setSelectionRange(pos, pos);
+    });
+  }
+
+  // ---------- Shipment detail page ----------
+  // Mirrors the Shipments module's detail layout: header card with key
+  // facts, then tabs. Arriving from ProPay lands on the Propay tab.
+  var SHIP_TABS = [["overview", "Overview"], ["progress", "Progress"], ["documents", "Documents"], ["propay", "Propay"]];
+
+  function renderShipment(id, tab) {
+    var s = SHIPMENTS[id];
+    tab = tab || "propay";
+    var lines = records.filter(function (r) { return r.shipmentId === id; });
+    var clip = '<svg viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.5-8.5a3.3 3.3 0 014.7 4.7L9.7 17.2a1.7 1.7 0 01-2.4-2.4L15 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+
+    var head =
+      '<a class="sd-back" href="#propay"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to ProPay</a>' +
+      '<section class="sd-card sd-hero">' +
+        '<div class="sd-hero-top">' +
+          '<div class="sd-hero-title"><h2>' + esc(s.id) + '</h2><span class="sd-pill ' + (s.status === "Active" ? "is-active" : "is-done") + '">' + esc(s.status) + "</span></div>" +
+          '<div class="sd-actions">' +
+            '<button type="button" class="btn btn-primary sd-actions-btn" id="sdActionsBtn" aria-expanded="false">Actions <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>' +
+            '<div class="sd-menu" id="sdMenu" hidden>' +
+              '<button type="button" data-sd-action="Status update sent to customer">Send status update</button>' +
+              '<button type="button" data-sd-action="Document request sent">Request documents</button>' +
+              '<button type="button" data-sd-action="Shipment link copied">Copy shipment link</button>' +
+            "</div>" +
+          "</div>" +
+        "</div>" +
+        '<dl class="sd-facts">' +
+          "<div><dt>Customer</dt><dd>" + esc(s.customer) + "</dd></div>" +
+          "<div><dt>Transport mode</dt><dd>" + esc(s.mode) + "</dd></div>" +
+          "<div><dt>Port of loading</dt><dd>" + esc(s.pol) + "</dd></div>" +
+          "<div><dt>Port of discharge</dt><dd>" + esc(s.pod) + "</dd></div>" +
+        "</dl>" +
+      "</section>" +
+      '<nav class="sd-card sd-tabs" aria-label="Shipment sections">' +
+        SHIP_TABS.map(function (t) {
+          return '<a href="#propay/shipment/' + encodeURIComponent(id) + "/" + t[0] + '" class="sd-tab' + (t[0] === tab ? " active" : "") + '"' + (t[0] === tab ? ' aria-current="page"' : "") + ">" + t[1] + "</a>";
+        }).join("") +
+      "</nav>";
+
+    var body = "";
+
+    if (tab === "overview") {
+      var detail = [
+        ["Customer", '<span class="sd-link">' + esc(s.customer) + "</span>"],
+        ["Booking contact", esc(s.bookingContact)],
+        ["Quote reference", '<span class="sd-link">' + esc(s.quoteRef) + "</span>"],
+        [s.mode === "Air Freight" ? "Air waybill" : "Bill of lading", esc(s.bl)],
+        ["Shipment type", esc(s.shipmentType)],
+        ["Transport mode", esc(s.mode)],
+        ["Service type", esc(s.serviceType)],
+        ["Incoterm", esc(s.incoterm)],
+        ["Origin", esc(s.origin)],
+        ["Destination", esc(s.destination)],
+        ["Load", esc(s.load)],
+        ["ETA", formatDate(s.eta)]
+      ].map(function (d) { return "<div><dt>" + d[0] + "</dt><dd>" + d[1] + "</dd></div>"; }).join("");
+
+      body =
+        '<div class="sd-split">' +
+          '<section class="sd-card"><div class="sd-card-head"><h3>Shipment Details</h3><p>Core reference data for this job.</p></div>' +
+            '<dl class="sd-grid">' + detail + "</dl></section>" +
+          '<section class="sd-card"><div class="sd-card-head"><h3>Shipment Team</h3><p>Who’s assigned to this shipment.</p></div>' +
+            '<ul class="sd-team">' + s.team.map(function (m, i) {
+              // Cycle the brand fills down the list so neighbours never match.
+              var fill = ["1", "3", "4", "2"][i % 4];
+              return '<li><span class="sd-avatar" style="background:var(--op-avatar-' + fill + '-bg);color:var(--op-avatar-' + fill + '-text)">' + initials(m.name) + '</span><div><strong>' + esc(m.name) + "</strong><span>" + esc(m.role) + "</span></div></li>";
+            }).join("") + "</ul></section>" +
+        "</div>";
+    } else if (tab === "progress") {
+      body =
+        '<section class="sd-card"><div class="sd-card-head"><h3>Progress</h3><p>Milestones from booking to delivery.</p></div>' +
+          '<ol class="sd-timeline">' + s.progress.map(function (m, i) {
+            var state = i < s.step ? "done" : i === s.step ? "current" : "todo";
+            return '<li class="is-' + state + '"><span class="sd-dot" aria-hidden="true"></span><div><strong>' + esc(m[0]) + "</strong><span>" +
+              (m[1] ? formatDate(m[1]) : state === "current" ? "In progress" : "Pending") + "</span></div></li>";
+          }).join("") + "</ol></section>";
+    } else if (tab === "documents") {
+      var docs = s.documents.map(function (d) { return { type: d[0], file: d[1], at: d[2] }; })
+        .concat(lines.filter(function (r) { return r.attachment; }).map(function (r) { return { type: r.category + " · " + r.id, file: r.attachment, at: null }; }));
+      body =
+        '<section class="sd-card"><div class="sd-card-head"><h3>Documents</h3><p>Shipping documents and payment attachments.</p></div>' +
+          (docs.length
+            ? '<ul class="sd-docs">' + docs.map(function (d) {
+                return '<li><span class="sd-doc-icon">' + clip + '</span><div><strong>' + esc(d.file) + "</strong><span>" + esc(d.type) + "</span></div>" +
+                  '<span class="pp-muted">' + (d.at ? formatDate(d.at) : "From ProPay") + "</span></li>";
+              }).join("") + "</ul>"
+            : '<p class="sd-empty">No documents uploaded yet.</p>') +
+        "</section>";
+    } else {
+      var payables = lines.filter(function (r) { return r.type === "payable"; });
+      var budget = payables.reduce(function (t, r) { return t + (r.budget || 0); }, 0);
+      var actual = payables.reduce(function (t, r) { return t + r.actual; }, 0);
+      var sell = payables.reduce(function (t, r) { return t + (r.sell || 0); }, 0);
+      var rows = lines.map(function (r) {
+        return "<tr>" +
+          '<td class="pp-po">' + esc(r.id) + "</td>" +
+          '<td class="customer-name">' + esc(r.party) + "</td>" +
+          '<td><span class="meeting-badge">' + esc(r.category) + "</span></td>" +
+          '<td class="pp-num">' + money(r.actual) + "</td>" +
+          "<td>" + budgetCheckHtml(r) + "</td>" +
+          "<td>" + statusHtml(r.status) + "</td>" +
+          '<td class="action-col"><button type="button" class="view-btn" data-more="' + esc(r.id) + '">View more</button></td>' +
+          "</tr>";
+      }).join("");
+      body =
+        '<section class="sd-card"><div class="sd-card-head"><h3>Cost overview</h3><p>Payables on this shipment against the quote.</p></div>' +
+          '<div class="sd-card-body">' + compareChart(sell, budget, actual) + "</div></section>" +
+        '<section class="sd-card"><div class="sd-card-head"><h3>Payment lines</h3><p>Payables and receivables raised on this shipment.</p></div>' +
+          '<div class="sd-table"><table class="activity-table pp-table sd-pp-table">' +
+            "<thead><tr><th>PO #</th><th>Vendor / Customer</th><th>Category</th><th>Amount</th><th>Budget check</th><th>Status</th><th class=\"action-col\">Action</th></tr></thead>" +
+            "<tbody>" + rows + "</tbody></table></div></section>";
+    }
+
+    root.innerHTML = '<div class="sd">' + head + body + "</div>";
+  }
+
+  // Cost chart: thick bars on one scale (sell price, budgeted cost, actual
+  // cost) with a gold "variance threshold" line at the budget, then a row
+  // of keyed figures. Actual cost past the threshold turns error-red. The
+  // currency picker converts the chart only, at a fixed prototype rate.
+  var CHART_RATES = { NGN: 1, USD: 1 / 1550 };
+  var chartFmt = {
+    NGN: new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }),
+    USD: new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })
+  };
+  function chartMoney(n) { return chartFmt[state.currency].format(n * CHART_RATES[state.currency]); }
+
+  function compareChart(sell, budget, actual) {
+    var hasBudget = budget != null;
+    var max = Math.max(sell || 0, budget || 0, actual || 0) || 1;
+    function pos(v) { return Math.round(v / max * 1000) / 10; }
+
+    var actualBar = hasBudget && actual > budget
+      ? '<div class="cc-bar cc-actual" style="width:' + pos(budget) + '%"></div><div class="cc-bar cc-over" style="left:' + pos(budget) + "%;width:" + (pos(actual) - pos(budget)) + '%"></div>'
+      : '<div class="cc-bar cc-actual" style="width:' + Math.max(1, pos(actual)) + '%"></div>';
+
+    var bars =
+      '<div class="cc-row" title="Sell price ' + chartMoney(sell) + '"><div class="cc-bar cc-sell" style="width:' + pos(sell) + '%"></div></div>' +
+      (hasBudget ? '<div class="cc-row" title="Budgeted cost ' + chartMoney(budget) + '"><div class="cc-bar cc-budget" style="width:' + pos(budget) + '%"></div></div>' : "") +
+      '<div class="cc-row" title="Actual cost ' + chartMoney(actual) + '">' + actualBar + "</div>";
+
+    var stats =
+      '<div class="cc-stat"><span class="cc-key"><i class="cc-sell"></i>Sell price</span><strong>' + chartMoney(sell) + "</strong></div>" +
+      (hasBudget ? '<div class="cc-stat"><span class="cc-key"><i class="cc-budget"></i>Budgeted cost</span><strong>' + chartMoney(budget) + "</strong></div>" : "") +
+      '<div class="cc-stat"><span class="cc-key"><i class="cc-actual"></i>Actual cost</span><strong>' + chartMoney(actual) + "</strong></div>";
+
+    if (hasBudget) {
+      var margin = sell - actual;
+      var variance = actual - budget;
+      var vSign = variance > 0 ? "+" : variance < 0 ? "−" : "";
+      stats +=
+        '<div class="cc-stat"><span class="cc-key">Margin</span><strong class="' + (margin < 0 ? "is-neg" : "") + '">' + (sell ? Math.round(margin / sell * 100) : 0) + "%</strong>" +
+          "<small>" + chartMoney(margin) + " of sell price</small></div>" +
+        '<div class="cc-stat"><span class="cc-key">Variance</span><strong class="' + (variance > 0 ? "is-neg" : "") + '">' + vSign + Math.abs(budget ? Math.round(variance / budget * 100) : 0) + "%</strong>" +
+          "<small>" + chartMoney(Math.abs(variance)) + (variance > 0 ? " over budget" : variance < 0 ? " under budget" : " on budget") + "</small></div>";
+    }
+
+    var currency =
+      '<label class="cc-currency"><span class="sr-only">Chart currency</span><select data-chart-currency>' +
+        ["NGN", "USD"].map(function (c) { return '<option value="' + c + '"' + (c === state.currency ? " selected" : "") + ">" + c + "</option>"; }).join("") +
+      "</select></label>";
+
+    return '<div class="cc">' +
+      '<div class="cc-top">' + currency + (hasBudget ? '<span class="cc-threshold-label">Variance threshold</span>' : "") + "</div>" +
+      '<div class="cc-plot">' + bars +
+        (hasBudget ? '<i class="cc-threshold" style="left:' + pos(budget) + '%" aria-hidden="true"></i>' : "") +
+      "</div>" +
+      '<div class="cc-stats">' + stats + "</div>" +
+    "</div>";
+  }
+
+  // ---------- View more drawer ----------
+  var drawerOverlay = document.getElementById("ppDrawerOverlay");
+  var drawer = document.getElementById("ppDrawer");
+
+  function openDrawer(id) {
+    state.drawerId = id;
+    renderDrawer();
+    drawerOverlay.hidden = false;
+    var close = drawer.querySelector(".modal-close");
+    if (close) close.focus();
+  }
+
+  function closeDrawer() {
+    drawerOverlay.hidden = true;
+    state.drawerId = null;
+  }
+
+  function renderDrawer() {
+    var r = byId(state.drawerId);
+    if (!r) return;
+    var ship = SHIPMENTS[r.shipmentId];
+    var paid = paidTotal(r);
+    var due = outstanding(r);
+    var canPay = (r.status === "Approved" || r.status === "Part paid") && due > 0;
+    var isPayable = r.type === "payable";
+    var noteNeeded = overBudget(r) && (r.status === "Approved" || r.status === "Part paid" || r.status === "Paid");
+
+    var clip = '<svg viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.5-8.5a3.3 3.3 0 014.7 4.7L9.7 17.2a1.7 1.7 0 01-2.4-2.4L15 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+
+    var payStatus = due === 0 ? "Paid" : paid > 0 ? "Part paid" : "Unpaid";
+    var payClass = { "Paid": "pp-st-paid", "Part paid": "pp-st-part", "Unpaid": "pp-st-awaiting" }[payStatus];
+
+    // Request details, laid out like the request detail screen: a
+    // three-column grid of labelled fields, then purpose and attachment.
+    function field(label, value, cls) {
+      return '<div class="rd-field' + (cls ? " " + cls : "") + '"><dt>' + label + "</dt><dd>" + value + "</dd></div>";
+    }
+    var grid =
+      field(isPayable ? "Vendor" : "Customer", esc(r.party)) +
+      field("Category", esc(r.category)) +
+      field("Amount", '<span class="rd-money">' + money(r.actual) + "</span>") +
+      field("Shipment #", '<a class="pp-link" href="#propay/shipment/' + encodeURIComponent(r.shipmentId) + '">' + esc(r.shipmentId) + "</a>") +
+      field("Quantity", esc(r.quantity || 1)) +
+      field("Raised by", esc(r.raisedBy || "—")) +
+      field("Date submitted", r.submittedAt ? formatDate(r.submittedAt) : "—") +
+      field("Date approved", r.approvedAt ? formatDate(r.approvedAt) : '<span class="pp-muted">Pending</span>') +
+      field("Approved by", r.approvedBy ? esc(r.approvedBy) : '<span class="pp-muted">Pending</span>') +
+      field("Budget check", isPayable ? budgetCheckHtml(r) : '<span class="pp-muted">Not applicable</span>') +
+      field("Payment status", '<span class="status-badge ' + payClass + '">' + payStatus + "</span>") +
+      field("Amount paid", money(paid)) +
+      field("Outstanding", '<strong class="rd-strong">' + money(due) + "</strong>") +
+      field("Purpose", esc(r.purpose || "—"), "rd-wide");
+
+    var fileExt = r.attachment ? r.attachment.split(".").pop().toUpperCase() : "";
+    var attachment = r.attachment
+      ? '<div class="rd-file"><span class="rd-file-icon"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5zM14 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
+          '<div class="rd-file-name"><strong title="' + esc(r.attachment) + '">' + esc(r.attachment) + "</strong><span>" + fileExt + "</span></div>" +
+          '<button type="button" class="rd-file-dl" data-download="' + esc(r.attachment) + '" aria-label="Download ' + esc(r.attachment) + '"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>'
+      : '<p class="pp-muted rd-none">No attachment</p>';
+
+    var history = r.payments.length
+      ? '<ul class="rd-payments">' + r.payments.map(function (p) {
+          return '<li><div><p><span class="rd-money">' + money(p.amount) + '</span><span class="rd-kind">' + esc(p.kind) + '</span></p><span class="pp-muted">' + formatDate(p.at) + " · " + esc(p.by) + '</span></div><span class="pp-muted">No receipt</span></li>';
+        }).join("") + "</ul>"
+      : '<p class="pp-muted rd-none">No payments recorded yet.</p>';
+
+    var payForm = canPay
+      ? '<form class="pd-pay" id="ppPayForm">' +
+          '<div class="pd-toggle" role="radiogroup" aria-label="Payment type">' +
+            '<label><input type="radio" name="ppKind" value="Full" checked /><span>Full payment</span></label>' +
+            '<label><input type="radio" name="ppKind" value="Partial" /><span>Partial payment</span></label>' +
+          "</div>" +
+          '<div class="field-row">' +
+            '<div class="field"><label class="op-input-wrap" for="ppAmount"><span class="op-notch">Amount (₦) <span class="req">*</span></span>' +
+              '<input type="number" id="ppAmount" min="1" max="' + due + '" step="1" value="' + due + '" readonly required /></label></div>' +
+            '<div class="field"><label class="op-input-wrap" for="ppDate"><span class="op-notch">Date <span class="req">*</span></span>' +
+              '<input type="date" id="ppDate" required value="' + new Date().toISOString().slice(0, 10) + '" /></label></div>' +
+          "</div>" +
+          '<p class="pp-help" id="ppAmountHelp">Clears the full outstanding balance.</p>' +
+          '<button type="submit" class="btn btn-primary pp-block">' + (isPayable ? "Record payment" : "Record receipt") + "</button>" +
+        "</form>"
+      : '<p class="pd-note">' + (due === 0 ? "Fully settled." : r.status === "Rejected" ? "Rejected. No payment can be recorded." : "Payments can be recorded once approved.") + "</p>";
+
+    drawer.innerHTML =
+      '<header class="pd-head">' +
+        "<div>" +
+          '<div class="pd-title"><h3 id="ppDrawerTitle">' + esc(r.id) + "</h3>" + statusHtml(r.status) + "</div>" +
+          '<p class="pd-sub">' + (isPayable ? "Request details" : "Invoice details") + "</p>" +
+        "</div>" +
+        '<button type="button" class="modal-close" data-close-drawer aria-label="Close">&times;</button>' +
+      "</header>" +
+
+      '<section class="pd-section">' + compareChart(r.sell, isPayable ? r.budget : null, r.actual) + "</section>" +
+
+      '<section class="pd-section"><dl class="rd-grid">' + grid + "</dl>" +
+        '<div class="rd-field rd-attach"><dt>Attachment</dt><dd>' + attachment + "</dd></div></section>" +
+
+      '<section class="pd-section"><h4 class="rd-h">Payments</h4>' + history + payForm + "</section>" +
+
+      '<section class="pd-section">' +
+        '<div class="pd-h-row"><h4 class="rd-h">Comments</h4>' +
+          '<button type="button" class="btn-ghost" data-comments="' + esc(r.id) + '">' + (r.comments.length > 2 ? "View all " + r.comments.length : "Open thread") + "</button>" +
+        "</div>" +
+        (noteNeeded ? '<div class="pp-callout">Approved ' + money(r.actual - r.budget) + " over budget. Add a comment with the reason.</div>" : "") +
+        (r.comments.length ? commentsListHtml(r, 2) : "") +
+        '<form class="pd-composer" data-comment-form="' + esc(r.id) + '">' +
+          '<textarea rows="2" required aria-label="Add a comment" placeholder="' + (noteNeeded ? "Why was this approved above budget?" : "Add a comment…") + '"></textarea>' +
+          '<button type="submit" class="btn btn-outline pp-sm">Post</button>' +
+        "</form>" +
+      "</section>";
+  }
+
+  function commentsListHtml(r, limit) {
+    if (!r.comments.length) return '<p class="pp-muted pp-empty-note">No comments yet.</p>';
+    var list = limit ? r.comments.slice(-limit) : r.comments;
+    return '<ul class="pp-comments">' + list.map(function (c) {
+      var idx = r.comments.indexOf(c);
+      return '<li class="pp-comment' + (c.replyTo != null ? " is-reply" : "") + '">' +
+        '<div class="pp-comment-head"><span class="owner-avatar pp-av" style="' + avatarStyle(c.author) + '">' + initials(c.author) + "</span>" +
+        "<strong>" + esc(c.author) + '</strong><span class="pp-role">' + esc(c.role) + '</span><span class="pp-muted">' + formatDateTime(c.at) + "</span></div>" +
+        (c.replyTo != null && r.comments[c.replyTo] ? '<p class="pp-quote">↳ ' + esc(r.comments[c.replyTo].author) + ": " + esc(r.comments[c.replyTo].text.slice(0, 60)) + (r.comments[c.replyTo].text.length > 60 ? "…" : "") + "</p>" : "") +
+        "<p>" + esc(c.text) + "</p>" +
+        (limit ? "" : '<button type="button" class="btn-ghost pp-reply" data-reply="' + idx + '">Reply</button>') +
+        "</li>";
+    }).join("") + "</ul>";
+  }
+
+  function initials(name) {
+    return name.split(/\s+/).map(function (p) { return p.charAt(0); }).join("").slice(0, 2).toUpperCase();
+  }
+
+  function avatarStyle(name) {
+    var fills = [["--op-avatar-1-bg", "--op-avatar-1-text"], ["--op-avatar-2-bg", "--op-avatar-2-text"], ["--op-avatar-3-bg", "--op-avatar-3-text"], ["--op-avatar-4-bg", "--op-avatar-4-text"]];
+    var hash = 0;
+    for (var i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    var f = fills[hash % 4];
+    return "background:var(" + f[0] + ");color:var(" + f[1] + ")";
+  }
+
+  function addComment(id, text, replyTo) {
+    var r = byId(id);
+    if (!r || !text.trim()) return;
+    var c = { author: CURRENT_USER.name, role: CURRENT_USER.role, text: text.trim(), at: new Date().toISOString().slice(0, 16) };
+    if (replyTo != null) c.replyTo = replyTo;
+    r.comments.push(c);
+    save();
+    toast(replyTo != null ? "Reply posted" : "Comment added");
+  }
+
+  // ---------- Comments modal ----------
+  var commentsOverlay = document.getElementById("ppCommentsOverlay");
+  var commentsModal = document.getElementById("ppCommentsModal");
+
+  function openComments(id) {
+    state.commentsId = id;
+    state.replyTo = null;
+    renderComments();
+    commentsOverlay.hidden = false;
+    var ta = commentsModal.querySelector("textarea");
+    if (ta) ta.focus();
+  }
+
+  function closeComments() {
+    commentsOverlay.hidden = true;
+    state.commentsId = null;
+    state.replyTo = null;
+  }
+
+  function renderComments() {
+    var r = byId(state.commentsId);
+    if (!r) return;
+    var replying = state.replyTo != null ? r.comments[state.replyTo] : null;
+    commentsModal.innerHTML =
+      '<div class="modal-head"><div><h3 id="ppCommentsTitle">Comments · ' + esc(r.id) + '</h3><p class="muted">' + esc(r.party) + " · " + statusHtml(r.status) + "</p></div>" +
+        '<button type="button" class="modal-close" data-close-comments aria-label="Close">&times;</button></div>' +
+      (overBudget(r) ? '<div class="pp-callout">Exceeds budget by ' + money(r.actual - r.budget) + ". Finance can respond here even after approval.</div>" : "") +
+      commentsListHtml(r, 0) +
+      '<form class="pp-comment-form" data-comment-form="' + esc(r.id) + '">' +
+        (replying ? '<p class="pp-replying">Replying to <strong>' + esc(replying.author) + '</strong> <button type="button" class="btn-ghost" data-cancel-reply>Cancel</button></p>' : "") +
+        '<div class="field"><label class="op-input-wrap"><span class="op-notch">' + (replying ? "Your reply" : "Add a comment") + '</span><textarea rows="3" required placeholder="Write a comment…"></textarea></label></div>' +
+        '<div class="modal-actions"><div class="modal-actions-right"><button type="button" class="btn btn-outline" data-close-comments>Close</button><button type="submit" class="btn btn-primary">' + (replying ? "Post reply" : "Post comment") + "</button></div></div>" +
+      "</form>";
+  }
+
+  // ---------- Events (delegated) ----------
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+
+    var menu = document.getElementById("sdMenu");
+    if (t.closest("#sdActionsBtn")) {
+      menu.hidden = !menu.hidden;
+      t.closest("#sdActionsBtn").setAttribute("aria-expanded", String(!menu.hidden));
+      return;
+    }
+    var act = t.closest("[data-sd-action]");
+    if (act) { menu.hidden = true; toast(act.dataset.sdAction); return; }
+    if (menu && !menu.hidden) { menu.hidden = true; document.getElementById("sdActionsBtn").setAttribute("aria-expanded", "false"); }
+
+    if (t.closest("#ppFilterBtn")) { state.filterOpen = !state.filterOpen; renderRegister(); return; }
+
+    var opt = t.closest(".pp-filter-opt");
+    if (opt) { state.status = opt.dataset.status; state.filterOpen = false; renderRegister(); return; }
+
+    if (state.filterOpen && !t.closest(".pp-filter") && root.contains(document.querySelector(".pp-filter"))) {
+      state.filterOpen = false; renderRegister();
+    }
+
+    var dl = t.closest("[data-download]");
+    if (dl) { toast("Downloads aren't available in the prototype"); return; }
+
+    var more = t.closest("[data-more]");
+    if (more) { openDrawer(more.dataset.more); return; }
+
+    var cm = t.closest("[data-comments]");
+    if (cm) { openComments(cm.dataset.comments); return; }
+
+    if (t.closest("[data-close-drawer]") || t === drawerOverlay) { closeDrawer(); return; }
+    if (t.closest("[data-close-comments]") || t === commentsOverlay) { closeComments(); return; }
+
+    // Following a link from inside the drawer navigates; close the drawer.
+    if (t.closest(".drawer a[href^='#propay']")) { closeDrawer(); return; }
+
+    var reply = t.closest("[data-reply]");
+    if (reply) {
+      state.replyTo = parseInt(reply.dataset.reply, 10);
+      renderComments();
+      commentsModal.querySelector("textarea").focus();
+      return;
+    }
+    if (t.closest("[data-cancel-reply]")) { state.replyTo = null; renderComments(); return; }
+  });
+
+  document.addEventListener("change", function (e) {
+    if (e.target.matches("[data-chart-currency]")) {
+      state.currency = e.target.value;
+      if (state.drawerId) renderDrawer();
+      refreshPage();
+      return;
+    }
+    if (e.target.name !== "ppKind") return;
+    var r = byId(state.drawerId);
+    var amount = document.getElementById("ppAmount");
+    var help = document.getElementById("ppAmountHelp");
+    var due = outstanding(r);
+    if (e.target.value === "Full") {
+      amount.value = due;
+      amount.readOnly = true;
+      help.textContent = "Clears the full outstanding balance.";
+    } else {
+      amount.value = "";
+      amount.readOnly = false;
+      amount.max = due - 1;
+      help.textContent = "Enter the amount paid — up to " + money(due - 1) + ".";
+      amount.focus();
+    }
+  });
+
+  document.addEventListener("submit", function (e) {
+    var form = e.target;
+
+    if (form.id === "ppPayForm") {
+      e.preventDefault();
+      var r = byId(state.drawerId);
+      var kind = form.querySelector("input[name=ppKind]:checked").value;
+      var amount = parseInt(document.getElementById("ppAmount").value, 10);
+      var due = outstanding(r);
+      if (!amount || amount <= 0 || amount > due) {
+        document.getElementById("ppAmount").closest(".op-input-wrap").classList.add("has-error");
+        document.getElementById("ppAmountHelp").textContent = "Enter an amount between ₦1 and " + money(due) + ".";
+        document.getElementById("ppAmountHelp").classList.add("is-error");
+        return;
+      }
+      r.payments.push({ amount: amount, kind: amount >= due ? "Full" : kind, at: document.getElementById("ppDate").value, by: CURRENT_USER.name });
+      r.status = outstanding(r) === 0 ? "Paid" : "Part paid";
+      save();
+      renderDrawer();
+      refreshPage();
+      toast((r.type === "payable" ? "Payment" : "Receipt") + " of " + money(amount) + " recorded");
+      return;
+    }
+
+    var cf = form.getAttribute("data-comment-form");
+    if (cf) {
+      e.preventDefault();
+      var text = form.querySelector("textarea").value;
+      var inModal = commentsModal.contains(form);
+      addComment(cf, text, inModal ? state.replyTo : null);
+      state.replyTo = null;
+      if (inModal) renderComments();
+      if (state.drawerId) renderDrawer();
+      refreshPage();
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    if (!commentsOverlay.hidden) closeComments();
+    else if (!drawerOverlay.hidden) closeDrawer();
+    else if (state.filterOpen) { state.filterOpen = false; renderRegister(); }
+  });
+
+  function refreshPage() {
+    if (!moduleEls.propay.classList.contains("active")) return;
+    var parts = location.hash.replace(/^#/, "").split("/");
+    if (parts[1] === "shipment" && SHIPMENTS[parts[2]]) renderShipment(parts[2], parts[3]);
+    else renderRegister();
+  }
+
+  window.addEventListener("hashchange", function () {
+    closeDrawer();
+    closeComments();
+    route();
+  });
+  route();
+})();
+
+</script>
