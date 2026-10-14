@@ -177,10 +177,6 @@
 
   function renderRegister() {
     var list = filtered();
-    var typeChips = [["all", "All"], ["payable", "Payables"], ["receivable", "Receivables"]].map(function (t) {
-      return '<button type="button" class="pp-seg' + (state.type === t[0] ? " active" : "") + '" data-type="' + t[0] + '" aria-pressed="' + (state.type === t[0]) + '">' + t[1] + "</button>";
-    }).join("");
-
     var statusOptions = ["all"].concat(STATUSES).map(function (s) {
       var label = s === "all" ? "All statuses" : s;
       return '<button type="button" class="pp-filter-opt' + (state.status === s ? " active" : "") + '" data-status="' + esc(s) + '">' + esc(label) + "</button>";
@@ -218,7 +214,6 @@
       "</div>" +
       '<div class="activity-toolbar">' +
         '<input type="search" id="ppSearch" class="search-input" placeholder="Search PO #, vendor, category or shipment #..." value="' + esc(state.search) + '" />' +
-        '<div class="pp-segmented" role="group" aria-label="Record type">' + typeChips + "</div>" +
         '<div class="pp-filter">' +
           '<button type="button" class="pp-filter-btn' + (state.status !== "all" ? " is-on" : "") + '" id="ppFilterBtn" aria-expanded="' + state.filterOpen + '" aria-label="Filter by status">' +
             '<svg viewBox="0 0 24 24"><path d="M4 5h16l-6 8v5l-4 2v-7L4 5z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>' +
@@ -470,9 +465,6 @@
   // ---------- Events (delegated) ----------
   document.addEventListener("click", function (e) {
     var t = e.target;
-
-    var seg = t.closest(".pp-seg");
-    if (seg) { state.type = seg.dataset.type; renderRegister(); return; }
 
     if (t.closest("#ppFilterBtn")) { state.filterOpen = !state.filterOpen; renderRegister(); return; }
 

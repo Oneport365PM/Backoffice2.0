@@ -547,21 +547,6 @@ body {
 }
 .pp-muted { color: var(--op-silver-light); font-size: 12px; }
 
-/* Payables / Receivables segmented filter — tab/filter-chip pattern */
-.pp-segmented { display: flex; gap: 6px; }
-.pp-seg {
-  padding: 8px 18px;
-  border-radius: var(--op-radius-md);
-  border: 1.5px solid var(--op-dark-green);
-  background: var(--op-white);
-  color: var(--op-dark-green);
-  font-family: var(--op-font-display);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.pp-seg.active { background: var(--op-light-green); border-color: var(--op-light-green); }
-
 .pp-filter { position: relative; }
 .pp-filter-btn {
   display: inline-flex; align-items: center; gap: 6px;
