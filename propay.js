@@ -8,7 +8,7 @@
   //   #propay                   ProPay register
   //   #propay/shipment/<id>     Shipment detail page
 
-  var STORAGE_KEY = "op365_propay_prototype_v1";
+  var STORAGE_KEY = "op365_propay_prototype_v2";
 
   var CURRENT_USER = { name: "Nkechi M.", initials: "NK", role: "Finance" };
 
@@ -61,8 +61,22 @@
       { id: "INV-26-10-118", type: "receivable", party: "Dangote Industries", category: "Freight invoice", shipmentId: "ZIL0312", actual: 7900000, budget: null, sell: 7900000, status: "Approved", attachment: "inv-118.pdf", comments: [], payments: [] },
       { id: "INV-26-10-112", type: "receivable", party: "Honeywell Group", category: "Freight invoice", shipmentId: "ZIL0305", actual: 6380000, budget: null, sell: 6380000, status: "Part paid", attachment: "inv-112.pdf", comments: [],
         payments: [{ amount: 3000000, kind: "Partial", at: "2026-10-12", by: "Nkechi M." }] }
-    ];
+    ].map(function (r) { return Object.assign(r, REQUEST_META[r.id]); });
   }
+
+  // Who raised and approved each request, and why. Approval fields stay
+  // empty while a request is awaiting approval.
+  var REQUEST_META = {
+    "PO-26-10-045": { quantity: 1, raisedBy: "Tunde Bello", submittedAt: "2026-10-10", purpose: "Terminal storage charges after a 4-day vessel delay." },
+    "PO-26-10-047": { quantity: 2, raisedBy: "Manuel Akin", submittedAt: "2026-10-06", approvedAt: "2026-10-07", approvedBy: "Kimeen Ugwu", purpose: "Terminal handling for 2 × 40ft HC." },
+    "PO-26-10-041": { quantity: 1, raisedBy: "Ugwu Neny", submittedAt: "2026-10-03", approvedAt: "2026-10-04", approvedBy: "Kimeen Ugwu", purpose: "Haulage from Tin Can to the Agbara warehouse." },
+    "PO-26-10-040": { quantity: 1, raisedBy: "Ugwu Neny", submittedAt: "2026-10-02", approvedAt: "2026-10-03", approvedBy: "Kimeen Ugwu", purpose: "Customs clearance and documentation." },
+    "PO-26-10-053": { quantity: 1, raisedBy: "Ada Okoro", submittedAt: "2026-10-09", approvedAt: "2026-10-11", approvedBy: "Kimeen Ugwu", purpose: "Shipping line charges including demurrage." },
+    "PO-26-10-052": { quantity: 1, raisedBy: "Manuel Akin", submittedAt: "2026-10-08", approvedAt: "2026-10-09", approvedBy: "Kimeen Ugwu", purpose: "Last-mile delivery to Honeywell, Ikeja." },
+    "PO-26-10-058": { quantity: 1, raisedBy: "Ugwu Neny", submittedAt: "2026-10-13", purpose: "Import duty assessed on Form M." },
+    "INV-26-10-118": { quantity: 1, raisedBy: "Nkechi M.", submittedAt: "2026-10-05", approvedAt: "2026-10-05", approvedBy: "Kimeen Ugwu", purpose: "Door-to-door ocean freight, Shanghai to Lagos." },
+    "INV-26-10-112": { quantity: 1, raisedBy: "Nkechi M.", submittedAt: "2026-10-08", approvedAt: "2026-10-08", approvedBy: "Kimeen Ugwu", purpose: "Air freight Dubai to Lagos, 1,240 kg." }
+  };
 
   function load() {
     try {
@@ -450,22 +464,44 @@
 
     var clip = '<svg viewBox="0 0 24 24"><path d="M20 11.5l-8 8a5 5 0 01-7-7l8.5-8.5a3.3 3.3 0 014.7 4.7L9.7 17.2a1.7 1.7 0 01-2.4-2.4L15 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
 
-    // Vendor, status and PO live in the header and the money lives in the
-    // chart, so the detail rows only carry what isn't shown elsewhere.
-    var rows = [
-      ["Shipment #", '<a class="pp-link" href="#propay/shipment/' + encodeURIComponent(r.shipmentId) + '">' + esc(r.shipmentId) + "</a>" + (ship ? '<span class="pp-muted">' + esc(ship.customer) + "</span>" : "")],
-      ["Category", esc(r.category)],
-      ["Budget check", isPayable ? budgetCheckHtml(r) : '<span class="pp-muted">Not applicable</span>'],
-      ["Attachment", r.attachment ? '<span class="pp-file">' + clip + esc(r.attachment) + "</span>" : '<span class="pp-muted">None</span>']
-    ].map(function (d) {
-      return '<div class="pd-row"><dt>' + d[0] + "</dt><dd>" + d[1] + "</dd></div>";
-    }).join("");
+    var payStatus = due === 0 ? "Paid" : paid > 0 ? "Part paid" : "Unpaid";
+    var payClass = { "Paid": "pp-st-paid", "Part paid": "pp-st-part", "Unpaid": "pp-st-awaiting" }[payStatus];
+
+    // Request details, laid out like the request detail screen: a
+    // three-column grid of labelled fields, then purpose and attachment.
+    function field(label, value, cls) {
+      return '<div class="rd-field' + (cls ? " " + cls : "") + '"><dt>' + label + "</dt><dd>" + value + "</dd></div>";
+    }
+    var grid =
+      field(isPayable ? "Vendor" : "Customer", esc(r.party)) +
+      field("Category", esc(r.category)) +
+      field("Amount", '<span class="rd-money">' + money(r.actual) + "</span>") +
+      field("Shipment #", '<a class="pp-link" href="#propay/shipment/' + encodeURIComponent(r.shipmentId) + '">' + esc(r.shipmentId) + "</a>") +
+      field("Quantity", esc(r.quantity || 1)) +
+      field("Raised by", esc(r.raisedBy || "—")) +
+      field("Date submitted", r.submittedAt ? formatDate(r.submittedAt) : "—") +
+      field("Date approved", r.approvedAt ? formatDate(r.approvedAt) : '<span class="pp-muted">Pending</span>') +
+      field("Approved by", r.approvedBy ? esc(r.approvedBy) : '<span class="pp-muted">Pending</span>') +
+      field("Budget", isPayable && r.budget != null ? money(r.budget) : '<span class="pp-muted">Not applicable</span>') +
+      field("Budget check", isPayable ? budgetCheckHtml(r) : '<span class="pp-muted">Not applicable</span>') +
+      field("Sell price", money(r.sell)) +
+      field("Payment status", '<span class="status-badge ' + payClass + '">' + payStatus + "</span>") +
+      field("Amount paid", money(paid)) +
+      field("Outstanding", '<strong class="rd-strong">' + money(due) + "</strong>") +
+      field("Purpose", esc(r.purpose || "—"), "rd-wide");
+
+    var fileExt = r.attachment ? r.attachment.split(".").pop().toUpperCase() : "";
+    var attachment = r.attachment
+      ? '<div class="rd-file"><span class="rd-file-icon"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8l-5-5zM14 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
+          '<div class="rd-file-name"><strong title="' + esc(r.attachment) + '">' + esc(r.attachment) + "</strong><span>" + fileExt + "</span></div>" +
+          '<button type="button" class="rd-file-dl" data-download="' + esc(r.attachment) + '" aria-label="Download ' + esc(r.attachment) + '"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>'
+      : '<p class="pp-muted rd-none">No attachment</p>';
 
     var history = r.payments.length
-      ? '<ul class="pd-history">' + r.payments.map(function (p) {
-          return '<li><span class="pd-history-amt">' + money(p.amount) + '</span><span class="pp-muted">' + esc(p.kind) + " · " + formatDate(p.at) + " · " + esc(p.by) + "</span></li>";
+      ? '<ul class="rd-payments">' + r.payments.map(function (p) {
+          return '<li><div><p><span class="rd-money">' + money(p.amount) + '</span><span class="rd-kind">' + esc(p.kind) + '</span></p><span class="pp-muted">' + formatDate(p.at) + " · " + esc(p.by) + '</span></div><span class="pp-muted">No receipt</span></li>';
         }).join("") + "</ul>"
-      : "";
+      : '<p class="pp-muted rd-none">No payments recorded yet.</p>';
 
     var payForm = canPay
       ? '<form class="pd-pay" id="ppPayForm">' +
@@ -487,27 +523,22 @@
     drawer.innerHTML =
       '<header class="pd-head">' +
         "<div>" +
-          '<p class="pp-eyebrow">' + (isPayable ? "Payable" : "Receivable") + "</p>" +
           '<div class="pd-title"><h3 id="ppDrawerTitle">' + esc(r.id) + "</h3>" + statusHtml(r.status) + "</div>" +
-          '<p class="pd-sub">' + esc(r.party) + "</p>" +
+          '<p class="pd-sub">' + (isPayable ? "Request details" : "Invoice details") + "</p>" +
         "</div>" +
         '<button type="button" class="modal-close" data-close-drawer aria-label="Close">&times;</button>' +
       "</header>" +
 
       '<section class="pd-section">' + compareChart(r.sell, isPayable ? r.budget : null, r.actual) + "</section>" +
 
-      '<section class="pd-section"><h4 class="pd-h">Details</h4><dl class="pd-rows">' + rows + "</dl></section>" +
+      '<section class="pd-section"><dl class="rd-grid">' + grid + "</dl>" +
+        '<div class="rd-field rd-attach"><dt>Attachment</dt><dd>' + attachment + "</dd></div></section>" +
+
+      '<section class="pd-section"><h4 class="rd-h">Payments</h4>' + history + payForm + "</section>" +
 
       '<section class="pd-section">' +
-        '<div class="pd-h-row"><h4 class="pd-h">Payments</h4><span class="pp-muted"><strong class="pp-due">' + money(paid) + "</strong> of " + money(r.actual) + " paid</span></div>" +
-        '<div class="pp-progress" aria-hidden="true"><div style="width:' + (r.actual ? Math.min(100, paid / r.actual * 100) : 0) + '%"></div></div>' +
-        (due > 0 && paid > 0 ? '<p class="pd-note">' + money(due) + " outstanding</p>" : "") +
-        history + payForm +
-      "</section>" +
-
-      '<section class="pd-section">' +
-        '<div class="pd-h-row"><h4 class="pd-h">Comments</h4>' +
-          (r.comments.length > 2 ? '<button type="button" class="btn-ghost" data-comments="' + esc(r.id) + '">View all ' + r.comments.length + "</button>" : '<button type="button" class="btn-ghost" data-comments="' + esc(r.id) + '">Open thread</button>') +
+        '<div class="pd-h-row"><h4 class="rd-h">Comments</h4>' +
+          '<button type="button" class="btn-ghost" data-comments="' + esc(r.id) + '">' + (r.comments.length > 2 ? "View all " + r.comments.length : "Open thread") + "</button>" +
         "</div>" +
         (noteNeeded ? '<div class="pp-callout">Approved ' + money(r.actual - r.budget) + " over budget. Add a comment with the reason.</div>" : "") +
         (r.comments.length ? commentsListHtml(r, 2) : "") +
@@ -612,6 +643,9 @@
     if (state.filterOpen && !t.closest(".pp-filter") && root.contains(document.querySelector(".pp-filter"))) {
       state.filterOpen = false; renderRegister();
     }
+
+    var dl = t.closest("[data-download]");
+    if (dl) { toast("Downloads aren't available in the prototype"); return; }
 
     var more = t.closest("[data-more]");
     if (more) { openDrawer(more.dataset.more); return; }
