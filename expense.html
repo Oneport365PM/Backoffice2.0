@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OnePort365 — Shipment Expense Approval</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;500;700&display=swap" />
+  <link rel="stylesheet" href="expense.css" />
+</head>
+<body>
+  <div class="phone">
+    <header class="back-bar">
+      <button class="icon-btn" type="button" aria-label="Back">
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></svg>
+      </button>
+      <span>Expense</span>
+    </header>
+
+    <section class="job-card">
+      <div class="job-head">
+        <h1 class="job-name">African Circle</h1>
+        <span class="chip chip-success">Active</span>
+      </div>
+      <div class="job-location">
+        <svg viewBox="0 0 24 24"><path d="M12 21s-6-5.6-6-11a6 6 0 0112 0c0 5.4-6 11-6 11z" /><circle cx="12" cy="10" r="2" /></svg>
+        Barcelona (ES…
+      </div>
+      <div class="job-foot">
+        <div>
+          <div class="label">Job number</div>
+          <div class="job-number">ZIKAN26090011</div>
+        </div>
+        <span class="budget-pill" id="budgetPill"></span>
+      </div>
+      <div class="budget-meter" aria-hidden="true"><span id="budgetMeterFill"></span></div>
+      <div class="budget-caption" id="budgetCaption"></div>
+    </section>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="expense" type="button">Expense <span class="count count-neutral" id="expenseCount">0</span></button>
+      <button class="tab active" role="tab" data-tab="queue" type="button">Approval Queue <span class="count count-alert" id="queueCount">0</span></button>
+    </div>
+
+    <p class="tab-hint" id="tabHint"></p>
+
+    <label class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6" /><path d="M20 20l-4-4" /></svg>
+      <input id="searchInput" type="search" placeholder="Search vendor, PO or Expense ID" />
+    </label>
+
+    <ul class="expense-list" id="expenseList"></ul>
+    <div class="empty" id="emptyState" hidden>
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h3" /></svg>
+      </div>
+      <p id="emptyText">Nothing here yet.</p>
+    </div>
+
+    <nav class="bottom-nav">
+      <button type="button"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M8 12l3 3 5-6" /></svg>Tasks</button>
+      <button type="button" class="active"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 13h18" /></svg>Expense</button>
+      <button type="button"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="18" cy="12" r="1.5" /></svg>More</button>
+    </nav>
+
+    <!-- Expense detail bottom sheet -->
+    <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
+    <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+      <div class="sheet-handle"></div>
+      <div class="sheet-body">
+        <h2 class="sheet-title" id="sheetTitle"></h2>
+        <p class="sheet-sub" id="sheetReason"></p>
+
+        <div class="over-budget" id="overBudget" hidden>
+          <div class="over-budget-head">
+            <svg viewBox="0 0 24 24"><path d="M12 4l9 16H3z" /><path d="M12 10v4M12 17v.5" /></svg>
+            <strong>Exceeds shipment budget</strong>
+          </div>
+          <dl class="budget-grid" id="budgetGrid"></dl>
+        </div>
+
+        <dl class="detail-rows" id="detailRows"></dl>
+
+        <section class="comments" id="comments" hidden aria-labelledby="commentsTitle">
+          <div class="comments-head">
+            <h3 id="commentsTitle">Comments <span class="count count-neutral" id="commentCount">0</span></h3>
+            <span class="comments-note">Required for over-budget approvals</span>
+          </div>
+          <ol class="comment-list" id="commentList"></ol>
+          <p class="comment-empty" id="commentEmpty" hidden>No comments yet. Explain why this over-budget expense should be approved or rejected.</p>
+
+          <form class="comment-form" id="commentForm" novalidate>
+            <div class="op-input-wrap" id="commentWrap">
+              <label class="op-notch" for="commentInput">Add a comment</label>
+              <textarea id="commentInput" rows="3" maxlength="500" placeholder="e.g. Approved: port congestion surcharge, confirmed with Motorways PLC"></textarea>
+            </div>
+            <div class="comment-form-foot">
+              <span class="helper" id="commentHelper"></span>
+              <button class="btn btn-outline btn-sm" type="submit">Post comment</button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <div class="sheet-actions" id="sheetActions">
+        <p class="action-hint" id="actionHint" hidden>Add a comment above to approve or reject this over-budget expense.</p>
+        <div class="action-buttons">
+          <button class="btn btn-reject" id="rejectBtn" type="button">Reject</button>
+          <button class="btn btn-accent" id="approveBtn" type="button">Approve</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" role="status" hidden></div>
+  </div>
+
+  <script src="expense.js"></script>
+</body>
+</html>
