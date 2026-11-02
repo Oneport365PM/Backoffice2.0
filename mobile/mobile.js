@@ -400,9 +400,7 @@
       '<p class="section-title">Stage · tap to jump</p><div class="stepper">' + steps + "</div>" +
       (d.note ? '<p class="deal-note" style="margin:-8px 0 16px">Lost reason: ' + esc(d.note) + "</p>" : "") +
       '<p class="section-title">Contact</p>' +
-      '<div class="owner-chip">' + avatar(contactName(ct), "sm") + "<div><b>" + esc(contactName(ct)) + "</b><small>" + esc(ct ? ct.title : "") + "</small></div>" +
-      '<div class="row-actions"><a class="round-btn" href="tel:+234' + esc(ct ? ct.phone.replace(/\s/g, "") : "") + '" aria-label="Call">' + ICON.phone +
-      '</a><a class="round-btn" href="mailto:' + esc(ct ? ct.email : "") + '" aria-label="Email">' + ICON.mail + "</a></div></div>" +
+      contactCard(ct) +
       '<p class="section-title">Details</p><dl class="info-card">' +
       '<div class="info-row"><dt>Owner</dt><dd><span class="owner">' + avatar(d.owner, "xs") + "<span>" + esc(d.owner) + "</span></span></dd></div>" +
       '<div class="info-row"><dt>Product</dt><dd><span class="chip chip-mode">' + esc(d.product) + "</span></dd></div>" +
@@ -416,6 +414,22 @@
     else foot += '<button type="button" class="btn btn-solid" data-close>Done</button>';
     $("dealSheetFoot").innerHTML = foot;
   }
+  function contactCard(ct) {
+    if (!ct) return '<p class="muted">No contact linked.</p>';
+    var phone = "+234 " + ct.phone;
+    var row = function (icon, label, value, href, kind) {
+      return '<div class="contact-line"><span class="contact-ico">' + icon + '</span>' +
+        '<span class="contact-val"><small>' + label + "</small><span>" + esc(value) + "</span></span>" +
+        '<button type="button" class="mini-btn" data-copy="' + esc(value) + '" aria-label="Copy ' + label.toLowerCase() + '">Copy</button>' +
+        '<a class="round-btn" href="' + esc(href) + '" aria-label="' + kind + " " + esc(contactName(ct)) + '">' + icon + "</a></div>";
+    };
+    return '<div class="contact-card">' +
+      '<div class="contact-head">' + avatar(contactName(ct), "sm") + "<div><b>" + esc(contactName(ct)) + "</b><small>" + esc(ct.title || "—") + "</small></div></div>" +
+      row(ICON.phone, "Phone", phone, "tel:" + phone.replace(/\s/g, ""), "Call") +
+      row(ICON.mail, "Email", ct.email, "mailto:" + ct.email, "Email") +
+      "</div>";
+  }
+
   $("dealSheet").addEventListener("click", function (e) {
     var g = e.target.closest("[data-goto]");
     if (!g || !openDealId) return;
@@ -795,8 +809,23 @@
     if (r) openCompanyDetail(r.getAttribute("data-contact-company"));
   });
   $("dealSheetBody").addEventListener("click", function (e) {
+    var cp = e.target.closest("[data-copy]");
+    if (cp) {
+      var v = cp.getAttribute("data-copy");
+      var done = function () { toast("Copied <b>" + esc(v) + "</b>"); };
+      try {
+        navigator.clipboard.writeText(v).then(done, function () { selectText(cp); });
+      } catch (err) { selectText(cp); }
+      return;
+    }
     if (e.target.closest("a")) { e.preventDefault(); toast("Prototype: this would open your phone or mail app"); }
   });
+  function selectText(btn) {
+    var span = btn.parentNode.querySelector(".contact-val span");
+    var r = document.createRange(); r.selectNodeContents(span);
+    var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    toast("Selected. Press Ctrl+C or Cmd+C to copy");
+  }
 
   var ctCompanyId = null;
   function openAddContact(prefCompanyId) {
