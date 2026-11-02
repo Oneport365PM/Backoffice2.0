@@ -732,10 +732,13 @@
     var cts = state.contacts.filter(function (x) { return x.companyId === id; });
     var dls = state.deals.filter(function (x) { return x.companyId === id; });
     $("cdBody").innerHTML =
-      '<dl class="info-card">' +
+      '<p class="section-title">Company details</p><dl class="info-card">' +
+      '<div class="info-row"><dt>Company name</dt><dd>' + esc(c.name) + "</dd></div>" +
+      '<div class="info-row"><dt>Class</dt><dd>' + tierChip(c.tier) + "</dd></div>" +
+      '<div class="info-row"><dt>Deal owner</dt><dd><span class="owner">' + avatar(c.owner, "xs") + "<span>" + esc(c.owner) + "</span></span></dd></div>" +
+      '<div class="info-row"><dt>Industry</dt><dd>' + esc(c.industry || "—") + "</dd></div>" +
       '<div class="info-row"><dt>Email</dt><dd>' + esc(c.email || "—") + "</dd></div>" +
-      '<div class="info-row"><dt>Address</dt><dd>' + esc(c.address || "—") + "</dd></div>" +
-      '<div class="info-row"><dt>Owner</dt><dd><span class="owner">' + avatar(c.owner, "xs") + "<span>" + esc(c.owner) + "</span></span></dd></div></dl>" +
+      '<div class="info-row"><dt>Address</dt><dd>' + esc(c.address || "—") + "</dd></div></dl>" +
       '<p class="section-title">Contacts · ' + cts.length + "</p>" +
       (cts.length ? cts.map(contactCard).join("") : '<p class="muted" style="margin:0 0 18px">No contacts yet.</p>') +
       '<p class="section-title">Deals · ' + dls.length + "</p>" +
