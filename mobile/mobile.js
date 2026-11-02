@@ -820,6 +820,54 @@
     toast("Sample data reset");
   });
 
+  // ---------- Horizontal scrollers ----------
+  function setupHScroll(wrap) {
+    var track = wrap.querySelector(".kpis, .stage-strip");
+    var prev = wrap.querySelector(".hs-prev"), next = wrap.querySelector(".hs-next");
+    function update() {
+      var max = track.scrollWidth - track.clientWidth;
+      prev.classList.toggle("off", track.scrollLeft <= 4);
+      next.classList.toggle("off", track.scrollLeft >= max - 4);
+    }
+    function step(dir) { track.scrollBy({ left: dir * track.clientWidth * 0.7, behavior: "smooth" }); }
+    prev.addEventListener("click", function () { step(-1); });
+    next.addEventListener("click", function () { step(1); });
+    track.addEventListener("scroll", update, { passive: true });
+    // Mouse wheel scrolls sideways
+    track.addEventListener("wheel", function (e) {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      var max = track.scrollWidth - track.clientWidth;
+      if ((e.deltaY < 0 && track.scrollLeft <= 0) || (e.deltaY > 0 && track.scrollLeft >= max)) return;
+      e.preventDefault();
+      track.scrollLeft += e.deltaY;
+    }, { passive: false });
+    // Click-and-drag with a mouse (touch already swipes natively)
+    var startX = 0, startLeft = 0, down = false, moved = false;
+    track.addEventListener("pointerdown", function (e) {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      down = true; moved = false; startX = e.clientX; startLeft = track.scrollLeft;
+    });
+    window.addEventListener("pointermove", function (e) {
+      if (!down) return;
+      var dx = e.clientX - startX;
+      if (!moved && Math.abs(dx) > 5) { moved = true; wrap.classList.add("dragging"); }
+      if (moved) track.scrollLeft = startLeft - dx;
+    });
+    window.addEventListener("pointerup", function () {
+      if (!down) return;
+      down = false;
+      wrap.classList.remove("dragging");
+    });
+    // Swallow the click that ends a drag so it doesn't select a stage
+    track.addEventListener("click", function (e) {
+      if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
+    }, true);
+    new MutationObserver(update).observe(track, { childList: true });
+    window.addEventListener("resize", update);
+    update();
+  }
+  document.querySelectorAll(".hscroll").forEach(setupHScroll);
+
   function renderAll() { renderPipeline(); renderCompanies(); renderContacts(); }
 
   state = seed();

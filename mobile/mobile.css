@@ -538,3 +538,25 @@ button { font: inherit; color: inherit; }
 }
 .seg button.active { background: var(--op-dark-green); color: var(--op-accent-lime); box-shadow: var(--op-elevation-1); }
 .seg button:disabled { color: var(--op-silver-light); cursor: not-allowed; }
+
+/* Horizontal scrollers (KPIs, stage strip): arrows, wheel and drag so they
+   scroll with a mouse as well as by swiping. */
+.hscroll { position: relative; }
+.hscroll > .kpis, .hscroll > .stage-strip { cursor: grab; scrollbar-width: thin; scrollbar-color: var(--op-light-green) transparent; }
+.hscroll > .kpis::-webkit-scrollbar, .hscroll > .stage-strip::-webkit-scrollbar { display: block; height: 4px; }
+.hscroll > .kpis::-webkit-scrollbar-thumb, .hscroll > .stage-strip::-webkit-scrollbar-thumb { background: var(--op-light-green); border-radius: 2px; }
+.hscroll.dragging > * { cursor: grabbing; user-select: none; }
+.hscroll.dragging .kpis, .hscroll.dragging .stage-strip { scroll-snap-type: none; }
+.hs-btn {
+  position: absolute; top: 50%; z-index: 2; margin-top: -20px;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  background: var(--op-white); color: var(--op-dark-green);
+  border: 1.5px solid var(--op-dark-green); box-shadow: var(--op-elevation-2);
+  transition: opacity .15s, background .15s;
+}
+.hs-btn svg { width: 16px; height: 16px; }
+.hs-btn:hover { background: var(--op-dark-green); color: var(--op-accent-lime); }
+.hs-prev { left: -8px; }
+.hs-next { right: -8px; }
+.hs-btn.off { opacity: 0; pointer-events: none; }
