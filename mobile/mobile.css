@@ -602,11 +602,6 @@ button { font: inherit; color: inherit; }
 .contact-val { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .contact-val small { font-size: 11px; color: var(--op-silver-light); }
 .contact-val span { font-weight: 700; color: var(--op-dark-green); font-size: 14px; overflow-wrap: anywhere; user-select: text; }
-.mini-btn {
-  background: var(--op-white); border: 1px solid var(--op-border-card); border-radius: var(--op-radius-sm);
-  padding: 6px 8px; font-size: 11px; font-weight: 700; color: var(--op-dark-green); cursor: pointer;
-}
-.mini-btn:hover { border-color: var(--op-dark-green); }
 
 .deal-count {
   display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;

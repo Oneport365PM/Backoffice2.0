@@ -414,21 +414,16 @@
     else foot += '<button type="button" class="btn btn-solid" data-close>Done</button>';
     $("dealSheetFoot").innerHTML = foot;
   }
-  // withActions=false shows the details as plain text (company detail)
-  function contactCard(ct, withActions) {
-    if (withActions === undefined) withActions = true;
+  function contactCard(ct) {
     if (!ct) return '<p class="muted">No contact linked.</p>';
-    var phone = "+234 " + ct.phone;
-    var row = function (icon, label, value, href, kind) {
+    var row = function (icon, label, value) {
       return '<div class="contact-line"><span class="contact-ico">' + icon + '</span>' +
-        '<span class="contact-val"><small>' + label + "</small><span>" + esc(value) + "</span></span>" +
-        (!withActions ? "</div>" : '<button type="button" class="mini-btn" data-copy="' + esc(value) + '" aria-label="Copy ' + label.toLowerCase() + '">Copy</button>' +
-        '<a class="round-btn" href="' + esc(href) + '" aria-label="' + kind + " " + esc(contactName(ct)) + '">' + icon + "</a></div>");
+        '<span class="contact-val"><small>' + label + "</small><span>" + esc(value) + "</span></span></div>";
     };
     return '<div class="contact-card">' +
       '<div class="contact-head">' + avatar(contactName(ct), "sm") + "<div><b>" + esc(contactName(ct)) + "</b><small>" + esc(ct.title || "—") + "</small></div></div>" +
-      row(ICON.phone, "Phone", phone, "tel:" + phone.replace(/\s/g, ""), "Call") +
-      row(ICON.mail, "Email", ct.email, "mailto:" + ct.email, "Email") +
+      row(ICON.phone, "Phone", "+234 " + ct.phone) +
+      row(ICON.mail, "Email", ct.email) +
       "</div>";
   }
 
@@ -742,13 +737,10 @@
       '<div class="info-row"><dt>Email</dt><dd>' + esc(c.email || "—") + "</dd></div>" +
       '<div class="info-row"><dt>Address</dt><dd>' + esc(c.address || "—") + "</dd></div></dl>" +
       '<p class="section-title">Contacts · ' + cts.length + "</p>" +
-      (cts.length ? cts.map(function (x) { return contactCard(x, false); }).join("") : '<p class="muted" style="margin:0 0 18px">No contacts yet.</p>') +
+      (cts.length ? cts.map(function (x) { return contactCard(x); }).join("") : '<p class="muted" style="margin:0 0 18px">No contacts yet.</p>') +
       '<div class="deal-count"><span>Deals</span><b>' + dls.length + "</b><small>" + (dls.length === 1 ? "deal" : "deals") + " tied to this company</small></div>";
     openSheet("companyDetailSheet");
   }
-  $("cdBody").addEventListener("click", function (e) {
-    handleContactActions(e);
-  });
   $("cdNewDeal").addEventListener("click", function () { openNewDeal(detailCompanyId); });
   $("cdAddContact").addEventListener("click", function () { openAddContact(detailCompanyId); });
 
@@ -805,27 +797,7 @@
     var r = e.target.closest("[data-contact-company]");
     if (r) openCompanyDetail(r.getAttribute("data-contact-company"));
   });
-  // Copy buttons and call/email links in contact cards (deal detail + company detail)
-  function handleContactActions(e) {
-    var cp = e.target.closest("[data-copy]");
-    if (cp) {
-      var v = cp.getAttribute("data-copy");
-      var done = function () { toast("Copied <b>" + esc(v) + "</b>"); };
-      try {
-        navigator.clipboard.writeText(v).then(done, function () { selectText(cp); });
-      } catch (err) { selectText(cp); }
-      return true;
-    }
-    if (e.target.closest(".contact-card a")) { e.preventDefault(); toast("Prototype: this would open your phone or mail app"); return true; }
-    return false;
-  }
-  $("dealSheetBody").addEventListener("click", handleContactActions);
-  function selectText(btn) {
-    var span = btn.parentNode.querySelector(".contact-val span");
-    var r = document.createRange(); r.selectNodeContents(span);
-    var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
-    toast("Selected. Press Ctrl+C or Cmd+C to copy");
-  }
+
 
   var ctCompanyId = null;
   function openAddContact(prefCompanyId) {
