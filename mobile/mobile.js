@@ -414,14 +414,16 @@
     else foot += '<button type="button" class="btn btn-solid" data-close>Done</button>';
     $("dealSheetFoot").innerHTML = foot;
   }
-  function contactCard(ct) {
+  // withActions=false shows the details as plain text (company detail)
+  function contactCard(ct, withActions) {
+    if (withActions === undefined) withActions = true;
     if (!ct) return '<p class="muted">No contact linked.</p>';
     var phone = "+234 " + ct.phone;
     var row = function (icon, label, value, href, kind) {
       return '<div class="contact-line"><span class="contact-ico">' + icon + '</span>' +
         '<span class="contact-val"><small>' + label + "</small><span>" + esc(value) + "</span></span>" +
-        '<button type="button" class="mini-btn" data-copy="' + esc(value) + '" aria-label="Copy ' + label.toLowerCase() + '">Copy</button>' +
-        '<a class="round-btn" href="' + esc(href) + '" aria-label="' + kind + " " + esc(contactName(ct)) + '">' + icon + "</a></div>";
+        (!withActions ? "</div>" : '<button type="button" class="mini-btn" data-copy="' + esc(value) + '" aria-label="Copy ' + label.toLowerCase() + '">Copy</button>' +
+        '<a class="round-btn" href="' + esc(href) + '" aria-label="' + kind + " " + esc(contactName(ct)) + '">' + icon + "</a></div>");
     };
     return '<div class="contact-card">' +
       '<div class="contact-head">' + avatar(contactName(ct), "sm") + "<div><b>" + esc(contactName(ct)) + "</b><small>" + esc(ct.title || "—") + "</small></div></div>" +
@@ -740,18 +742,12 @@
       '<div class="info-row"><dt>Email</dt><dd>' + esc(c.email || "—") + "</dd></div>" +
       '<div class="info-row"><dt>Address</dt><dd>' + esc(c.address || "—") + "</dd></div></dl>" +
       '<p class="section-title">Contacts · ' + cts.length + "</p>" +
-      (cts.length ? cts.map(contactCard).join("") : '<p class="muted" style="margin:0 0 18px">No contacts yet.</p>') +
-      '<p class="section-title">Deals · ' + dls.length + "</p>" +
-      (dls.length ? '<div class="row-list">' + dls.map(function (x) {
-        return '<button type="button" class="row" data-open-deal="' + x.id + '"><span class="row-main"><span class="row-title">' + esc(x.product) + " · " + money(x.value) +
-          '</span><span class="row-sub">' + esc(stageById(x.stage).name) + " · Created " + esc(x.created) + "</span></span>" + (outcomeChip(x) || tierChip(x.tier)) + "</button>";
-      }).join("") + "</div>" : '<p class="muted">No deals yet.</p>');
+      (cts.length ? cts.map(function (x) { return contactCard(x, false); }).join("") : '<p class="muted" style="margin:0 0 18px">No contacts yet.</p>') +
+      '<div class="deal-count"><span>Deals</span><b>' + dls.length + "</b><small>" + (dls.length === 1 ? "deal" : "deals") + " tied to this company</small></div>";
     openSheet("companyDetailSheet");
   }
   $("cdBody").addEventListener("click", function (e) {
-    if (handleContactActions(e)) return;
-    var r = e.target.closest("[data-open-deal]");
-    if (r) openDeal(r.getAttribute("data-open-deal"));
+    handleContactActions(e);
   });
   $("cdNewDeal").addEventListener("click", function () { openNewDeal(detailCompanyId); });
   $("cdAddContact").addEventListener("click", function () { openAddContact(detailCompanyId); });

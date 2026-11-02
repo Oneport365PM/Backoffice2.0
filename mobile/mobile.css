@@ -607,3 +607,11 @@ button { font: inherit; color: inherit; }
   padding: 6px 8px; font-size: 11px; font-weight: 700; color: var(--op-dark-green); cursor: pointer;
 }
 .mini-btn:hover { border-color: var(--op-dark-green); }
+
+.deal-count {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  border: 1px solid var(--op-border-card); border-radius: var(--op-radius-lg); padding: 14px;
+}
+.deal-count span { width: 100%; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--op-silver-light); }
+.deal-count b { font-family: var(--op-font-display); font-weight: 600; font-size: 28px; color: var(--op-dark-green); line-height: 1; }
+.deal-count small { font-size: 13px; color: var(--op-silver-light); }
