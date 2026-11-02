@@ -737,10 +737,7 @@
       '<div class="info-row"><dt>Address</dt><dd>' + esc(c.address || "—") + "</dd></div>" +
       '<div class="info-row"><dt>Owner</dt><dd><span class="owner">' + avatar(c.owner, "xs") + "<span>" + esc(c.owner) + "</span></span></dd></div></dl>" +
       '<p class="section-title">Contacts · ' + cts.length + "</p>" +
-      (cts.length ? '<div class="row-list" style="margin-bottom:18px">' + cts.map(function (x) {
-        return '<div class="row" style="cursor:default">' + avatar(contactName(x), "sm") + '<span class="row-main"><span class="row-title">' + esc(contactName(x)) +
-          '</span><span class="row-sub">' + esc(x.title) + "</span></span></div>";
-      }).join("") + "</div>" : '<p class="muted" style="margin:0 0 18px">No contacts yet.</p>') +
+      (cts.length ? cts.map(contactCard).join("") : '<p class="muted" style="margin:0 0 18px">No contacts yet.</p>') +
       '<p class="section-title">Deals · ' + dls.length + "</p>" +
       (dls.length ? '<div class="row-list">' + dls.map(function (x) {
         return '<button type="button" class="row" data-open-deal="' + x.id + '"><span class="row-main"><span class="row-title">' + esc(x.product) + " · " + money(x.value) +
@@ -749,6 +746,7 @@
     openSheet("companyDetailSheet");
   }
   $("cdBody").addEventListener("click", function (e) {
+    if (handleContactActions(e)) return;
     var r = e.target.closest("[data-open-deal]");
     if (r) openDeal(r.getAttribute("data-open-deal"));
   });
@@ -808,7 +806,8 @@
     var r = e.target.closest("[data-contact-company]");
     if (r) openCompanyDetail(r.getAttribute("data-contact-company"));
   });
-  $("dealSheetBody").addEventListener("click", function (e) {
+  // Copy buttons and call/email links in contact cards (deal detail + company detail)
+  function handleContactActions(e) {
     var cp = e.target.closest("[data-copy]");
     if (cp) {
       var v = cp.getAttribute("data-copy");
@@ -816,10 +815,12 @@
       try {
         navigator.clipboard.writeText(v).then(done, function () { selectText(cp); });
       } catch (err) { selectText(cp); }
-      return;
+      return true;
     }
-    if (e.target.closest("a")) { e.preventDefault(); toast("Prototype: this would open your phone or mail app"); }
-  });
+    if (e.target.closest(".contact-card a")) { e.preventDefault(); toast("Prototype: this would open your phone or mail app"); return true; }
+    return false;
+  }
+  $("dealSheetBody").addEventListener("click", handleContactActions);
   function selectText(btn) {
     var span = btn.parentNode.querySelector(".contact-val span");
     var r = document.createRange(); r.selectNodeContents(span);
