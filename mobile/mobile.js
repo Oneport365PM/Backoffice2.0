@@ -17,6 +17,7 @@
     arrow: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     check: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     cross: '<svg viewBox="0 0 24 24" width="10" height="10"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+    chevron: '<svg viewBox="0 0 24 24" class="chev"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
     phone: '<svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>',
     mail: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="2" fill="none"/></svg>',
@@ -220,10 +221,8 @@
 
   function dealCard(d, freshId) {
     var c = company(d.companyId);
-    var nx = nextStage(d.stage);
-    var foot = d.stage === "closed"
-      ? outcomeChip(d)
-      : '<button type="button" class="move-btn" data-move="' + d.id + '" aria-label="Move ' + esc(c.name) + " to " + esc(nx.name) + '">' + esc(nx.name) + ICON.arrow + "</button>";
+    var foot = '<button type="button" class="stage-select" data-stage-menu="' + d.id + '" aria-haspopup="menu" aria-label="Change stage for ' + esc(c.name) + ', currently ' + esc(stageById(d.stage).name) + '">' +
+      '<span class="stage-dot" style="background:' + stageById(d.stage).bar + '"></span>' + esc(stageById(d.stage).name) + ICON.chevron + "</button>";
     return '<article class="deal-card' + (d.id === freshId ? " fresh" : "") + '" data-deal="' + d.id + '" tabindex="0">' +
       '<div class="deal-top"><h3>' + esc(c.name) + '</h3><span class="deal-value">' + money(d.value) + "</span></div>" +
       '<div class="deal-meta"><span class="owner">' + avatar(d.owner, "xs") + "<span>" + esc(d.owner) + "</span></span>" + tierChip(d.tier) + "</div>" +
@@ -262,8 +261,8 @@
     b.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   });
   $("dealList").addEventListener("click", function (e) {
-    var mv = e.target.closest("[data-move]");
-    if (mv) { e.stopPropagation(); advance(mv.getAttribute("data-move")); return; }
+    var mv = e.target.closest("[data-stage-menu]");
+    if (mv) { e.stopPropagation(); openStageMenu(mv); return; }
     var card = e.target.closest("[data-deal]");
     if (card) openDeal(card.getAttribute("data-deal"));
   });
@@ -274,12 +273,6 @@
   });
 
   // Moving deals
-  function advance(id) {
-    var d = deal(id);
-    var nx = nextStage(d.stage);
-    if (nx) moveTo(id, nx.id);
-  }
-
   function moveTo(id, toStage, outcome, note) {
     var d = deal(id);
     if (!d || d.stage === toStage && !outcome) return;
@@ -305,6 +298,53 @@
       setTimeout(apply, 220);
     } else apply();
   }
+
+  // ---------- Stage dropdown on deal cards ----------
+  var menuDealId = null, menuBtn = null;
+  function openStageMenu(btn) {
+    var id = btn.getAttribute("data-stage-menu");
+    if (menuDealId === id) { closeStageMenu(); return; }
+    closeStageMenu();
+    menuDealId = id; menuBtn = btn;
+    var d = deal(id);
+    var menu = $("stageMenu");
+    menu.innerHTML = '<p class="stage-menu-head">Move deal to</p>' + STAGES.map(function (s, i) {
+      var cur = s.id === d.stage;
+      return '<button type="button" role="menuitemradio" aria-checked="' + cur + '" class="stage-opt' + (cur ? " current" : "") + '" data-to="' + s.id + '">' +
+        '<span class="stage-num">' + (i + 1) + "</span><span class=\"stage-opt-name\">" + esc(s.name) +
+        (s.id === "closed" ? '<small>Won or lost</small>' : "") + "</span>" +
+        (cur ? '<span class="pick-check">' + ICON.check + "</span>" : "") + "</button>";
+    }).join("");
+    menu.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+    var phone = $("phone").getBoundingClientRect(), r = btn.getBoundingClientRect();
+    var mh = menu.offsetHeight, mw = menu.offsetWidth;
+    var top = r.bottom - phone.top + 6;
+    if (r.bottom + mh + 90 > phone.bottom) top = r.top - phone.top - mh - 6; // open upward near the bottom
+    menu.style.top = top + "px";
+    menu.style.left = Math.max(12, r.right - phone.left - mw) + "px";
+    var first = menu.querySelector(".stage-opt:not(.current)");
+    if (first) first.focus({ preventScroll: true });
+  }
+  function closeStageMenu() {
+    $("stageMenu").hidden = true;
+    if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+    menuDealId = null; menuBtn = null;
+  }
+  $("stageMenu").addEventListener("click", function (e) {
+    var o = e.target.closest("[data-to]");
+    if (!o) return;
+    var id = menuDealId, to = o.getAttribute("data-to");
+    closeStageMenu();
+    if (deal(id).stage !== to) moveTo(id, to);
+  });
+  document.addEventListener("click", function (e) {
+    if (menuDealId && !e.target.closest("#stageMenu") && !e.target.closest("[data-stage-menu]")) closeStageMenu();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && menuDealId) { closeStageMenu(); e.stopImmediatePropagation(); }
+  }, true);
+  $("screens").addEventListener("scroll", closeStageMenu, { passive: true });
 
   // ---------- Sheet manager (stackable) ----------
   var stack = [];
