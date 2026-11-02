@@ -624,3 +624,18 @@ button { font: inherit; color: inherit; }
 .stage-opt .stage-num svg { width: 11px; height: 11px; }
 .stage-opt.opt-won .stage-num { background: var(--op-success); }
 .stage-opt.opt-lost .stage-num { background: var(--op-chip-error-text); }
+
+/* Move sheet + comments */
+.move-path { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+.move-path svg { width: 16px; height: 16px; color: var(--op-dark-green); }
+.move-path .chip { font-size: 12px; padding: 5px 10px; }
+.comments { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 10px; }
+.comment { border: 1px solid var(--op-border-card); border-radius: var(--op-radius-lg); padding: 12px 14px; }
+.comment-head { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.comment-head b { color: var(--op-dark-green); }
+.comment-head .muted { margin-left: auto; }
+.comment-move { margin: 8px 0 4px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #2f6b1e; }
+.comment-text { margin: 0; line-height: 1.5; color: var(--op-silver-dark); }
+.comment-text.muted { font-style: italic; }
+.comments-empty { margin: 0 0 18px; }
+#dealSheet .sheet-body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }

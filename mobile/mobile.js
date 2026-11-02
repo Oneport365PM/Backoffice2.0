@@ -97,6 +97,18 @@
       };
     });
 
+    // Example comments left when deals were moved
+    deals.forEach(function (d) { d.comments = []; });
+    function addC(i, from, to, text, date, by, outcome) {
+      deals[i].comments.push({ from: from, to: to, outcome: outcome || null, text: text, date: date, by: by });
+    }
+    addC(4, "prospect", "contacted", "Intro call done. They ship 6 containers a month from Apapa.", "30-10-2026", "Aishat Jimoh");
+    addC(8, "contacted", "qualified", "Budget confirmed for Q4. Decision maker is the procurement manager.", "24-10-2026", "Deborah Oje");
+    addC(8, "prospect", "contacted", "Sent company profile and rate card.", "23-10-2026", "Deborah Oje");
+    addC(11, "qualified", "quote", "Quote sent for 40ft ocean freight, Lagos to Rotterdam.", "31-10-2026", "Aishat Jimoh");
+    addC(15, "quote", "closed", "High rate and response time", "29-10-2026", "Aishat Jimoh", "lost");
+    addC(14, "quote", "closed", "PO received. First shipment booked for next week.", "25-10-2026", "Aishat Jimoh", "won");
+
     return { companies: companies, contacts: contacts, deals: deals, stage: "prospect", screen: "pipeline" };
   }
 
@@ -274,23 +286,27 @@
   });
 
   // Moving deals
-  function moveTo(id, toStage, outcome, note) {
+  function moveTo(id, toStage, outcome, comment) {
     var d = deal(id);
     if (!d || d.stage === toStage && !outcome) return;
     if (stageIndex(toStage) < stageIndex(d.stage)) return; // deals only move forward
-    if (toStage === "closed" && !outcome) { openOutcome(id); return; }
+    if (toStage === "closed" && !outcome) { openMove(id, toStage); return; }
     var prev = { stage: d.stage, outcome: d.outcome, note: d.note };
+    var entry = { from: d.stage, to: toStage, outcome: outcome || null, text: comment || "", date: today(), by: "Nkechi" };
     var card = document.querySelector('.deal-card[data-deal="' + id + '"]');
     var apply = function () {
       d.stage = toStage;
       d.outcome = toStage === "closed" ? outcome : null;
-      d.note = toStage === "closed" && outcome === "lost" ? (note || "") : "";
+      d.note = toStage === "closed" && outcome === "lost" ? (comment || "") : "";
+      d.comments = d.comments || [];
+      d.comments.unshift(entry);
       renderPipeline();
       if ($("dealSheet").classList.contains("open")) renderDealSheet(id);
       var c = company(d.companyId);
       var label = toStage === "closed" ? "closed as " + (outcome === "won" ? "Won" : "Lost") : "moved to " + stageById(toStage).name;
       toast("<b>" + esc(c.name) + "</b> " + label, function () {
         d.stage = prev.stage; d.outcome = prev.outcome; d.note = prev.note;
+        d.comments = d.comments.filter(function (x) { return x !== entry; });
         renderPipeline();
         if ($("dealSheet").classList.contains("open")) renderDealSheet(id);
       });
@@ -342,8 +358,7 @@
     if (!o) return;
     var id = menuDealId, to = o.getAttribute("data-to"), outcome = o.getAttribute("data-outcome");
     closeStageMenu();
-    if (outcome) closeAs(id, outcome);
-    else if (deal(id).stage !== to) moveTo(id, to);
+    if (deal(id).stage !== to || outcome) openMove(id, to, outcome);
   });
   document.addEventListener("click", function (e) {
     if (menuDealId && !e.target.closest("#stageMenu") && !e.target.closest("[data-stage-menu]")) closeStageMenu();
@@ -407,7 +422,7 @@
       '<div class="detail-hero"><div><span class="kpi-label">Deal value</span><span class="detail-value">' + money(d.value) + "</span></div>" +
       '<div>' + tierChip(d.tier) + " " + outcomeChip(d) + "</div></div>" +
       '<p class="section-title">Stage · tap a later stage to move</p><div class="stepper">' + steps + "</div>" +
-      (d.note ? '<p class="deal-note" style="margin:-8px 0 16px">Lost reason: ' + esc(d.note) + "</p>" : "") +
+      commentsBlock(d) +
       '<p class="section-title">Contact</p>' +
       contactCard(ct) +
       '<p class="section-title">Details</p><dl class="info-card">' +
@@ -416,14 +431,20 @@
       '<div class="info-row"><dt>Company email</dt><dd>' + esc(c.email || "—") + "</dd></div>" +
       '<div class="info-row"><dt>Industry</dt><dd>' + esc(c.industry || "—") + "</dd></div></dl>";
 
-    var nx = nextStage(d.stage);
-    var foot = "";
-    if (nx && nx.id === "closed") {
-      foot += '<button type="button" class="btn btn-outline" data-close-as="lost">Closed · Lost</button>' +
-        '<button type="button" class="btn btn-primary" data-close-as="won">Closed · Won</button>';
-    } else if (nx) foot += '<button type="button" class="btn btn-primary" data-goto="' + nx.id + '">Move to ' + esc(nx.name) + "</button>";
-    else foot += '<button type="button" class="btn btn-solid" data-close>Done</button>';
-    $("dealSheetFoot").innerHTML = foot;
+  }
+  function stageLabel(c) {
+    return c.to === "closed" ? "Closed · " + (c.outcome === "won" ? "Won" : "Lost") : stageById(c.to).name;
+  }
+  function commentsBlock(d) {
+    var list = d.comments || [];
+    return '<p class="section-title">Comments · ' + list.length + "</p>" +
+      (list.length ? '<ol class="comments">' + list.map(function (c) {
+        return '<li class="comment"><div class="comment-head">' + avatar(c.by, "xs") + "<b>" + esc(c.by) + "</b>" +
+          '<span class="muted">' + esc(c.date) + "</span></div>" +
+          '<p class="comment-move">' + esc(stageById(c.from).name) + " → " + esc(stageLabel(c)) + "</p>" +
+          (c.text ? '<p class="comment-text">' + esc(c.text) + "</p>" : '<p class="comment-text muted">No comment added</p>') + "</li>";
+      }).join("") + "</ol>"
+        : '<p class="muted comments-empty">No comments yet. Add one when you move this deal to a later stage.</p>');
   }
   function contactCard(ct) {
     if (!ct) return '<p class="muted">No contact linked.</p>';
@@ -439,50 +460,48 @@
   }
 
   $("dealSheet").addEventListener("click", function (e) {
-    var ca = e.target.closest("[data-close-as]");
-    if (ca && openDealId) { closeAs(openDealId, ca.getAttribute("data-close-as")); return; }
     var g = e.target.closest("[data-goto]");
     if (!g || !openDealId) return;
     var to = g.getAttribute("data-goto");
     var d = deal(openDealId);
     if (to === d.stage) return;
-    moveTo(openDealId, to);
+    openMove(openDealId, to);
   });
 
   // ---------- Close-out ----------
-  var outcomeDealId = null;
-  // Won closes straight away; Lost asks for an optional reason first.
-  function closeAs(id, outcome) {
-    if (outcome === "won") moveTo(id, "closed", "won");
-    else openOutcome(id, "lost");
-  }
-  function openOutcome(id, preset) {
-    outcomeDealId = id;
-    $("outcomeSub").textContent = company(deal(id).companyId).name + " · " + money(deal(id).value);
-    document.querySelectorAll('input[name="outcome"]').forEach(function (r) { r.checked = false; });
-    $("lostReason").value = "";
-    $("lostReasonField").hidden = true;
-    $("outcomeConfirm").disabled = true;
-    if (preset) {
-      var r = document.querySelector('input[name="outcome"][value="' + preset + '"]');
-      r.checked = true;
-      $("lostReasonField").hidden = preset !== "lost";
-      $("outcomeConfirm").disabled = false;
-    }
+  // Every stage move goes through this sheet so the user can add a comment.
+  var moveDealId = null, moveTarget = null;
+  function openMove(id, to, outcome) {
+    var d = deal(id);
+    moveDealId = id; moveTarget = to;
+    var closing = to === "closed";
+    $("outcomeTitle").textContent = closing ? "Close deal" : "Move to " + stageById(to).name;
+    $("outcomeSub").textContent = company(d.companyId).name + " · " + money(d.value);
+    $("movePath").innerHTML = '<span class="chip chip-mode">' + esc(stageById(d.stage).name) + "</span>" + ICON.arrow +
+      '<span class="chip chip-primary" id="moveTo">' + esc(closing ? "Closed" : stageById(to).name) + "</span>";
+    $("outcomeOptions").hidden = !closing;
+    document.querySelectorAll('input[name="outcome"]').forEach(function (r) { r.checked = r.value === outcome; });
+    $("moveComment").value = "";
+    syncMoveSheet();
     openSheet("outcomeSheet");
-    if (preset === "lost") setTimeout(function () { $("lostReason").focus(); }, 300);
+    setTimeout(function () { $("moveComment").focus(); }, 300);
   }
-  document.querySelectorAll('input[name="outcome"]').forEach(function (r) {
-    r.addEventListener("change", function () {
-      $("lostReasonField").hidden = r.value !== "lost";
-      $("outcomeConfirm").disabled = false;
-    });
-  });
+  function syncMoveSheet() {
+    var sel = document.querySelector('input[name="outcome"]:checked');
+    var closing = moveTarget === "closed";
+    var lost = closing && sel && sel.value === "lost";
+    $("moveCommentLabel").innerHTML = lost ? "Reason lost <em>optional</em>" : "Comment <em>optional</em>";
+    $("moveComment").placeholder = lost ? "e.g. High rate and response time" : closing ? "e.g. PO received, shipment booked" : "e.g. Called the client, they want a quote by Friday";
+    if (closing && sel) $("moveTo").textContent = "Closed · " + (sel.value === "won" ? "Won" : "Lost");
+    $("outcomeConfirm").textContent = closing ? "Close deal" : "Move deal";
+    $("outcomeConfirm").disabled = closing && !sel;
+  }
+  document.querySelectorAll('input[name="outcome"]').forEach(function (r) { r.addEventListener("change", syncMoveSheet); });
   $("outcomeConfirm").addEventListener("click", function () {
     var sel = document.querySelector('input[name="outcome"]:checked');
-    if (!sel) return;
+    if (moveTarget === "closed" && !sel) return;
     closeSheet("outcomeSheet");
-    moveTo(outcomeDealId, "closed", sel.value, $("lostReason").value.trim());
+    moveTo(moveDealId, moveTarget, moveTarget === "closed" ? sel.value : null, $("moveComment").value.trim());
   });
 
   // ---------- Picker ----------

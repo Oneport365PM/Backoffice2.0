@@ -126,7 +126,6 @@
             </button>
           </header>
           <div class="sheet-body" id="dealSheetBody"></div>
-          <footer class="sheet-foot" id="dealSheetFoot"></footer>
         </section>
       </div>
 
@@ -137,7 +136,7 @@
           <div class="grabber"></div>
           <header class="sheet-head">
             <div>
-              <h2 id="outcomeTitle">Close deal</h2>
+              <h2 id="outcomeTitle">Move deal</h2>
               <p class="sheet-sub" id="outcomeSub"></p>
             </div>
             <button type="button" class="icon-btn" data-close aria-label="Close">
@@ -145,18 +144,19 @@
             </button>
           </header>
           <div class="sheet-body">
-            <div class="outcome-options" role="radiogroup" aria-label="Outcome">
+            <div class="move-path" id="movePath"></div>
+            <div class="outcome-options" id="outcomeOptions" role="radiogroup" aria-label="Outcome">
               <label class="outcome-card"><input type="radio" name="outcome" value="won" /><span class="radio"></span><span><b>Won</b><small>Customer accepted the quote</small></span></label>
               <label class="outcome-card"><input type="radio" name="outcome" value="lost" /><span class="radio"></span><span><b>Lost</b><small>Deal didn't go ahead</small></span></label>
             </div>
-            <label class="field" id="lostReasonField" hidden>
-              <span class="notch">Reason lost</span>
-              <input type="text" id="lostReason" placeholder="e.g. High rate and response time" />
+            <label class="field">
+              <span class="notch" id="moveCommentLabel">Comment <em>optional</em></span>
+              <textarea id="moveComment" rows="3" placeholder="e.g. Called the client, they want a quote by Friday"></textarea>
             </label>
           </div>
           <footer class="sheet-foot">
             <button type="button" class="btn btn-outline" data-close>Cancel</button>
-            <button type="button" class="btn btn-primary" id="outcomeConfirm" disabled>Close deal</button>
+            <button type="button" class="btn btn-primary" id="outcomeConfirm">Move deal</button>
           </footer>
         </section>
       </div>
