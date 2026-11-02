@@ -616,3 +616,11 @@ button { font: inherit; color: inherit; }
 .stage-opt.past .stage-num { background: var(--op-light-green); color: var(--op-dark-green); }
 .stage-opt.past:hover { background: none; }
 .step:disabled { cursor: default; }
+
+/* Closed = Won or Lost */
+.stage-select.is-final svg { width: 12px; height: 12px; }
+.stage-select.outcome-won { background: var(--op-chip-success-bg); color: var(--op-chip-success-text); border-color: transparent; }
+.stage-select.outcome-lost { background: var(--op-chip-error-bg); color: var(--op-chip-error-text); border-color: transparent; }
+.stage-opt .stage-num svg { width: 11px; height: 11px; }
+.stage-opt.opt-won .stage-num { background: var(--op-success); }
+.stage-opt.opt-lost .stage-num { background: var(--op-chip-error-text); }

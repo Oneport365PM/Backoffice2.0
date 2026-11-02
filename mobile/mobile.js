@@ -221,7 +221,7 @@
   function dealCard(d, freshId) {
     var c = company(d.companyId);
     var foot = d.stage === "closed"
-      ? '<span class="stage-select is-final"><span class="stage-dot" style="background:' + stageById(d.stage).bar + '"></span>Closed</span>'
+      ? '<span class="stage-select is-final outcome-' + d.outcome + '">' + (d.outcome === "won" ? ICON.check + "Closed · Won" : ICON.cross + "Closed · Lost") + "</span>"
       : '<button type="button" class="stage-select" data-stage-menu="' + d.id + '" aria-haspopup="menu" aria-label="Change stage for ' + esc(c.name) + ', currently ' + esc(stageById(d.stage).name) + '">' +
       '<span class="stage-dot" style="background:' + stageById(d.stage).bar + '"></span>' + esc(stageById(d.stage).name) + ICON.chevron + "</button>";
     return '<article class="deal-card' + (d.id === freshId ? " fresh" : "") + '" data-deal="' + d.id + '" tabindex="0">' +
@@ -310,14 +310,17 @@
     menuDealId = id; menuBtn = btn;
     var d = deal(id);
     var menu = $("stageMenu");
-    menu.innerHTML = '<p class="stage-menu-head">Move deal to</p>' + STAGES.map(function (s, i) {
+    menu.innerHTML = '<p class="stage-menu-head">Move deal to</p>' + STAGES.filter(function (s) { return s.id !== "closed"; }).map(function (s, i) {
       var cur = s.id === d.stage, past = i < stageIndex(d.stage);
       return '<button type="button" role="menuitemradio" aria-checked="' + cur + '" class="stage-opt' + (cur ? " current" : "") + (past ? " past" : "") + '"' +
         (past ? ' disabled aria-disabled="true"' : ' data-to="' + s.id + '"') + ">" +
         '<span class="stage-num">' + (i + 1) + "</span><span class=\"stage-opt-name\">" + esc(s.name) +
-        (s.id === "closed" ? '<small>Won or lost</small>' : past ? "<small>Completed</small>" : "") + "</span>" +
+        (past ? "<small>Completed</small>" : "") + "</span>" +
         (cur ? '<span class="pick-check">' + ICON.check + "</span>" : "") + "</button>";
-    }).join("");
+    }).join("") +
+      '<p class="stage-menu-head">Close deal</p>' +
+      '<button type="button" role="menuitem" class="stage-opt opt-won" data-to="closed" data-outcome="won"><span class="stage-num">' + ICON.check + '</span><span class="stage-opt-name">Closed · Won<small>Customer accepted</small></span></button>' +
+      '<button type="button" role="menuitem" class="stage-opt opt-lost" data-to="closed" data-outcome="lost"><span class="stage-num">' + ICON.cross + '</span><span class="stage-opt-name">Closed · Lost<small>Add a reason</small></span></button>';
     menu.hidden = false;
     btn.setAttribute("aria-expanded", "true");
     var phone = $("phone").getBoundingClientRect(), r = btn.getBoundingClientRect();
@@ -337,9 +340,10 @@
   $("stageMenu").addEventListener("click", function (e) {
     var o = e.target.closest("[data-to]");
     if (!o) return;
-    var id = menuDealId, to = o.getAttribute("data-to");
+    var id = menuDealId, to = o.getAttribute("data-to"), outcome = o.getAttribute("data-outcome");
     closeStageMenu();
-    if (deal(id).stage !== to) moveTo(id, to);
+    if (outcome) closeAs(id, outcome);
+    else if (deal(id).stage !== to) moveTo(id, to);
   });
   document.addEventListener("click", function (e) {
     if (menuDealId && !e.target.closest("#stageMenu") && !e.target.closest("[data-stage-menu]")) closeStageMenu();
@@ -395,7 +399,8 @@
       var dot = i < idx ? ICON.check : String(i + 1);
       var ahead = i > idx;
       return '<button type="button" class="step ' + cls + '"' + (ahead ? ' data-goto="' + s.id + '" aria-label="Move to ' + esc(s.name) + '"' : " disabled") +
-        (i === idx ? ' aria-current="step"' : "") + '><span class="step-dot">' + dot + "</span>" + esc(s.name) + "</button>";
+        (i === idx ? ' aria-current="step"' : "") + '><span class="step-dot">' + dot + "</span>" +
+        esc(s.id === "closed" ? (d.outcome === "won" ? "Won" : d.outcome === "lost" ? "Lost" : "Won / Lost") : s.name) + "</button>";
     }).join("");
 
     $("dealSheetBody").innerHTML =
@@ -413,7 +418,10 @@
 
     var nx = nextStage(d.stage);
     var foot = "";
-    if (nx) foot += '<button type="button" class="btn btn-primary" data-goto="' + nx.id + '">Move to ' + esc(nx.name) + "</button>";
+    if (nx && nx.id === "closed") {
+      foot += '<button type="button" class="btn btn-outline" data-close-as="lost">Closed · Lost</button>' +
+        '<button type="button" class="btn btn-primary" data-close-as="won">Closed · Won</button>';
+    } else if (nx) foot += '<button type="button" class="btn btn-primary" data-goto="' + nx.id + '">Move to ' + esc(nx.name) + "</button>";
     else foot += '<button type="button" class="btn btn-solid" data-close>Done</button>';
     $("dealSheetFoot").innerHTML = foot;
   }
@@ -431,6 +439,8 @@
   }
 
   $("dealSheet").addEventListener("click", function (e) {
+    var ca = e.target.closest("[data-close-as]");
+    if (ca && openDealId) { closeAs(openDealId, ca.getAttribute("data-close-as")); return; }
     var g = e.target.closest("[data-goto]");
     if (!g || !openDealId) return;
     var to = g.getAttribute("data-goto");
@@ -441,14 +451,26 @@
 
   // ---------- Close-out ----------
   var outcomeDealId = null;
-  function openOutcome(id) {
+  // Won closes straight away; Lost asks for an optional reason first.
+  function closeAs(id, outcome) {
+    if (outcome === "won") moveTo(id, "closed", "won");
+    else openOutcome(id, "lost");
+  }
+  function openOutcome(id, preset) {
     outcomeDealId = id;
     $("outcomeSub").textContent = company(deal(id).companyId).name + " · " + money(deal(id).value);
     document.querySelectorAll('input[name="outcome"]').forEach(function (r) { r.checked = false; });
     $("lostReason").value = "";
     $("lostReasonField").hidden = true;
     $("outcomeConfirm").disabled = true;
+    if (preset) {
+      var r = document.querySelector('input[name="outcome"][value="' + preset + '"]');
+      r.checked = true;
+      $("lostReasonField").hidden = preset !== "lost";
+      $("outcomeConfirm").disabled = false;
+    }
     openSheet("outcomeSheet");
+    if (preset === "lost") setTimeout(function () { $("lostReason").focus(); }, 300);
   }
   document.querySelectorAll('input[name="outcome"]').forEach(function (r) {
     r.addEventListener("change", function () {
@@ -848,7 +870,7 @@
       setTimeout(function () {
         if (f === "move") {
           setScreen("pipeline"); state.stage = "qualified"; renderPipeline();
-          toast("Tap a stage arrow on a card, or open a card to use the stepper");
+          toast("Use the stage dropdown on a card, or open a card to move it");
         } else if (f === "deal") { setScreen("pipeline"); openNewDeal(); }
         else if (f === "company") { setScreen("companies"); openAddCompany(); }
         else { setScreen("contacts"); openAddContact(); }
