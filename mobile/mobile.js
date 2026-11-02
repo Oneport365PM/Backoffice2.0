@@ -136,7 +136,6 @@
   function stageIndex(id) { for (var i = 0; i < STAGES.length; i++) if (STAGES[i].id === id) return i; return -1; }
   function stageById(id) { return STAGES[stageIndex(id)]; }
   function nextStage(id) { return STAGES[stageIndex(id) + 1] || null; }
-  function prevStage(id) { return STAGES[stageIndex(id) - 1] || null; }
   function tierChip(t) { return '<span class="chip chip-' + esc(t) + '">' + esc(t) + "</span>"; }
   function outcomeChip(d) {
     if (d.outcome === "won") return '<span class="chip chip-won">' + ICON.check.replace("<svg ", '<svg width="11" height="11" ') + " Won</span>";
@@ -221,7 +220,9 @@
 
   function dealCard(d, freshId) {
     var c = company(d.companyId);
-    var foot = '<button type="button" class="stage-select" data-stage-menu="' + d.id + '" aria-haspopup="menu" aria-label="Change stage for ' + esc(c.name) + ', currently ' + esc(stageById(d.stage).name) + '">' +
+    var foot = d.stage === "closed"
+      ? '<span class="stage-select is-final"><span class="stage-dot" style="background:' + stageById(d.stage).bar + '"></span>Closed</span>'
+      : '<button type="button" class="stage-select" data-stage-menu="' + d.id + '" aria-haspopup="menu" aria-label="Change stage for ' + esc(c.name) + ', currently ' + esc(stageById(d.stage).name) + '">' +
       '<span class="stage-dot" style="background:' + stageById(d.stage).bar + '"></span>' + esc(stageById(d.stage).name) + ICON.chevron + "</button>";
     return '<article class="deal-card' + (d.id === freshId ? " fresh" : "") + '" data-deal="' + d.id + '" tabindex="0">' +
       '<div class="deal-top"><h3>' + esc(c.name) + '</h3><span class="deal-value">' + money(d.value) + "</span></div>" +
@@ -276,6 +277,7 @@
   function moveTo(id, toStage, outcome, note) {
     var d = deal(id);
     if (!d || d.stage === toStage && !outcome) return;
+    if (stageIndex(toStage) < stageIndex(d.stage)) return; // deals only move forward
     if (toStage === "closed" && !outcome) { openOutcome(id); return; }
     var prev = { stage: d.stage, outcome: d.outcome, note: d.note };
     var card = document.querySelector('.deal-card[data-deal="' + id + '"]');
@@ -309,10 +311,11 @@
     var d = deal(id);
     var menu = $("stageMenu");
     menu.innerHTML = '<p class="stage-menu-head">Move deal to</p>' + STAGES.map(function (s, i) {
-      var cur = s.id === d.stage;
-      return '<button type="button" role="menuitemradio" aria-checked="' + cur + '" class="stage-opt' + (cur ? " current" : "") + '" data-to="' + s.id + '">' +
+      var cur = s.id === d.stage, past = i < stageIndex(d.stage);
+      return '<button type="button" role="menuitemradio" aria-checked="' + cur + '" class="stage-opt' + (cur ? " current" : "") + (past ? " past" : "") + '"' +
+        (past ? ' disabled aria-disabled="true"' : ' data-to="' + s.id + '"') + ">" +
         '<span class="stage-num">' + (i + 1) + "</span><span class=\"stage-opt-name\">" + esc(s.name) +
-        (s.id === "closed" ? '<small>Won or lost</small>' : "") + "</span>" +
+        (s.id === "closed" ? '<small>Won or lost</small>' : past ? "<small>Completed</small>" : "") + "</span>" +
         (cur ? '<span class="pick-check">' + ICON.check + "</span>" : "") + "</button>";
     }).join("");
     menu.hidden = false;
@@ -390,14 +393,15 @@
     var steps = STAGES.map(function (s, i) {
       var cls = i < idx ? "done" : i === idx ? "current" : "";
       var dot = i < idx ? ICON.check : String(i + 1);
-      return '<button type="button" class="step ' + cls + '" data-goto="' + s.id + '" aria-label="Move to ' + esc(s.name) + '"' +
+      var ahead = i > idx;
+      return '<button type="button" class="step ' + cls + '"' + (ahead ? ' data-goto="' + s.id + '" aria-label="Move to ' + esc(s.name) + '"' : " disabled") +
         (i === idx ? ' aria-current="step"' : "") + '><span class="step-dot">' + dot + "</span>" + esc(s.name) + "</button>";
     }).join("");
 
     $("dealSheetBody").innerHTML =
       '<div class="detail-hero"><div><span class="kpi-label">Deal value</span><span class="detail-value">' + money(d.value) + "</span></div>" +
       '<div>' + tierChip(d.tier) + " " + outcomeChip(d) + "</div></div>" +
-      '<p class="section-title">Stage · tap to jump</p><div class="stepper">' + steps + "</div>" +
+      '<p class="section-title">Stage · tap a later stage to move</p><div class="stepper">' + steps + "</div>" +
       (d.note ? '<p class="deal-note" style="margin:-8px 0 16px">Lost reason: ' + esc(d.note) + "</p>" : "") +
       '<p class="section-title">Contact</p>' +
       contactCard(ct) +
@@ -407,9 +411,8 @@
       '<div class="info-row"><dt>Company email</dt><dd>' + esc(c.email || "—") + "</dd></div>" +
       '<div class="info-row"><dt>Industry</dt><dd>' + esc(c.industry || "—") + "</dd></div></dl>";
 
-    var nx = nextStage(d.stage), pv = prevStage(d.stage);
+    var nx = nextStage(d.stage);
     var foot = "";
-    if (pv) foot += '<button type="button" class="btn btn-outline back-link" data-goto="' + pv.id + '" aria-label="Move back to ' + esc(pv.name) + '">Back</button>';
     if (nx) foot += '<button type="button" class="btn btn-primary" data-goto="' + nx.id + '">Move to ' + esc(nx.name) + "</button>";
     else foot += '<button type="button" class="btn btn-solid" data-close>Done</button>';
     $("dealSheetFoot").innerHTML = foot;

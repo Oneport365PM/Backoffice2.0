@@ -491,7 +491,6 @@ button { font: inherit; color: inherit; }
 .owner-chip small { color: var(--op-silver-light); font-size: 12px; }
 .owner-chip .row-actions { margin-left: auto; }
 
-.back-link { flex: 0 0 auto !important; }
 
 /* Outcome */
 .outcome-options { display: grid; gap: 10px; margin-bottom: 20px; }
@@ -610,3 +609,10 @@ button { font: inherit; color: inherit; }
 .deal-count span { width: 100%; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--op-silver-light); }
 .deal-count b { font-family: var(--op-font-display); font-weight: 600; font-size: 28px; color: var(--op-dark-green); line-height: 1; }
 .deal-count small { font-size: 13px; color: var(--op-silver-light); }
+
+/* Deals only move forward */
+.stage-select.is-final { cursor: default; border-color: var(--op-border-card); background: var(--op-chip-neutral-bg); }
+.stage-opt.past { color: var(--op-silver-light); cursor: not-allowed; }
+.stage-opt.past .stage-num { background: var(--op-light-green); color: var(--op-dark-green); }
+.stage-opt.past:hover { background: none; }
+.step:disabled { cursor: default; }
