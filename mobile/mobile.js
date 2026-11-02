@@ -496,19 +496,27 @@
   }
   function renderNd() {
     var coBtn = $("ndCompanyBtn"), ctBtn = $("ndContactBtn");
-    if (nd.newCompany) setPickerBtn(coBtn, $("ndCoName").value.trim() || "New company", "");
-    else setPickerBtn(coBtn, nd.companyId ? company(nd.companyId).name : "", "Search companies…");
+    setPickerBtn(coBtn, nd.companyId ? company(nd.companyId).name : "", "Search companies…");
+    $("ndCoExisting").hidden = nd.newCompany;
     $("ndNewCompany").hidden = !nd.newCompany;
 
-    var hasCompany = nd.newCompany || !!nd.companyId;
-    ctBtn.disabled = !hasCompany || nd.newCompany;
+    // A brand-new company has no contacts yet, so its contact must be new too.
+    if (nd.newCompany) nd.newContact = true;
+    ctBtn.disabled = !nd.companyId;
     $("ndContactField").classList.toggle("is-disabled", ctBtn.disabled);
-    $("ndContactField").hidden = nd.newCompany;
-    if (nd.newContact) setPickerBtn(ctBtn, "", "New contact below");
-    else if (nd.contactId) setPickerBtn(ctBtn, contactName(contact(nd.contactId)), "");
-    else setPickerBtn(ctBtn, "", hasCompany ? "Select or add a contact" : "Select a company first");
+    $("ndContactField").hidden = nd.newContact;
+    $("ndContactHint").hidden = !nd.newCompany;
+    if (nd.contactId) setPickerBtn(ctBtn, contactName(contact(nd.contactId)), "");
+    else setPickerBtn(ctBtn, "", nd.companyId ? "Select a contact" : "Select a company first");
     $("ndNewContact").hidden = !nd.newContact;
-    $("ndNewContactRemove").hidden = nd.newCompany;
+
+    document.querySelectorAll("#newDealForm [data-seg]").forEach(function (b) {
+      var isNew = b.getAttribute("data-seg") === "company" ? nd.newCompany : nd.newContact;
+      var on = (b.getAttribute("data-val") === "new") === isNew;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-checked", String(on));
+      b.disabled = b.getAttribute("data-seg") === "contact" && b.getAttribute("data-val") === "existing" && nd.newCompany;
+    });
     document.querySelectorAll("#newDealForm select").forEach(syncSelectPlaceholder);
     validateNd();
   }
@@ -568,13 +576,26 @@
       }
     });
   });
-  $("ndNewCompanyRemove").addEventListener("click", function () {
-    nd.newCompany = false; nd.newContact = false; nd.companyId = null; nd.contactId = null;
-    renderNd();
+  $("newDealForm").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-seg]");
+    if (!b || b.disabled) return;
+    var isNew = b.getAttribute("data-val") === "new";
+    if (b.getAttribute("data-seg") === "company") {
+      if (isNew === nd.newCompany) return;
+      nd.newCompany = isNew;
+      nd.companyId = null; nd.contactId = null;
+      nd.newContact = isNew;
+      renderNd();
+      if (isNew) setTimeout(function () { $("ndCoName").focus(); }, 50);
+    } else {
+      nd.newContact = isNew;
+      if (isNew) nd.contactId = null;
+      renderNd();
+      if (isNew) setTimeout(function () { $("ndCtFirst").focus(); }, 50);
+    }
   });
-  $("ndNewContactRemove").addEventListener("click", function () { nd.newContact = false; renderNd(); });
   $("newDealForm").addEventListener("input", function (e) {
-    if (e.target.id === "ndCoName") renderNd(); else validateNd();
+    validateNd();
     clearFieldError(e.target);
   });
   $("newDealForm").addEventListener("change", validateNd);

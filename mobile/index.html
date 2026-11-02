@@ -168,32 +168,32 @@
             </button>
           </header>
           <form class="sheet-body" id="newDealForm" novalidate>
-            <div class="field picker-field">
+            <p class="form-section"><span class="stage-num">1</span>Company</p>
+            <div class="seg" role="radiogroup" aria-label="Company">
+              <button type="button" role="radio" data-seg="company" data-val="existing">Existing company</button>
+              <button type="button" role="radio" data-seg="company" data-val="new">+ New company</button>
+            </div>
+            <div class="field picker-field" id="ndCoExisting">
               <span class="notch">Company *</span>
               <button type="button" class="picker-btn" id="ndCompanyBtn"><span>Search companies…</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
             </div>
-
-            <div class="inline-panel" id="ndNewCompany" hidden>
-              <div class="inline-panel-head">
-                <span class="chip chip-primary">New company</span>
-                <button type="button" class="link" id="ndNewCompanyRemove">Remove</button>
-              </div>
+            <div id="ndNewCompany" hidden>
               <label class="field"><span class="notch">Company name *</span><input type="text" id="ndCoName" placeholder="Name" /></label>
               <label class="field"><span class="notch">Email address</span><input type="email" id="ndCoEmail" placeholder="company@example.com" /><small class="err"></small></label>
               <label class="field"><span class="notch">Industry *</span><input type="text" id="ndCoIndustry" placeholder="Ex. Technology" /></label>
-              <p class="hint">Class tier comes from the deal's class below.</p>
             </div>
 
+            <p class="form-section"><span class="stage-num">2</span>Contact</p>
+            <div class="seg" role="radiogroup" aria-label="Contact">
+              <button type="button" role="radio" data-seg="contact" data-val="existing">Existing contact</button>
+              <button type="button" role="radio" data-seg="contact" data-val="new">+ New contact</button>
+            </div>
+            <p class="hint" id="ndContactHint" hidden>A new company needs a new contact.</p>
             <div class="field picker-field" id="ndContactField">
               <span class="notch">Contact *</span>
               <button type="button" class="picker-btn" id="ndContactBtn" disabled><span>Select a company first</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
             </div>
-
-            <div class="inline-panel" id="ndNewContact" hidden>
-              <div class="inline-panel-head">
-                <span class="chip chip-primary">New contact</span>
-                <button type="button" class="link" id="ndNewContactRemove">Remove</button>
-              </div>
+            <div id="ndNewContact" hidden>
               <div class="field-row">
                 <label class="field"><span class="notch">First name *</span><input type="text" id="ndCtFirst" placeholder="First name" /></label>
                 <label class="field"><span class="notch">Last name *</span><input type="text" id="ndCtLast" placeholder="Last name" /></label>
@@ -203,6 +203,7 @@
               <label class="field"><span class="notch">Email *</span><input type="email" id="ndCtEmail" placeholder="email@example.com" /><small class="err"></small></label>
             </div>
 
+            <p class="form-section"><span class="stage-num">3</span>Deal details</p>
             <label class="field field-money">
               <span class="notch">Deal value (USD) <em>optional</em></span>
               <span class="prefix">$</span>
