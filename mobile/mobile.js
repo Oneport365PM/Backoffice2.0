@@ -862,14 +862,31 @@
   });
   $("activityList").addEventListener("click", function (e) {
     var r = e.target.closest("[data-activity-deal]");
-    if (r) openDeal(r.getAttribute("data-activity-deal"));
+    if (r) openDealActivities(r.getAttribute("data-activity-deal"));
   });
   $("activityList").addEventListener("keydown", function (e) {
     var r = e.target.closest("[data-activity-deal]");
-    if (r && e.key === "Enter") openDeal(r.getAttribute("data-activity-deal"));
+    if (r && e.key === "Enter") openDealActivities(r.getAttribute("data-activity-deal"));
   });
   $("dealSheetBody").addEventListener("click", function (e) {
     if (e.target.closest("[data-add-activity]")) openActivity(openDealId);
+  });
+
+  // Activity tab -> a deal's logged activities only (no contact or deal details)
+  var daDealId = null;
+  function openDealActivities(id) {
+    daDealId = id;
+    renderDealActivities();
+    openSheet("dealActSheet");
+  }
+  function renderDealActivities() {
+    var d = deal(daDealId);
+    $("daTitle").textContent = company(d.companyId).name;
+    $("daSub").textContent = d.product + " · " + money(d.value);
+    $("daBody").innerHTML = stageStatus(d, stageIndex(d.stage)) + activitiesBlock(d);
+  }
+  $("daBody").addEventListener("click", function (e) {
+    if (e.target.closest("[data-add-activity]")) openActivity(daDealId);
   });
 
   // Add activity sheet. From a deal the deal is fixed; from the Activity tab you pick one.
@@ -925,6 +942,7 @@
     closeSheet("activitySheet");
     renderActivity();
     if ($("dealSheet").classList.contains("open") && openDealId === d.id) renderDealSheet(d.id);
+    if ($("dealActSheet").classList.contains("open") && daDealId === d.id) renderDealActivities();
     toast(esc(a.type) + " logged on <b>" + esc(company(d.companyId).name) + "</b> · " + esc(stageById(d.stage).name));
   });
 

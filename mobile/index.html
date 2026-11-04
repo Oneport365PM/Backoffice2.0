@@ -260,6 +260,24 @@
         </section>
       </div>
 
+      <!-- Deal activities (opened from the Activity tab): stage + activities only -->
+      <div class="sheet-host" id="dealActSheet" hidden>
+        <div class="scrim" data-close></div>
+        <section class="sheet sheet-tall" role="dialog" aria-modal="true" aria-labelledby="daTitle">
+          <div class="grabber"></div>
+          <header class="sheet-head">
+            <div>
+              <h2 id="daTitle">Deal</h2>
+              <p class="sheet-sub" id="daSub"></p>
+            </div>
+            <button type="button" class="icon-btn" data-close aria-label="Close">
+              <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </header>
+          <div class="sheet-body" id="daBody"></div>
+        </section>
+      </div>
+
       <!-- Add activity -->
       <div class="sheet-host" id="activitySheet" hidden>
         <div class="scrim" data-close></div>
