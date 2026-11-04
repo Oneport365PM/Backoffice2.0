@@ -837,29 +837,11 @@
         : '<p class="muted comments-empty">No activities logged yet.</p>');
   }
 
-  var activityFilter = "all";
-  function setActivityFilter(f) {
-    activityFilter = f;
-    document.querySelectorAll("#activityFilter [data-filter]").forEach(function (b) {
-      var on = b.getAttribute("data-filter") === f;
-      b.classList.toggle("active", on); b.setAttribute("aria-checked", String(on));
-    });
-    renderActivity();
-  }
   function renderActivity() {
-    var all = state.activities;
-    var up = all.filter(isUpcoming).length;
-    $("activitySummary").innerHTML = "<b>" + all.length + "</b> activities · " + up + " upcoming";
-    var list = sortActivities(all.filter(function (a) {
-      return activityFilter === "all" || (activityFilter === "upcoming") === isUpcoming(a);
-    }));
+    var list = sortActivities(state.activities);
     $("activityList").innerHTML = list.length ? list.map(function (a) { return activityItem(a, true); }).join("")
-      : '<li class="empty"><b>No activities here</b>Tap Add activity to log one against a deal.</li>';
+      : '<li class="empty"><b>No activities yet</b>Tap Add activity to log one against a deal.</li>';
   }
-  $("activityFilter").addEventListener("click", function (e) {
-    var b = e.target.closest("[data-filter]");
-    if (b) setActivityFilter(b.getAttribute("data-filter"));
-  });
   $("activityList").addEventListener("click", function (e) {
     var r = e.target.closest("[data-activity-deal]");
     if (r) openDealActivities(r.getAttribute("data-activity-deal"));
@@ -965,7 +947,7 @@
   $("resetBtn").addEventListener("click", function () {
     closeAll();
     state = seed();
-    $("dealSearch").value = ""; $("companySearch").value = ""; setActivityFilter("all");
+    $("dealSearch").value = ""; $("companySearch").value = "";
     setScreen("pipeline");
     renderAll();
     toast("Sample data reset");
