@@ -226,8 +226,8 @@
     var count = function (id) {
       return state.deals.filter(function (d) { return (id === "all" || d.stage === id) && dealMatches(d, q); }).length;
     };
-    $("stageFilter").innerHTML = '<option value="all">All stages (' + count("all") + ")</option>" +
-      STAGES.map(function (s, i) { return '<option value="' + s.id + '">' + (i + 1) + ". " + esc(s.name) + " (" + count(s.id) + ")</option>"; }).join("");
+    $("stageFilter").innerHTML = '<option value="all">All stages</option>' +
+      STAGES.map(function (s) { return '<option value="' + s.id + '">' + esc(s.name) + " " + count(s.id) + "</option>"; }).join("");
     $("stageFilter").value = state.stage;
   }
 
