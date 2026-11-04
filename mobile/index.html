@@ -237,19 +237,29 @@
           <header class="sheet-head">
             <div>
               <h2 id="companyTitle">Add company</h2>
-              <p class="sheet-sub">Register a customer account</p>
+              <p class="sheet-sub">Register a customer account and its main contact</p>
             </div>
             <button type="button" class="icon-btn" data-close aria-label="Close">
               <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
           </header>
           <form class="sheet-body" id="companyForm" novalidate>
+            <p class="form-section"><span class="stage-num">1</span>Company</p>
             <label class="field"><span class="notch">Company name *</span><input type="text" id="coName" placeholder="Name" /></label>
             <label class="field"><span class="notch">Email address</span><input type="email" id="coEmail" placeholder="company@example.com" /><small class="err"></small></label>
             <label class="field"><span class="notch">Company address</span><textarea id="coAddress" rows="2" placeholder="Street, city, country"></textarea></label>
             <label class="field"><span class="notch">Industry *</span><input type="text" id="coIndustry" placeholder="Ex. Technology" /></label>
             <label class="field field-select"><span class="notch">Class tier *</span><select id="coTier"></select></label>
             <label class="field field-select"><span class="notch">Owner *</span><select id="coOwner"><option value="">Select owner</option></select></label>
+
+            <p class="form-section"><span class="stage-num">2</span>Contact</p>
+            <div class="field-row">
+              <label class="field"><span class="notch">First name *</span><input type="text" id="coCtFirst" placeholder="First name" /></label>
+              <label class="field"><span class="notch">Last name *</span><input type="text" id="coCtLast" placeholder="Last name" /></label>
+            </div>
+            <label class="field"><span class="notch">Title</span><input type="text" id="coCtTitle" placeholder="e.g. Procurement Manager" /></label>
+            <label class="field field-phone"><span class="notch">Phone number *</span><span class="prefix">+234</span><input type="tel" id="coCtPhone" inputmode="tel" placeholder="803 000 0000" /></label>
+            <label class="field"><span class="notch">Email *</span><input type="email" id="coCtEmail" placeholder="email@example.com" /><small class="err"></small></label>
           </form>
           <footer class="sheet-foot">
             <button type="button" class="btn btn-outline" data-close>Cancel</button>

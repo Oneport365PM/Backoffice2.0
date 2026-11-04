@@ -786,7 +786,8 @@
     openSheet("companySheet");
   }
   function validateCo() {
-    $("coSubmit").disabled = !($("coName").value.trim() && $("coIndustry").value.trim() && $("coTier").value && $("coOwner").value);
+    $("coSubmit").disabled = !($("coName").value.trim() && $("coIndustry").value.trim() && $("coTier").value && $("coOwner").value &&
+      ["coCtFirst", "coCtLast", "coCtPhone", "coCtEmail"].every(function (id) { return $(id).value.trim(); }));
   }
   $("companyForm").addEventListener("input", function (e) { validateCo(); clearFieldError(e.target); });
   $("companyForm").addEventListener("change", validateCo);
@@ -794,14 +795,18 @@
     e.preventDefault();
     var em = $("coEmail").value.trim();
     if (em && !isEmail(em)) { fieldError($("coEmail"), "Enter a valid email"); return; }
+    if (!isEmail($("coCtEmail").value.trim())) { fieldError($("coCtEmail"), "Enter a valid email"); return; }
     var c = { id: uid("co"), name: $("coName").value.trim(), email: em, address: $("coAddress").value.trim(), industry: $("coIndustry").value.trim(), tier: $("coTier").value, owner: $("coOwner").value };
     state.companies.unshift(c);
+    var ct = { id: uid("ct"), first: $("coCtFirst").value.trim(), last: $("coCtLast").value.trim(), companyId: c.id,
+      title: $("coCtTitle").value.trim(), phone: $("coCtPhone").value.trim(), email: $("coCtEmail").value.trim() };
+    state.contacts.unshift(ct);
     freshCompany = c.id;
     closeSheet("companySheet");
     setScreen("companies");
     $("companySearch").value = "";
     renderCompanies();
-    toast("<b>" + esc(c.name) + "</b> added to companies");
+    toast("<b>" + esc(c.name) + "</b> added with contact " + esc(contactName(ct)));
   });
 
   // ---------- Contacts ----------
