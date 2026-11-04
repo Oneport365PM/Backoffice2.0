@@ -786,7 +786,6 @@
     openSheet("companyDetailSheet");
   }
   $("cdNewDeal").addEventListener("click", function () { openNewDeal(detailCompanyId); });
-  $("cdAddContact").addEventListener("click", function () { openAddContact(detailCompanyId); });
 
   function openAddCompany() {
     $("companyForm").reset();
