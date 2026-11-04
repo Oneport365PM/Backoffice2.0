@@ -708,3 +708,9 @@ button { font: inherit; color: inherit; }
 .pager-info { display: flex; flex-direction: column; align-items: center; text-align: center; }
 .pager-info b { font-family: var(--op-font-display); font-weight: 600; font-size: 13px; color: var(--op-dark-green); }
 .pager-info small { font-size: 11px; color: var(--op-silver-light); }
+
+/* A deal's activity list scrolls on its own once it gets long */
+.deal-acts { max-height: 440px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; margin-bottom: 0;
+  scrollbar-width: thin; scrollbar-color: var(--op-light-green) transparent; }
+.deal-acts + .pager { margin-bottom: 18px; }
+.deal-acts:last-child { margin-bottom: 18px; }

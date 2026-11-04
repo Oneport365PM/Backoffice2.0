@@ -120,6 +120,19 @@
     addA(8, "qualified", "Call", "2026-11-07", "09:30", 20, "Follow up on rate expectations before quoting.", "Deborah Oje");
     addA(11, "quote", "Call", "2026-11-03", "15:00", 30, "Walked through the ocean freight quote line by line.", "Aishat Jimoh");
     addA(13, "quote", "TBD", "2026-11-10", "12:00", 45, "Review revised quote with their logistics lead.", "Adeshewa Adelowotan");
+    [
+      ["prospect", "Call", "2026-09-29", "10:00", 20, "First call. They clear 10 to 15 containers a month through Tin Can."],
+      ["prospect", "Email", "2026-09-30", "09:15", 10, "Sent company profile and customs clearance overview."],
+      ["contacted", "In-person Meeting", "2026-10-03", "11:00", 60, "Met the shipping manager at their Apapa office."],
+      ["contacted", "Call", "2026-10-06", "14:00", 25, "Confirmed the documents they need help with: Form M and PAAR."],
+      ["contacted", "Email", "2026-10-08", "16:30", 10, "Shared sample clearance timeline for a 40ft container."],
+      ["qualified", "Call", "2026-10-13", "10:30", 30, "Budget approved by their finance team for Q4."],
+      ["qualified", "In-person Meeting", "2026-10-16", "13:00", 45, "Walked through our tracking dashboard with the ops team."],
+      ["qualified", "Email", "2026-10-20", "09:00", 15, "Requested last 3 months of shipment volumes to price the quote."],
+      ["quote", "Email", "2026-10-26", "17:00", 10, "Sent first quote for customs clearance on 12 containers."],
+      ["quote", "Call", "2026-10-29", "11:30", 20, "They asked for a discount on demurrage handling."],
+      ["quote", "Call", "2026-11-02", "15:45", 30, "Agreed revised demurrage terms, sending updated quote."]
+    ].forEach(function (x) { addA(13, x[0], x[1], x[2], x[3], x[4], x[5], "Adeshewa Adelowotan"); });
 
     return { companies: companies, contacts: contacts, deals: deals, activities: activities, stage: "all", screen: "pipeline" };
   }
@@ -863,11 +876,23 @@
   function sortActivities(list) {
     return list.slice().sort(function (x, y) { return activityWhen(y) - activityWhen(x); });
   }
+  var DEAL_ACT_PAGE = 10;
+  var dealActPage = {}; // dealId -> page
   function activitiesBlock(d) {
     var list = sortActivities(state.activities.filter(function (a) { return a.dealId === d.id; }));
+    var count = Math.max(1, Math.ceil(list.length / DEAL_ACT_PAGE));
+    var p = Math.min(dealActPage[d.id] || 1, count), start = (p - 1) * DEAL_ACT_PAGE;
+    dealActPage[d.id] = p;
+    var shown = list.slice(start, start + DEAL_ACT_PAGE);
+    var pager = list.length > DEAL_ACT_PAGE
+      ? '<nav class="pager" aria-label="Activity pages">' +
+        '<button type="button" class="pager-btn" data-dact="' + d.id + '" data-dir="-1"' + (p === 1 ? " disabled" : "") + ' aria-label="Previous page">' + ICON.chevron + "Prev</button>" +
+        '<span class="pager-info"><b>Page ' + p + " of " + count + "</b><small>" + (start + 1) + "–" + Math.min(start + DEAL_ACT_PAGE, list.length) + " of " + list.length + "</small></span>" +
+        '<button type="button" class="pager-btn next" data-dact="' + d.id + '" data-dir="1"' + (p === count ? " disabled" : "") + ' aria-label="Next page">Next' + ICON.chevron + "</button></nav>"
+      : "";
     var add = d.stage === "closed" ? "" : '<button type="button" class="btn-sm" data-add-activity>' + ICON.plus + "Add activity</button>";
     return '<div class="section-head"><p class="section-title">Activities · ' + list.length + "</p>" + add + "</div>" +
-      (list.length ? '<ol class="activity-list">' + list.map(function (a) { return activityItem(a, false); }).join("") + "</ol>"
+      (list.length ? '<ol class="activity-list deal-acts">' + shown.map(function (a) { return activityItem(a, false); }).join("") + "</ol>" + pager
         : '<p class="muted comments-empty">No activities logged yet.</p>');
   }
 
@@ -900,7 +925,17 @@
   });
   $("dealSheetBody").addEventListener("click", function (e) {
     if (e.target.closest("[data-add-activity]")) openActivity(openDealId);
+    if (turnDealActPage(e)) renderDealSheet(openDealId);
   });
+
+  function turnDealActPage(e) {
+    var b = e.target.closest("[data-dact]");
+    if (!b || b.disabled) return false;
+    var id = b.getAttribute("data-dact");
+    dealActPage[id] = (dealActPage[id] || 1) + Number(b.getAttribute("data-dir"));
+    setTimeout(function () { document.querySelectorAll(".deal-acts").forEach(function (l) { l.scrollTop = 0; }); }, 0);
+    return true;
+  }
 
   // Activity tab -> a deal's logged activities only (no contact or deal details)
   var daDealId = null;
@@ -917,6 +952,7 @@
   }
   $("daBody").addEventListener("click", function (e) {
     if (e.target.closest("[data-add-activity]")) openActivity(daDealId);
+    if (turnDealActPage(e)) renderDealActivities();
   });
 
   // Add activity sheet. From a deal the deal is fixed; from the Activity tab you pick one.
@@ -969,6 +1005,8 @@
     var a = { id: uid("ac"), dealId: d.id, stage: d.stage, type: $("acType").value, date: $("acDate").value, time: $("acTime").value,
       duration: Math.round(Number($("acDuration").value)), comment: $("acComment").value.trim(), by: "Nkechi" };
     state.activities.push(a);
+    var dl = sortActivities(state.activities.filter(function (x) { return x.dealId === d.id; }));
+    dealActPage[d.id] = Math.floor(dl.indexOf(a) / DEAL_ACT_PAGE) + 1;
     // show the page that holds the new activity
     var visible = sortActivities(state.activities.filter(function (x) { return ownerFilter === "all" || deal(x.dealId).owner === ownerFilter; }));
     var at = visible.indexOf(a);
