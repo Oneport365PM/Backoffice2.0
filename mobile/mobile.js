@@ -813,15 +813,13 @@
     "TBD": '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M4 10h16M9 3v4M15 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
   };
   function activityWhen(a) { return new Date(a.date + "T" + (a.time || "00:00")); }
-  function isUpcoming(a) { return activityWhen(a) > new Date(); }
   function fmtDate(iso) { var p = iso.split("-"); return p[2] + "-" + p[1] + "-" + p[0]; }
   function activityItem(a, showDeal) {
-    var d = deal(a.dealId), up = isUpcoming(a);
+    var d = deal(a.dealId);
     return '<li class="activity' + (showDeal ? " is-link" : "") + '"' + (showDeal ? ' data-activity-deal="' + a.dealId + '" tabindex="0"' : "") + ">" +
       '<span class="act-ico">' + (TYPE_ICON[a.type] || TYPE_ICON.TBD) + "</span>" +
       '<div class="act-main">' +
-      '<div class="act-top"><b>' + esc(a.type) + (showDeal ? " · " + esc(company(d.companyId).name) : "") + "</b>" +
-      '<span class="chip ' + (up ? "chip-upcoming" : "chip-done") + '">' + (up ? "Upcoming" : "Done") + "</span></div>" +
+      '<div class="act-top"><b>' + esc(a.type) + (showDeal ? " · " + esc(company(d.companyId).name) : "") + "</b></div>" +
       '<div class="act-meta"><span>' + esc(fmtDate(a.date)) + " · " + esc(a.time) + " · " + esc(a.duration) + ' min</span><span class="chip chip-mode">' + esc(stageById(a.stage).name) + "</span></div>" +
       '<p class="act-comment">' + esc(a.comment) + "</p>" +
       '<small class="muted">Logged by ' + esc(a.by) + "</small></div></li>";

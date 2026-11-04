@@ -679,8 +679,6 @@ button { font: inherit; color: inherit; }
 .act-top b { font-family: var(--op-font-display); font-weight: 600; font-size: 14px; color: var(--op-dark-green); }
 .act-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; margin-top: 4px; font-size: 12px; color: var(--op-silver-light); }
 .act-comment { margin: 8px 0 4px; line-height: 1.5; color: var(--op-silver-dark); }
-.chip-upcoming { background: var(--op-chip-warning-bg); color: var(--op-chip-warning-text); }
-.chip-done { background: var(--op-chip-success-bg); color: var(--op-chip-success-text); }
 .seg-3 { grid-template-columns: repeat(3, 1fr); }
 .deal-chip-row {
   display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
