@@ -691,3 +691,5 @@ button { font: inherit; color: inherit; }
 /* Stage filter dropdown */
 .stage-filter { margin-bottom: 14px; background: var(--op-white); }
 .stage-filter select { font-family: var(--op-font-display); font-weight: 600; font-size: 14px; }
+
+#screen-activity .stage-filter { margin-top: 10px; }
