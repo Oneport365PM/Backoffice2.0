@@ -693,3 +693,18 @@ button { font: inherit; color: inherit; }
 .stage-filter select { font-family: var(--op-font-display); font-weight: 600; font-size: 14px; }
 
 #screen-activity .stage-filter { margin-top: 10px; }
+
+/* Pagination */
+.pager { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; }
+.pager-btn {
+  display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
+  background: var(--op-white); border: 1.5px solid var(--op-dark-green); color: var(--op-dark-green);
+  border-radius: var(--op-radius-md); padding: 8px 12px; font-family: var(--op-font-display); font-weight: 600; font-size: 13px;
+}
+.pager-btn svg { width: 14px; height: 14px; transform: rotate(90deg); }
+.pager-btn.next svg { transform: rotate(-90deg); }
+.pager-btn:hover:not(:disabled) { background: var(--op-dark-green); color: var(--op-accent-lime); }
+.pager-btn:disabled { border-color: var(--op-border-card); color: var(--op-silver-light); cursor: not-allowed; }
+.pager-info { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.pager-info b { font-family: var(--op-font-display); font-weight: 600; font-size: 13px; color: var(--op-dark-green); }
+.pager-info small { font-size: 11px; color: var(--op-silver-light); }

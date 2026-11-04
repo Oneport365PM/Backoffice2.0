@@ -211,6 +211,32 @@
     else openActivity(null);
   });
 
+  // ---------- Pagination (shared by Pipeline, Companies and Activity) ----------
+  var PAGE_SIZE = 5;
+  var pages = { deals: 1, companies: 1, activity: 1 };
+  function paginate(key, list) {
+    var count = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+    if (pages[key] > count) pages[key] = count;
+    var p = pages[key], start = (p - 1) * PAGE_SIZE;
+    var pager = $("pager-" + key);
+    pager.hidden = list.length <= PAGE_SIZE;
+    if (!pager.hidden) {
+      pager.innerHTML =
+        '<button type="button" class="pager-btn" data-pager="' + key + '" data-dir="-1"' + (p === 1 ? " disabled" : "") + ' aria-label="Previous page">' + ICON.chevron + "Prev</button>" +
+        '<span class="pager-info"><b>Page ' + p + " of " + count + "</b><small>" + (start + 1) + "–" + Math.min(start + PAGE_SIZE, list.length) + " of " + list.length + "</small></span>" +
+        '<button type="button" class="pager-btn next" data-pager="' + key + '" data-dir="1"' + (p === count ? " disabled" : "") + ' aria-label="Next page">Next' + ICON.chevron + "</button>";
+    }
+    return list.slice(start, start + PAGE_SIZE);
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-pager]");
+    if (!b || b.disabled) return;
+    var key = b.getAttribute("data-pager");
+    pages[key] += Number(b.getAttribute("data-dir"));
+    ({ deals: renderDeals, companies: renderCompanies, activity: renderActivity })[key]();
+    $("screens").scrollTop = 0;
+  });
+
   // ---------- Pipeline ----------
 
 
@@ -256,8 +282,9 @@
       extra = " · " + w + " won · " + (list.length - w) + " lost";
     }
     $("stageSummary").innerHTML = "<b>" + esc(st.name) + "</b> · " + list.length + " deal" + (list.length === 1 ? "" : "s") + " · " + money(total) + extra;
+    var shown = paginate("deals", list);
     $("dealList").innerHTML = list.length
-      ? list.map(function (d) { return dealCard(d, freshId); }).join("")
+      ? shown.map(function (d) { return dealCard(d, freshId); }).join("")
       : '<div class="empty"><b>' + (q ? "No deals match “" + esc($("dealSearch").value.trim()) + "”" : "No deals in " + esc(st.name)) + "</b>" +
         (q ? "Search by company, deal owner or contact name." : "Move a deal here or create a new one.") + "</div>";
   }
@@ -266,9 +293,10 @@
     renderStages(); renderDeals(freshId);
   }
 
-  $("dealSearch").addEventListener("input", function () { renderStages(); renderDeals(); });
+  $("dealSearch").addEventListener("input", function () { pages.deals = 1; renderStages(); renderDeals(); });
   $("stageFilter").addEventListener("change", function () {
     state.stage = $("stageFilter").value;
+    pages.deals = 1;
     renderDeals();
   });
   $("dealList").addEventListener("click", function (e) {
@@ -711,6 +739,7 @@
     setScreen("pipeline");
     state.stage = "prospect";
     $("dealSearch").value = "";
+    pages.deals = 1;
     renderPipeline(d.id);
     renderCompanies(); renderActivity();
     toast("Deal created for <b>" + esc(company(coId).name) + "</b> in Prospect" + (made.length ? " · new " + made.join(" & ") + " added" : ""));
@@ -739,7 +768,8 @@
     var q = $("companySearch").value.trim().toLowerCase();
     var list = state.companies.filter(function (c) { return !q || (c.name + " " + c.email + " " + c.industry).toLowerCase().indexOf(q) !== -1; });
     $("companySummary").innerHTML = "<b>" + state.companies.length + "</b> companies registered";
-    $("companyList").innerHTML = list.length ? list.map(function (c) {
+    if (!list.length) $("pager-companies").hidden = true;
+    $("companyList").innerHTML = list.length ? paginate("companies", list).map(function (c) {
       var n = state.deals.filter(function (d) { return d.companyId === c.id; }).length;
       return '<button type="button" class="row' + (c.id === freshCompany ? " fresh" : "") + '" data-company="' + c.id + '">' + avatar(c.name) +
         '<span class="row-main"><span class="row-title">' + esc(c.name) + '</span><span class="row-sub">' + esc(c.email || c.industry) + "</span></span>" +
@@ -747,7 +777,7 @@
     }).join("") : '<div class="empty" style="border:0"><b>No companies found</b>Try a different search.</div>';
     freshCompany = null;
   }
-  $("companySearch").addEventListener("input", renderCompanies);
+  $("companySearch").addEventListener("input", function () { pages.companies = 1; renderCompanies(); });
   $("companyList").addEventListener("click", function (e) {
     var r = e.target.closest("[data-company]");
     if (r) openCompanyDetail(r.getAttribute("data-company"));
@@ -802,6 +832,7 @@
       title: $("coCtTitle").value.trim(), phone: $("coCtPhone").value.trim(), email: $("coCtEmail").value.trim() };
     state.contacts.unshift(ct);
     freshCompany = c.id;
+    pages.companies = 1;
     closeSheet("companySheet");
     setScreen("companies");
     $("companySearch").value = "";
@@ -850,11 +881,13 @@
     var list = sortActivities(state.activities.filter(function (a) {
       return ownerFilter === "all" || deal(a.dealId).owner === ownerFilter;
     }));
-    $("activityList").innerHTML = list.length ? list.map(function (a) { return activityItem(a, true); }).join("")
+    if (!list.length) $("pager-activity").hidden = true;
+    $("activityList").innerHTML = list.length ? paginate("activity", list).map(function (a) { return activityItem(a, true); }).join("")
       : '<li class="empty"><b>' + (ownerFilter === "all" ? "No activities yet" : "No activities on " + esc(ownerFilter) + "'s deals") + "</b>Tap Add activity to log one against a deal.</li>";
   }
   $("ownerFilter").addEventListener("change", function () {
     ownerFilter = $("ownerFilter").value;
+    pages.activity = 1;
     renderActivity();
   });
   $("activityList").addEventListener("click", function (e) {
@@ -936,6 +969,10 @@
     var a = { id: uid("ac"), dealId: d.id, stage: d.stage, type: $("acType").value, date: $("acDate").value, time: $("acTime").value,
       duration: Math.round(Number($("acDuration").value)), comment: $("acComment").value.trim(), by: "Nkechi" };
     state.activities.push(a);
+    // show the page that holds the new activity
+    var visible = sortActivities(state.activities.filter(function (x) { return ownerFilter === "all" || deal(x.dealId).owner === ownerFilter; }));
+    var at = visible.indexOf(a);
+    pages.activity = at < 0 ? 1 : Math.floor(at / PAGE_SIZE) + 1;
     closeSheet("activitySheet");
     renderActivity();
     if ($("dealSheet").classList.contains("open") && openDealId === d.id) renderDealSheet(d.id);
@@ -962,7 +999,7 @@
   $("resetBtn").addEventListener("click", function () {
     closeAll();
     state = seed();
-    $("dealSearch").value = ""; $("companySearch").value = ""; ownerFilter = "all";
+    $("dealSearch").value = ""; $("companySearch").value = ""; ownerFilter = "all"; pages = { deals: 1, companies: 1, activity: 1 };
     setScreen("pipeline");
     renderAll();
     toast("Sample data reset");
