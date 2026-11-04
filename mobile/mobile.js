@@ -121,7 +121,7 @@
     addA(11, "quote", "Call", "2026-11-03", "15:00", 30, "Walked through the ocean freight quote line by line.", "Aishat Jimoh");
     addA(13, "quote", "TBD", "2026-11-10", "12:00", 45, "Review revised quote with their logistics lead.", "Adeshewa Adelowotan");
 
-    return { companies: companies, contacts: contacts, deals: deals, activities: activities, stage: "prospect", screen: "pipeline" };
+    return { companies: companies, contacts: contacts, deals: deals, activities: activities, stage: "all", screen: "pipeline" };
   }
 
   // ---------- Helpers ----------
@@ -217,17 +217,18 @@
   function dealMatches(d, q) {
     if (!q) return true;
     var c = company(d.companyId);
-    return (c.name + " " + d.owner + " " + d.product + " " + contactName(contact(d.contactId))).toLowerCase().indexOf(q) !== -1;
+    return (c.name + " " + d.owner + " " + contactName(contact(d.contactId))).toLowerCase().indexOf(q) !== -1;
   }
 
+  // Stage filter: a single dropdown with live counts (respects the search)
   function renderStages() {
     var q = $("dealSearch").value.trim().toLowerCase();
-    $("stageStrip").innerHTML = STAGES.map(function (s, i) {
-      var n = state.deals.filter(function (d) { return d.stage === s.id && dealMatches(d, q); }).length;
-      return '<button type="button" role="tab" class="stage-chip' + (state.stage === s.id ? " active" : "") +
-        '" aria-selected="' + (state.stage === s.id) + '" data-stage="' + s.id + '" style="--bar:' + s.bar + '">' +
-        '<span class="stage-num">' + (i + 1) + "</span>" + esc(s.name) + '<span class="stage-count">' + n + "</span></button>";
-    }).join("");
+    var count = function (id) {
+      return state.deals.filter(function (d) { return (id === "all" || d.stage === id) && dealMatches(d, q); }).length;
+    };
+    $("stageFilter").innerHTML = '<option value="all">All stages (' + count("all") + ")</option>" +
+      STAGES.map(function (s, i) { return '<option value="' + s.id + '">' + (i + 1) + ". " + esc(s.name) + " (" + count(s.id) + ")</option>"; }).join("");
+    $("stageFilter").value = state.stage;
   }
 
   function dealCard(d, freshId) {
@@ -245,8 +246,9 @@
 
   function renderDeals(freshId) {
     var q = $("dealSearch").value.trim().toLowerCase();
-    var st = stageById(state.stage);
-    var list = state.deals.filter(function (d) { return d.stage === state.stage && dealMatches(d, q); });
+    var all = state.stage === "all";
+    var st = all ? { name: "All stages" } : stageById(state.stage);
+    var list = state.deals.filter(function (d) { return (all || d.stage === state.stage) && dealMatches(d, q); });
     var total = list.reduce(function (a, d) { return a + (Number(d.value) || 0); }, 0);
     var extra = "";
     if (state.stage === "closed") {
@@ -256,22 +258,18 @@
     $("stageSummary").innerHTML = "<b>" + esc(st.name) + "</b> · " + list.length + " deal" + (list.length === 1 ? "" : "s") + " · " + money(total) + extra;
     $("dealList").innerHTML = list.length
       ? list.map(function (d) { return dealCard(d, freshId); }).join("")
-      : '<div class="empty"><b>No deals in ' + esc(st.name) + "</b>" + (q ? "Try a different search." : "Move a deal here or create a new one.") + "</div>";
+      : '<div class="empty"><b>' + (q ? "No deals match “" + esc($("dealSearch").value.trim()) + "”" : "No deals in " + esc(st.name)) + "</b>" +
+        (q ? "Search by company, deal owner or contact name." : "Move a deal here or create a new one.") + "</div>";
   }
 
   function renderPipeline(freshId) {
     renderStages(); renderDeals(freshId);
-    var active = document.querySelector(".stage-chip.active");
-    if (active) active.scrollIntoView({ block: "nearest", inline: "center" });
   }
 
   $("dealSearch").addEventListener("input", function () { renderStages(); renderDeals(); });
-  $("stageStrip").addEventListener("click", function (e) {
-    var b = e.target.closest("[data-stage]");
-    if (!b) return;
-    state.stage = b.getAttribute("data-stage");
-    renderStages(); renderDeals();
-    b.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  $("stageFilter").addEventListener("change", function () {
+    state.stage = $("stageFilter").value;
+    renderDeals();
   });
   $("dealList").addEventListener("click", function (e) {
     var mv = e.target.closest("[data-stage-menu]");
@@ -955,53 +953,6 @@
     toast("Sample data reset");
   });
 
-  // ---------- Horizontal scrollers ----------
-  function setupHScroll(wrap) {
-    var track = wrap.querySelector(".stage-strip");
-    var prev = wrap.querySelector(".hs-prev"), next = wrap.querySelector(".hs-next");
-    function update() {
-      var max = track.scrollWidth - track.clientWidth;
-      prev.classList.toggle("off", track.scrollLeft <= 4);
-      next.classList.toggle("off", track.scrollLeft >= max - 4);
-    }
-    function step(dir) { track.scrollBy({ left: dir * track.clientWidth * 0.7, behavior: "smooth" }); }
-    prev.addEventListener("click", function () { step(-1); });
-    next.addEventListener("click", function () { step(1); });
-    track.addEventListener("scroll", update, { passive: true });
-    // Mouse wheel scrolls sideways
-    track.addEventListener("wheel", function (e) {
-      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-      var max = track.scrollWidth - track.clientWidth;
-      if ((e.deltaY < 0 && track.scrollLeft <= 0) || (e.deltaY > 0 && track.scrollLeft >= max)) return;
-      e.preventDefault();
-      track.scrollLeft += e.deltaY;
-    }, { passive: false });
-    // Click-and-drag with a mouse (touch already swipes natively)
-    var startX = 0, startLeft = 0, down = false, moved = false;
-    track.addEventListener("pointerdown", function (e) {
-      if (e.pointerType !== "mouse" || e.button !== 0) return;
-      down = true; moved = false; startX = e.clientX; startLeft = track.scrollLeft;
-    });
-    window.addEventListener("pointermove", function (e) {
-      if (!down) return;
-      var dx = e.clientX - startX;
-      if (!moved && Math.abs(dx) > 5) { moved = true; wrap.classList.add("dragging"); }
-      if (moved) track.scrollLeft = startLeft - dx;
-    });
-    window.addEventListener("pointerup", function () {
-      if (!down) return;
-      down = false;
-      wrap.classList.remove("dragging");
-    });
-    // Swallow the click that ends a drag so it doesn't select a stage
-    track.addEventListener("click", function (e) {
-      if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; }
-    }, true);
-    new MutationObserver(update).observe(track, { childList: true });
-    window.addEventListener("resize", update);
-    update();
-  }
-  document.querySelectorAll(".hscroll").forEach(setupHScroll);
 
   function renderAll() { renderPipeline(); renderCompanies(); renderActivity(); }
 

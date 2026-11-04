@@ -50,14 +50,13 @@
         <section class="screen" id="screen-pipeline" data-title="Pipeline">
           <label class="search">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <input type="search" id="dealSearch" placeholder="Search deals…" autocomplete="off" />
+            <input type="search" id="dealSearch" placeholder="Search company, owner or contact…" autocomplete="off" />
           </label>
 
-          <div class="hscroll">
-            <button type="button" class="hs-btn hs-prev" aria-label="Scroll left" tabindex="-1"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <div class="stage-strip" id="stageStrip" role="tablist" aria-label="Pipeline stages"></div>
-            <button type="button" class="hs-btn hs-next" aria-label="Scroll right" tabindex="-1"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          </div>
+          <label class="field field-select stage-filter">
+            <span class="notch">Deal stage</span>
+            <select id="stageFilter" aria-label="Filter by deal stage"></select>
+          </label>
           <p class="list-summary" id="stageSummary"></p>
           <div class="card-list" id="dealList"></div>
         </section>
