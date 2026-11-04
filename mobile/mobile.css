@@ -639,3 +639,53 @@ button { font: inherit; color: inherit; }
 .comment-text.muted { font-style: italic; }
 .comments-empty { margin: 0 0 18px; }
 #dealSheet .sheet-body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+
+/* Deal stage status (deal detail) */
+.stage-status { border: 1px solid var(--op-border-card); border-radius: var(--op-radius-lg); padding: 12px 14px; margin-bottom: 18px; }
+.stage-status-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+.stage-pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: var(--op-radius-full);
+  background: var(--op-accent-lime); color: var(--op-dark-green);
+  font-family: var(--op-font-display); font-weight: 600; font-size: 14px;
+}
+.stage-status.is-won .stage-pill { background: var(--op-chip-success-bg); color: var(--op-chip-success-text); }
+.stage-status.is-lost .stage-pill { background: var(--op-chip-error-bg); color: var(--op-chip-error-text); }
+
+/* Activities */
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.section-head .section-title { margin: 0; }
+.btn-sm {
+  display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
+  background: var(--op-dark-green); color: var(--op-accent-lime); border: 0; border-radius: var(--op-radius-md);
+  padding: 7px 12px 7px 9px; font-family: var(--op-font-display); font-weight: 600; font-size: 12px;
+}
+.btn-sm svg { width: 14px; height: 14px; }
+.btn-sm:hover { background: #03571f; }
+.activity-list { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 10px; }
+.activity {
+  display: flex; gap: 12px; background: var(--op-white);
+  border: 1px solid var(--op-border-card); border-radius: var(--op-radius-lg); padding: 12px 14px;
+}
+.activity.is-link { cursor: pointer; box-shadow: var(--op-elevation-1); }
+.activity.is-link:active { box-shadow: var(--op-elevation-3); }
+.act-ico {
+  width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+  background: var(--op-light-green); color: var(--op-dark-green);
+  display: flex; align-items: center; justify-content: center;
+}
+.act-ico svg { width: 17px; height: 17px; }
+.act-main { flex: 1; min-width: 0; }
+.act-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.act-top b { font-family: var(--op-font-display); font-weight: 600; font-size: 14px; color: var(--op-dark-green); }
+.act-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; margin-top: 4px; font-size: 12px; color: var(--op-silver-light); }
+.act-comment { margin: 8px 0 4px; line-height: 1.5; color: var(--op-silver-dark); }
+.chip-upcoming { background: var(--op-chip-warning-bg); color: var(--op-chip-warning-text); }
+.chip-done { background: var(--op-chip-success-bg); color: var(--op-chip-success-text); }
+.seg-3 { grid-template-columns: repeat(3, 1fr); }
+.deal-chip-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  background: #F4F6EF; border: 1px solid var(--op-border-card); border-radius: var(--op-radius-lg); padding: 10px 12px;
+}
+.deal-chip-row b { display: block; color: var(--op-dark-green); }
+.deal-chip-row small { color: var(--op-silver-light); font-size: 12px; }
+#acStageHint { margin: -6px 0 16px; }

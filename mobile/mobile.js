@@ -109,7 +109,19 @@
     addC(15, "quote", "closed", "High rate and response time", "29-10-2026", "Aishat Jimoh", "lost");
     addC(14, "quote", "closed", "PO received. First shipment booked for next week.", "25-10-2026", "Aishat Jimoh", "won");
 
-    return { companies: companies, contacts: contacts, deals: deals, stage: "prospect", screen: "pipeline" };
+    // Example activities, each logged against the deal's stage at the time
+    var activities = [];
+    function addA(i, stage, type, date, time, duration, comment, by) {
+      activities.push({ id: uid("ac"), dealId: deals[i].id, stage: stage, type: type, date: date, time: time, duration: duration, comment: comment, by: by });
+    }
+    addA(0, "prospect", "Call", "2026-11-06", "10:00", 30, "Discovery call to understand their import volumes.", "Aishat Jimoh");
+    addA(4, "contacted", "Email", "2026-10-30", "14:30", 15, "Sent company profile and FreightSaver brochure.", "Aishat Jimoh");
+    addA(8, "qualified", "In-person Meeting", "2026-10-24", "11:00", 60, "Site visit at their Ikeja warehouse. Confirmed Q4 budget.", "Deborah Oje");
+    addA(8, "qualified", "Call", "2026-11-07", "09:30", 20, "Follow up on rate expectations before quoting.", "Deborah Oje");
+    addA(11, "quote", "Call", "2026-11-03", "15:00", 30, "Walked through the ocean freight quote line by line.", "Aishat Jimoh");
+    addA(13, "quote", "TBD", "2026-11-10", "12:00", 45, "Review revised quote with their logistics lead.", "Adeshewa Adelowotan");
+
+    return { companies: companies, contacts: contacts, deals: deals, activities: activities, stage: "prospect", screen: "pipeline" };
   }
 
   // ---------- Helpers ----------
@@ -180,14 +192,14 @@
   // ---------- Screens ----------
   function setScreen(name) {
     state.screen = name;
-    ["pipeline", "companies", "contacts"].forEach(function (s) {
+    ["pipeline", "companies", "activity"].forEach(function (s) {
       $("screen-" + s).hidden = s !== name;
     });
     document.querySelectorAll(".nav-btn").forEach(function (b) {
       b.classList.toggle("active", b.getAttribute("data-screen") === name);
     });
     $("screenTitle").textContent = $("screen-" + name).getAttribute("data-title");
-    $("fabLabel").textContent = { pipeline: "New deal", companies: "Add company", contacts: "Add contact" }[name];
+    $("fabLabel").textContent = { pipeline: "New deal", companies: "Add company", activity: "Add activity" }[name];
     $("screens").scrollTop = 0;
   }
   document.querySelectorAll(".nav-btn").forEach(function (b) {
@@ -196,23 +208,11 @@
   $("fab").addEventListener("click", function () {
     if (state.screen === "pipeline") openNewDeal();
     else if (state.screen === "companies") openAddCompany();
-    else openAddContact();
+    else openActivity(null);
   });
 
   // ---------- Pipeline ----------
-  function renderKpis() {
-    var active = state.deals.filter(function (d) { return d.stage !== "closed"; });
-    var won = state.deals.filter(function (d) { return d.outcome === "won"; });
-    var lost = state.deals.filter(function (d) { return d.outcome === "lost"; });
-    var sum = function (arr) { return arr.reduce(function (a, d) { return a + (Number(d.value) || 0); }, 0); };
-    $("kpis").innerHTML =
-      '<div class="kpi kpi-dark"><div class="kpi-label">Active pipeline (USD)</div><div class="kpi-value">' + money(sum(active)) +
-      '</div><div class="kpi-sub">' + active.length + " deals in progress</div></div>" +
-      '<div class="kpi"><div class="kpi-label">Deals won (USD)</div><div class="kpi-value money">' + money(sum(won)) +
-      '</div><div class="kpi-sub">' + won.length + " deals won · " + lost.length + " lost</div></div>" +
-      '<div class="kpi"><div class="kpi-label">Total deals</div><div class="kpi-value">' + state.deals.length +
-      '</div><div class="kpi-sub">All-time deals</div></div>';
-  }
+
 
   function dealMatches(d, q) {
     if (!q) return true;
@@ -260,7 +260,7 @@
   }
 
   function renderPipeline(freshId) {
-    renderKpis(); renderStages(); renderDeals(freshId);
+    renderStages(); renderDeals(freshId);
     var active = document.querySelector(".stage-chip.active");
     if (active) active.scrollIntoView({ block: "nearest", inline: "center" });
   }
@@ -409,19 +409,11 @@
     $("dealSheetTitle").textContent = c.name;
     $("dealSheetSub").textContent = d.product + " · Created " + d.created;
 
-    var steps = STAGES.map(function (s, i) {
-      var cls = i < idx ? "done" : i === idx ? "current" : "";
-      var dot = i < idx ? ICON.check : String(i + 1);
-      var ahead = i > idx;
-      return '<button type="button" class="step ' + cls + '"' + (ahead ? ' data-goto="' + s.id + '" aria-label="Move to ' + esc(s.name) + '"' : " disabled") +
-        (i === idx ? ' aria-current="step"' : "") + '><span class="step-dot">' + dot + "</span>" +
-        esc(s.id === "closed" ? (d.outcome === "won" ? "Won" : d.outcome === "lost" ? "Lost" : "Won / Lost") : s.name) + "</button>";
-    }).join("");
-
     $("dealSheetBody").innerHTML =
       '<div class="detail-hero"><div><span class="kpi-label">Deal value</span><span class="detail-value">' + money(d.value) + "</span></div>" +
       '<div>' + tierChip(d.tier) + " " + outcomeChip(d) + "</div></div>" +
-      '<p class="section-title">Stage · tap a later stage to move</p><div class="stepper">' + steps + "</div>" +
+      stageStatus(d, idx) +
+      activitiesBlock(d) +
       commentsBlock(d) +
       '<p class="section-title">Contact</p>' +
       contactCard(ct) +
@@ -431,6 +423,13 @@
       '<div class="info-row"><dt>Company email</dt><dd>' + esc(c.email || "—") + "</dd></div>" +
       '<div class="info-row"><dt>Industry</dt><dd>' + esc(c.industry || "—") + "</dd></div></dl>";
 
+  }
+  function stageStatus(d, idx) {
+    var label = d.stage === "closed" ? "Closed · " + (d.outcome === "won" ? "Won" : "Lost") : stageById(d.stage).name;
+    var cls = d.outcome === "won" ? " is-won" : d.outcome === "lost" ? " is-lost" : "";
+    return '<div class="stage-status' + cls + '"><span class="kpi-label">Deal stage</span>' +
+      '<div class="stage-status-row"><span class="stage-pill"><span class="stage-num">' + (idx + 1) + "</span>" + esc(label) + "</span>" +
+      '<span class="muted">Stage ' + (idx + 1) + " of " + STAGES.length + "</span></div></div>";
   }
   function stageLabel(c) {
     return c.to === "closed" ? "Closed · " + (c.outcome === "won" ? "Won" : "Lost") : stageById(c.to).name;
@@ -458,15 +457,6 @@
       row(ICON.mail, "Email", ct.email) +
       "</div>";
   }
-
-  $("dealSheet").addEventListener("click", function (e) {
-    var g = e.target.closest("[data-goto]");
-    if (!g || !openDealId) return;
-    var to = g.getAttribute("data-goto");
-    var d = deal(openDealId);
-    if (to === d.stage) return;
-    openMove(openDealId, to);
-  });
 
   // ---------- Close-out ----------
   // Every stage move goes through this sheet so the user can add a comment.
@@ -724,7 +714,7 @@
     state.stage = "prospect";
     $("dealSearch").value = "";
     renderPipeline(d.id);
-    renderCompanies(); renderContacts();
+    renderCompanies(); renderActivity();
     toast("Deal created for <b>" + esc(company(coId).name) + "</b> in Prospect" + (made.length ? " · new " + made.join(" & ") + " added" : ""));
   });
 
@@ -817,66 +807,127 @@
   });
 
   // ---------- Contacts ----------
-  var freshContact = null;
-  function renderContacts() {
-    var q = $("contactSearch").value.trim().toLowerCase();
-    var list = state.contacts.filter(function (c) {
-      var co = company(c.companyId);
-      return !q || (contactName(c) + " " + c.title + " " + c.email + " " + co.name).toLowerCase().indexOf(q) !== -1;
-    });
-    $("contactSummary").innerHTML = "<b>" + state.contacts.length + "</b> contacts registered";
-    $("contactList").innerHTML = list.length ? list.map(function (c) {
-      var co = company(c.companyId);
-      return '<div class="row' + (c.id === freshContact ? " fresh" : "") + '" data-contact-company="' + co.id + '">' + avatar(contactName(c)) +
-        '<span class="row-main"><span class="row-title">' + esc(contactName(c)) + '</span><span class="row-sub">' + ICON.building + " " + esc(co.name) + (c.title ? " · " + esc(c.title) : "") + "</span></span>" +
-        '<span class="row-actions"><a class="round-btn" href="tel:+234' + esc(c.phone.replace(/\s/g, "")) + '" aria-label="Call ' + esc(contactName(c)) + '">' + ICON.phone +
-        '</a><a class="round-btn" href="mailto:' + esc(c.email) + '" aria-label="Email ' + esc(contactName(c)) + '">' + ICON.mail + "</a></span></div>";
-    }).join("") : '<div class="empty" style="border:0"><b>No contacts found</b>Try a different search.</div>';
-    freshContact = null;
+  // ---------- Activities ----------
+  var TYPE_ICON = {
+    "Call": ICON.phone,
+    "Email": ICON.mail,
+    "In-person Meeting": '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M3 20a6 6 0 0112 0M16 5.5a3 3 0 010 5.6M18 20a5 5 0 00-2.5-4.3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
+    "TBD": '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M4 10h16M9 3v4M15 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+  };
+  function activityWhen(a) { return new Date(a.date + "T" + (a.time || "00:00")); }
+  function isUpcoming(a) { return activityWhen(a) > new Date(); }
+  function fmtDate(iso) { var p = iso.split("-"); return p[2] + "-" + p[1] + "-" + p[0]; }
+  function activityItem(a, showDeal) {
+    var d = deal(a.dealId), up = isUpcoming(a);
+    return '<li class="activity' + (showDeal ? " is-link" : "") + '"' + (showDeal ? ' data-activity-deal="' + a.dealId + '" tabindex="0"' : "") + ">" +
+      '<span class="act-ico">' + (TYPE_ICON[a.type] || TYPE_ICON.TBD) + "</span>" +
+      '<div class="act-main">' +
+      '<div class="act-top"><b>' + esc(a.type) + (showDeal ? " · " + esc(company(d.companyId).name) : "") + "</b>" +
+      '<span class="chip ' + (up ? "chip-upcoming" : "chip-done") + '">' + (up ? "Upcoming" : "Done") + "</span></div>" +
+      '<div class="act-meta"><span>' + esc(fmtDate(a.date)) + " · " + esc(a.time) + " · " + esc(a.duration) + ' min</span><span class="chip chip-mode">' + esc(stageById(a.stage).name) + "</span></div>" +
+      '<p class="act-comment">' + esc(a.comment) + "</p>" +
+      '<small class="muted">Logged by ' + esc(a.by) + "</small></div></li>";
   }
-  $("contactSearch").addEventListener("input", renderContacts);
-  $("contactList").addEventListener("click", function (e) {
-    if (e.target.closest("a")) { e.preventDefault(); toast("Prototype: this would open your phone or mail app"); return; }
-    var r = e.target.closest("[data-contact-company]");
-    if (r) openCompanyDetail(r.getAttribute("data-contact-company"));
+  function sortActivities(list) {
+    return list.slice().sort(function (x, y) { return activityWhen(y) - activityWhen(x); });
+  }
+  function activitiesBlock(d) {
+    var list = sortActivities(state.activities.filter(function (a) { return a.dealId === d.id; }));
+    var add = d.stage === "closed" ? "" : '<button type="button" class="btn-sm" data-add-activity>' + ICON.plus + "Add activity</button>";
+    return '<div class="section-head"><p class="section-title">Activities · ' + list.length + "</p>" + add + "</div>" +
+      (list.length ? '<ol class="activity-list">' + list.map(function (a) { return activityItem(a, false); }).join("") + "</ol>"
+        : '<p class="muted comments-empty">No activities logged yet.</p>');
+  }
+
+  var activityFilter = "all";
+  function setActivityFilter(f) {
+    activityFilter = f;
+    document.querySelectorAll("#activityFilter [data-filter]").forEach(function (b) {
+      var on = b.getAttribute("data-filter") === f;
+      b.classList.toggle("active", on); b.setAttribute("aria-checked", String(on));
+    });
+    renderActivity();
+  }
+  function renderActivity() {
+    var all = state.activities;
+    var up = all.filter(isUpcoming).length;
+    $("activitySummary").innerHTML = "<b>" + all.length + "</b> activities · " + up + " upcoming";
+    var list = sortActivities(all.filter(function (a) {
+      return activityFilter === "all" || (activityFilter === "upcoming") === isUpcoming(a);
+    }));
+    $("activityList").innerHTML = list.length ? list.map(function (a) { return activityItem(a, true); }).join("")
+      : '<li class="empty"><b>No activities here</b>Tap Add activity to log one against a deal.</li>';
+  }
+  $("activityFilter").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-filter]");
+    if (b) setActivityFilter(b.getAttribute("data-filter"));
+  });
+  $("activityList").addEventListener("click", function (e) {
+    var r = e.target.closest("[data-activity-deal]");
+    if (r) openDeal(r.getAttribute("data-activity-deal"));
+  });
+  $("activityList").addEventListener("keydown", function (e) {
+    var r = e.target.closest("[data-activity-deal]");
+    if (r && e.key === "Enter") openDeal(r.getAttribute("data-activity-deal"));
+  });
+  $("dealSheetBody").addEventListener("click", function (e) {
+    if (e.target.closest("[data-add-activity]")) openActivity(openDealId);
   });
 
-
-  var ctCompanyId = null;
-  function openAddContact(prefCompanyId) {
-    $("contactForm").reset();
-    clearErrors($("contactForm"));
-    ctCompanyId = prefCompanyId || null;
-    setPickerBtn($("ctCompanyBtn"), ctCompanyId ? company(ctCompanyId).name : "", "Search companies…");
-    validateCt();
-    openSheet("contactSheet");
+  // Add activity sheet. From a deal the deal is fixed; from the Activity tab you pick one.
+  var acDealId = null, acFixed = false;
+  function openActivity(dealId) {
+    $("activityForm").reset();
+    clearErrors($("activityForm"));
+    acDealId = dealId; acFixed = !!dealId;
+    var t = new Date();
+    $("acDate").value = t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
+    $("acType").value = "Call";
+    renderAcDeal();
+    openSheet("activitySheet");
   }
-  function validateCt() {
-    $("ctSubmit").disabled = !(["ctFirst", "ctLast", "ctTitle", "ctPhone", "ctEmail"].every(function (id) { return $(id).value.trim(); }) && ctCompanyId);
+  function renderAcDeal() {
+    $("acDealField").hidden = acFixed;
+    $("acDealFixed").hidden = !acFixed;
+    var d = acDealId ? deal(acDealId) : null;
+    if (acFixed) {
+      $("acDealFixed").innerHTML = avatar(company(d.companyId).name, "sm") + '<div><b>' + esc(company(d.companyId).name) + "</b><small>" + esc(d.product) + " · " + money(d.value) + "</small></div>";
+    } else setPickerBtn($("acDealBtn"), d ? company(d.companyId).name + " · " + d.product : "", "Search deals…");
+    $("acStageHint").hidden = !d;
+    if (d) $("acStageHint").innerHTML = "Logged to the <b>" + esc(stageById(d.stage).name) + "</b> stage";
+    validateAc();
   }
-  $("ctCompanyBtn").addEventListener("click", function () {
+  function validateAc() {
+    $("acSubmit").disabled = !(acDealId && $("acType").value && $("acDate").value && $("acTime").value &&
+      Number($("acDuration").value) > 0 && $("acComment").value.trim());
+  }
+  $("acDealBtn").addEventListener("click", function () {
     openPicker({
-      title: "Company",
-      placeholder: "Search companies…",
-      items: companyItems,
-      selected: ctCompanyId,
-      onPick: function (id) { ctCompanyId = id; setPickerBtn($("ctCompanyBtn"), company(id).name, ""); validateCt(); }
+      title: "Deal",
+      placeholder: "Search deals…",
+      items: function () {
+        return state.deals.filter(function (d) { return d.stage !== "closed"; }).map(function (d) {
+          return { id: d.id, label: company(d.companyId).name, sub: d.product + " · " + stageById(d.stage).name + " · " + money(d.value) };
+        });
+      },
+      selected: acDealId,
+      onPick: function (id) { acDealId = id; renderAcDeal(); }
     });
   });
-  $("contactForm").addEventListener("input", function (e) { validateCt(); clearFieldError(e.target); });
-  $("contactForm").addEventListener("submit", function (e) {
+  $("activityForm").addEventListener("input", validateAc);
+  $("activityForm").addEventListener("change", validateAc);
+  $("activityForm").addEventListener("submit", function (e) {
     e.preventDefault();
-    if (!isEmail($("ctEmail").value.trim())) { fieldError($("ctEmail"), "Enter a valid email"); return; }
-    var c = { id: uid("ct"), first: $("ctFirst").value.trim(), last: $("ctLast").value.trim(), companyId: ctCompanyId, title: $("ctTitle").value.trim(), phone: $("ctPhone").value.trim(), email: $("ctEmail").value.trim() };
-    state.contacts.unshift(c);
-    freshContact = c.id;
-    closeSheet("contactSheet");
-    closeSheet("companyDetailSheet");
-    setScreen("contacts");
-    $("contactSearch").value = "";
-    renderContacts();
-    renderCompanies();
-    toast("<b>" + esc(contactName(c)) + "</b> added to " + esc(company(c.companyId).name));
+    validateAc();
+    if ($("acSubmit").disabled) return;
+    var d = deal(acDealId);
+    var a = { id: uid("ac"), dealId: d.id, stage: d.stage, type: $("acType").value, date: $("acDate").value, time: $("acTime").value,
+      duration: Math.round(Number($("acDuration").value)), comment: $("acComment").value.trim(), by: "Nkechi" };
+    state.activities.push(a);
+    closeSheet("activitySheet");
+    renderActivity();
+    if ($("dealSheet").classList.contains("open") && openDealId === d.id) renderDealSheet(d.id);
+    toast(esc(a.type) + " logged on <b>" + esc(company(d.companyId).name) + "</b> · " + esc(stageById(d.stage).name));
   });
 
   // ---------- Guided flows (desktop brief) ----------
@@ -888,17 +939,17 @@
       setTimeout(function () {
         if (f === "move") {
           setScreen("pipeline"); state.stage = "qualified"; renderPipeline();
-          toast("Use the stage dropdown on a card, or open a card to move it");
+          toast("Use the stage dropdown on a card to move it to a later stage");
         } else if (f === "deal") { setScreen("pipeline"); openNewDeal(); }
         else if (f === "company") { setScreen("companies"); openAddCompany(); }
-        else { setScreen("contacts"); openAddContact(); }
+        else { setScreen("activity"); openActivity(null); }
       }, 0);
     });
   });
   $("resetBtn").addEventListener("click", function () {
     closeAll();
     state = seed();
-    $("dealSearch").value = ""; $("companySearch").value = ""; $("contactSearch").value = "";
+    $("dealSearch").value = ""; $("companySearch").value = ""; setActivityFilter("all");
     setScreen("pipeline");
     renderAll();
     toast("Sample data reset");
@@ -906,7 +957,7 @@
 
   // ---------- Horizontal scrollers ----------
   function setupHScroll(wrap) {
-    var track = wrap.querySelector(".kpis, .stage-strip");
+    var track = wrap.querySelector(".stage-strip");
     var prev = wrap.querySelector(".hs-prev"), next = wrap.querySelector(".hs-next");
     function update() {
       var max = track.scrollWidth - track.clientWidth;
@@ -952,7 +1003,7 @@
   }
   document.querySelectorAll(".hscroll").forEach(setupHScroll);
 
-  function renderAll() { renderPipeline(); renderCompanies(); renderContacts(); }
+  function renderAll() { renderPipeline(); renderCompanies(); renderActivity(); }
 
   state = seed();
   renderAll();

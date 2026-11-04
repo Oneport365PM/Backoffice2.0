@@ -17,10 +17,10 @@
       <h1>Clickthrough prototype</h1>
       <p class="brief-lede">Tap through the phone, or jump straight into a flow:</p>
       <ol class="flows">
-        <li><button type="button" data-flow="move"><span>01</span>View the pipeline and move a deal to the next stage</button></li>
+        <li><button type="button" data-flow="move"><span>01</span>View the pipeline and move a deal to a later stage</button></li>
         <li><button type="button" data-flow="deal"><span>02</span>Add a deal, creating a new company and contact on the way</button></li>
         <li><button type="button" data-flow="company"><span>03</span>Add a company</button></li>
-        <li><button type="button" data-flow="contact"><span>04</span>Add a contact</button></li>
+        <li><button type="button" data-flow="activity"><span>04</span>Log an activity on a deal</button></li>
       </ol>
       <button type="button" class="link" id="resetBtn">Reset sample data</button>
     </aside>
@@ -48,12 +48,6 @@
       <div class="screens" id="screens">
         <!-- PIPELINE -->
         <section class="screen" id="screen-pipeline" data-title="Pipeline">
-          <div class="hscroll">
-            <button type="button" class="hs-btn hs-prev" aria-label="Scroll left" tabindex="-1"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <div class="kpis" id="kpis"></div>
-            <button type="button" class="hs-btn hs-next" aria-label="Scroll right" tabindex="-1"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          </div>
-
           <label class="search">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             <input type="search" id="dealSearch" placeholder="Search deals…" autocomplete="off" />
@@ -78,14 +72,15 @@
           <div class="row-list" id="companyList"></div>
         </section>
 
-        <!-- CONTACTS -->
-        <section class="screen" id="screen-contacts" data-title="Contacts" hidden>
-          <p class="list-summary" id="contactSummary"></p>
-          <label class="search">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <input type="search" id="contactSearch" placeholder="Search contacts…" autocomplete="off" />
-          </label>
-          <div class="row-list" id="contactList"></div>
+        <!-- ACTIVITY -->
+        <section class="screen" id="screen-activity" data-title="Activity" hidden>
+          <p class="list-summary" id="activitySummary"></p>
+          <div class="seg seg-3" id="activityFilter" role="radiogroup" aria-label="Filter activities">
+            <button type="button" role="radio" data-filter="all" class="active" aria-checked="true">All</button>
+            <button type="button" role="radio" data-filter="upcoming" aria-checked="false">Upcoming</button>
+            <button type="button" role="radio" data-filter="done" aria-checked="false">Done</button>
+          </div>
+          <ol class="activity-list" id="activityList"></ol>
         </section>
       </div>
 
@@ -103,9 +98,9 @@
           <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V6l7-3 7 3v15M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
           <span>Companies</span>
         </button>
-        <button type="button" class="nav-btn" data-screen="contacts">
-          <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-          <span>Contacts</span>
+        <button type="button" class="nav-btn" data-screen="activity">
+          <svg viewBox="0 0 24 24"><path d="M4 12h4l2-7 4 14 2-7h4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Activity</span>
         </button>
       </nav>
 
@@ -266,36 +261,45 @@
         </section>
       </div>
 
-      <!-- Add contact -->
-      <div class="sheet-host" id="contactSheet" hidden>
+      <!-- Add activity -->
+      <div class="sheet-host" id="activitySheet" hidden>
         <div class="scrim" data-close></div>
-        <section class="sheet sheet-tall" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+        <section class="sheet sheet-tall" role="dialog" aria-modal="true" aria-labelledby="activityTitle">
           <div class="grabber"></div>
           <header class="sheet-head">
             <div>
-              <h2 id="contactTitle">Add contact</h2>
-              <p class="sheet-sub">Contacts link to one company</p>
+              <h2 id="activityTitle">Add activity</h2>
+              <p class="sheet-sub">Enter the details below to add a new activity</p>
             </div>
             <button type="button" class="icon-btn" data-close aria-label="Close">
               <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
           </header>
-          <form class="sheet-body" id="contactForm" novalidate>
+          <form class="sheet-body" id="activityForm" novalidate>
+            <div class="field picker-field" id="acDealField">
+              <span class="notch">Deal *</span>
+              <button type="button" class="picker-btn" id="acDealBtn"><span>Search deals…</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+            </div>
+            <div class="deal-chip-row" id="acDealFixed" hidden></div>
+            <p class="hint" id="acStageHint" hidden></p>
+            <label class="field field-select"><span class="notch">Meeting type *</span>
+              <select id="acType">
+                <option value="Call">Call</option>
+                <option value="In-person Meeting">In-person Meeting</option>
+                <option value="Email">Email</option>
+                <option value="TBD">TBD</option>
+              </select>
+            </label>
             <div class="field-row">
-              <label class="field"><span class="notch">First name *</span><input type="text" id="ctFirst" placeholder="First name" /></label>
-              <label class="field"><span class="notch">Last name *</span><input type="text" id="ctLast" placeholder="Last name" /></label>
+              <label class="field"><span class="notch">Date *</span><input type="date" id="acDate" /></label>
+              <label class="field"><span class="notch">Time *</span><input type="time" id="acTime" /></label>
             </div>
-            <div class="field picker-field">
-              <span class="notch">Company *</span>
-              <button type="button" class="picker-btn" id="ctCompanyBtn"><span>Search companies…</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
-            </div>
-            <label class="field"><span class="notch">Title *</span><input type="text" id="ctTitle" placeholder="e.g. Procurement Manager" /></label>
-            <label class="field field-phone"><span class="notch">Phone number *</span><span class="prefix">+234</span><input type="tel" id="ctPhone" inputmode="tel" placeholder="803 000 0000" /></label>
-            <label class="field"><span class="notch">Email *</span><input type="email" id="ctEmail" placeholder="email@example.com" /><small class="err"></small></label>
+            <label class="field"><span class="notch">Duration (minutes) *</span><input type="number" id="acDuration" min="1" inputmode="numeric" placeholder="Eg 30" /></label>
+            <label class="field"><span class="notch">Activity comment *</span><textarea id="acComment" rows="3" placeholder="Add a comment"></textarea></label>
           </form>
           <footer class="sheet-foot">
             <button type="button" class="btn btn-outline" data-close>Cancel</button>
-            <button type="submit" form="contactForm" class="btn btn-primary" id="ctSubmit" disabled>Add contact</button>
+            <button type="submit" form="activityForm" class="btn btn-primary" id="acSubmit" disabled>Save activity</button>
           </footer>
         </section>
       </div>
