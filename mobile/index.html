@@ -385,8 +385,8 @@
         <!-- Log in -->
         <form class="auth-card" id="loginForm" novalidate>
           <div class="auth-error" id="loginError" role="alert" hidden></div>
-          <label class="field"><span class="notch">Work email *</span>
-            <input type="email" id="loginEmail" autocomplete="username" placeholder="name@oneport365.com" /><small class="err"></small>
+          <label class="field"><span class="notch">Email *</span>
+            <input type="email" id="loginEmail" autocomplete="username" placeholder="name@company.com" /><small class="err"></small>
           </label>
           <label class="field field-password"><span class="notch">Password *</span>
             <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Enter your password" />
@@ -398,17 +398,12 @@
             <button type="button" class="link" id="forgotLink">Forgot password?</button>
           </div>
           <button type="submit" class="btn btn-primary btn-block" id="loginSubmit"><span class="spinner" hidden></span><span class="lbl">Log in</span></button>
-          <div class="demo-cred">
-            <span class="kpi-label">Demo login</span>
-            <dl><dt>Email</dt><dd>demo@oneport365.com</dd><dt>Password</dt><dd>Demo@365</dd></dl>
-            <button type="button" class="link" id="fillDemo">Fill in demo login</button>
-          </div>
         </form>
 
         <!-- Forgot password -->
         <form class="auth-card" id="forgotForm" novalidate hidden>
-          <label class="field"><span class="notch">Work email *</span>
-            <input type="email" id="forgotEmail" autocomplete="username" placeholder="name@oneport365.com" /><small class="err"></small>
+          <label class="field"><span class="notch">Email *</span>
+            <input type="email" id="forgotEmail" autocomplete="username" placeholder="name@company.com" /><small class="err"></small>
           </label>
           <button type="submit" class="btn btn-primary btn-block" id="forgotSubmit"><span class="spinner" hidden></span><span class="lbl">Send reset link</span></button>
           <button type="button" class="link auth-back" data-auth="login">Back to log in</button>

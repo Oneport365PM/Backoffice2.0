@@ -1047,9 +1047,13 @@
   function renderAll() { renderPipeline(); renderCompanies(); renderActivity(); }
 
   // ---------- Login flow ----------
-  // Dummy credentials for the prototype
-  var DEMO_USER = { email: "demo@oneport365.com", password: "Demo@365", name: "Demo User" };
+  // Prototype login: any valid email with any password logs in
   var currentUser = { name: "", email: "" };
+  function nameFromEmail(email) {
+    var parts = email.split("@")[0].split(/[._-]+/).filter(Boolean);
+    if (!parts.length) return "User";
+    return parts.slice(0, 2).map(function (p) { return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase(); }).join(" ");
+  }
 
   function showAuth(view) {
     $("loginForm").hidden = view !== "login";
@@ -1058,7 +1062,7 @@
     $("authHeading").textContent = { login: "Welcome back", forgot: "Reset your password", sent: "Check your email" }[view];
     $("authLede").textContent = {
       login: "Log in to manage your pipeline, companies and activities.",
-      forgot: "Enter your work email and we'll send you a link to set a new password.",
+      forgot: "Enter your email and we'll send you a link to set a new password.",
       sent: "Follow the link in the email to set a new password."
     }[view];
     $("loginError").hidden = true;
@@ -1072,9 +1076,8 @@
   }
   function checkWorkEmail(input) {
     var v = input.value.trim();
-    if (!v) { fieldError(input, "Enter your work email"); return false; }
-    if (!isEmail(v)) { fieldError(input, "Enter a valid email, like name@oneport365.com"); return false; }
-    if (!/@oneport365\.com$/i.test(v)) { fieldError(input, "Use your @oneport365.com work email"); return false; }
+    if (!v) { fieldError(input, "Enter your email"); return false; }
+    if (!isEmail(v)) { fieldError(input, "Enter a valid email, like name@company.com"); return false; }
     return true;
   }
   $("pwToggle").addEventListener("click", function () {
@@ -1097,18 +1100,13 @@
     setBusy(btn, true, "Logging in…");
     setTimeout(function () {
       setBusy(btn, false, "Log in");
-      if (email.value.trim().toLowerCase() !== DEMO_USER.email || pw.value !== DEMO_USER.password) {
-        $("loginError").innerHTML = "<b>That email and password don't match.</b> Check them and try again, or reset your password.";
-        $("loginError").hidden = false;
-        pw.value = ""; pw.focus();
-        return;
-      }
       logIn(email.value.trim());
     }, 900);
   });
   function logIn(email) {
-    currentUser = { email: DEMO_USER.email, name: DEMO_USER.name };
-    $("profileBtn").textContent = initials(DEMO_USER.name);
+    currentUser = { email: email, name: nameFromEmail(email) };
+    var p = currentUser.name.split(" ");
+    $("profileBtn").textContent = (p.length > 1 ? p[0][0] + p[1][0] : p[0].slice(0, 2)).toUpperCase();
     $("auth").classList.add("leaving");
     setTimeout(function () {
       $("auth").hidden = true;
@@ -1118,12 +1116,6 @@
       toast("Welcome back, <b>" + esc(currentUser.name) + "</b>");
     }, 280);
   }
-  $("fillDemo").addEventListener("click", function () {
-    $("loginEmail").value = DEMO_USER.email;
-    $("loginPassword").value = DEMO_USER.password;
-    clearErrors($("loginForm")); $("loginError").hidden = true;
-    $("loginSubmit").focus();
-  });
   $("forgotLink").addEventListener("click", function () {
     $("forgotEmail").value = $("loginEmail").value.trim();
     showAuth("forgot");
