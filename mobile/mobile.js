@@ -331,7 +331,7 @@
     if (stageIndex(toStage) < stageIndex(d.stage)) return; // deals only move forward
     if (toStage === "closed" && !outcome) { openMove(id, toStage); return; }
     var prev = { stage: d.stage, outcome: d.outcome, note: d.note };
-    var entry = { from: d.stage, to: toStage, outcome: outcome || null, text: comment || "", date: today(), by: "Nkechi" };
+    var entry = { from: d.stage, to: toStage, outcome: outcome || null, text: comment || "", date: today(), by: currentUser.name };
     var card = document.querySelector('.deal-card[data-deal="' + id + '"]');
     var apply = function () {
       d.stage = toStage;
@@ -1003,7 +1003,7 @@
     if ($("acSubmit").disabled) return;
     var d = deal(acDealId);
     var a = { id: uid("ac"), dealId: d.id, stage: d.stage, type: $("acType").value, date: $("acDate").value, time: $("acTime").value,
-      duration: Math.round(Number($("acDuration").value)), comment: $("acComment").value.trim(), by: "Nkechi" };
+      duration: Math.round(Number($("acDuration").value)), comment: $("acComment").value.trim(), by: currentUser.name };
     state.activities.push(a);
     var dl = sortActivities(state.activities.filter(function (x) { return x.dealId === d.id; }));
     dealActPage[d.id] = Math.floor(dl.indexOf(a) / DEAL_ACT_PAGE) + 1;
@@ -1046,7 +1046,120 @@
 
   function renderAll() { renderPipeline(); renderCompanies(); renderActivity(); }
 
+  // ---------- Login flow ----------
+  var currentUser = { name: "", email: "" };
+  function nameFromEmail(email) {
+    var local = email.split("@")[0].split(/[._-]+/)[0] || "User";
+    return local.charAt(0).toUpperCase() + local.slice(1).toLowerCase();
+  }
+  function showAuth(view) {
+    $("loginForm").hidden = view !== "login";
+    $("forgotForm").hidden = view !== "forgot";
+    $("sentPanel").hidden = view !== "sent";
+    $("authHeading").textContent = { login: "Welcome back", forgot: "Reset your password", sent: "Check your email" }[view];
+    $("authLede").textContent = {
+      login: "Log in to manage your pipeline, companies and activities.",
+      forgot: "Enter your work email and we'll send you a link to set a new password.",
+      sent: "Follow the link in the email to set a new password."
+    }[view];
+    $("loginError").hidden = true;
+    clearErrors($("loginForm")); clearErrors($("forgotForm"));
+    $("phone").classList.add("auth-on");
+  }
+  function setBusy(btn, busy, label) {
+    btn.disabled = busy;
+    btn.querySelector(".spinner").hidden = !busy;
+    btn.querySelector(".lbl").textContent = label;
+  }
+  function checkWorkEmail(input) {
+    var v = input.value.trim();
+    if (!v) { fieldError(input, "Enter your work email"); return false; }
+    if (!isEmail(v)) { fieldError(input, "Enter a valid email, like name@oneport365.com"); return false; }
+    if (!/@oneport365\.com$/i.test(v)) { fieldError(input, "Use your @oneport365.com work email"); return false; }
+    return true;
+  }
+  $("pwToggle").addEventListener("click", function () {
+    var pw = $("loginPassword"), show = pw.type === "password";
+    pw.type = show ? "text" : "password";
+    this.setAttribute("aria-pressed", String(show));
+    this.setAttribute("aria-label", show ? "Hide password" : "Show password");
+    this.classList.toggle("on", show);
+  });
+  ["loginForm", "forgotForm"].forEach(function (id) {
+    $(id).addEventListener("input", function (e) { clearFieldError(e.target); $("loginError").hidden = true; });
+  });
+  $("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var email = $("loginEmail"), pw = $("loginPassword");
+    var ok = checkWorkEmail(email);
+    if (!pw.value) { fieldError(pw, "Enter your password"); ok = false; }
+    if (!ok) return;
+    var btn = $("loginSubmit");
+    setBusy(btn, true, "Logging in…");
+    setTimeout(function () {
+      setBusy(btn, false, "Log in");
+      if (pw.value.length < 6) {
+        $("loginError").innerHTML = "<b>That email and password don't match.</b> Check them and try again, or reset your password.";
+        $("loginError").hidden = false;
+        pw.value = ""; pw.focus();
+        return;
+      }
+      logIn(email.value.trim());
+    }, 900);
+  });
+  function logIn(email) {
+    currentUser = { email: email, name: nameFromEmail(email) };
+    // "ada.okeke@" -> AO, "nkechim@" -> NK
+    var parts = email.split("@")[0].split(/[._-]+/).filter(Boolean);
+    $("profileBtn").textContent = (parts.length > 1 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2)).toUpperCase();
+    $("auth").classList.add("leaving");
+    setTimeout(function () {
+      $("auth").hidden = true;
+      $("phone").classList.remove("auth-on");
+      $("auth").classList.remove("leaving");
+      $("loginPassword").value = "";
+      toast("Welcome back, <b>" + esc(currentUser.name) + "</b>");
+    }, 280);
+  }
+  $("forgotLink").addEventListener("click", function () {
+    $("forgotEmail").value = $("loginEmail").value.trim();
+    showAuth("forgot");
+    $("forgotEmail").focus();
+  });
+  $("forgotForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!checkWorkEmail($("forgotEmail"))) return;
+    var btn = $("forgotSubmit");
+    setBusy(btn, true, "Sending…");
+    setTimeout(function () {
+      setBusy(btn, false, "Send reset link");
+      $("sentEmail").textContent = $("forgotEmail").value.trim();
+      showAuth("sent");
+    }, 800);
+  });
+  $("resendLink").addEventListener("click", function () { toast("Reset link sent again to <b>" + esc($("sentEmail").textContent) + "</b>"); });
+  $("auth").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-auth]");
+    if (b) { showAuth(b.getAttribute("data-auth")); $("loginEmail").focus(); }
+  });
+
+  // Account sheet + log out
+  $("profileBtn").addEventListener("click", function () {
+    $("accountChip").innerHTML = '<span class="avatar avatar-1 avatar-sm">' + esc($("profileBtn").textContent) + "</span>" +
+      "<div><b>" + esc(currentUser.name) + "</b><small>" + esc(currentUser.email) + "</small></div>";
+    openSheet("accountSheet");
+  });
+  $("logoutBtn").addEventListener("click", function () {
+    closeAll();
+    hideToast();
+    showAuth("login");
+    if (!$("rememberMe").checked) $("loginEmail").value = "";
+    $("auth").hidden = false;
+    setScreen("pipeline");
+  });
+
   state = seed();
   renderAll();
   setScreen("pipeline");
+  showAuth("login");
 })();

@@ -41,7 +41,7 @@
         </div>
         <div class="appbar-right">
           <span class="brand">OnePort<b>365</b></span>
-          <span class="avatar avatar-1 avatar-sm" title="You">NK</span>
+          <button type="button" class="avatar avatar-1 avatar-sm avatar-btn" id="profileBtn" aria-label="Your account">NK</button>
         </div>
       </header>
 
@@ -372,6 +372,73 @@
       </div>
 
       <div class="stage-menu" id="stageMenu" role="menu" aria-label="Deal stage" hidden></div>
+
+      <!-- ============ AUTH (shown before the app) ============ -->
+      <div class="auth" id="auth">
+        <div class="auth-hero">
+          <span class="auth-brand">OnePort<b>365</b></span>
+          <span class="crm-badge">CRM</span>
+          <h2 id="authHeading">Welcome back</h2>
+          <p id="authLede">Log in to manage your pipeline, companies and activities.</p>
+        </div>
+
+        <!-- Log in -->
+        <form class="auth-card" id="loginForm" novalidate>
+          <div class="auth-error" id="loginError" role="alert" hidden></div>
+          <label class="field"><span class="notch">Work email *</span>
+            <input type="email" id="loginEmail" autocomplete="username" placeholder="name@oneport365.com" /><small class="err"></small>
+          </label>
+          <label class="field field-password"><span class="notch">Password *</span>
+            <input type="password" id="loginPassword" autocomplete="current-password" placeholder="Enter your password" />
+            <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" fill="none"/></svg></button>
+            <small class="err"></small>
+          </label>
+          <div class="auth-row">
+            <label class="check"><input type="checkbox" id="rememberMe" checked /><span class="box"></span>Keep me logged in</label>
+            <button type="button" class="link" id="forgotLink">Forgot password?</button>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="loginSubmit"><span class="spinner" hidden></span><span class="lbl">Log in</span></button>
+          <p class="auth-hint">Prototype: use any <b>@oneport365.com</b> email and a password of 6 or more characters.</p>
+        </form>
+
+        <!-- Forgot password -->
+        <form class="auth-card" id="forgotForm" novalidate hidden>
+          <label class="field"><span class="notch">Work email *</span>
+            <input type="email" id="forgotEmail" autocomplete="username" placeholder="name@oneport365.com" /><small class="err"></small>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block" id="forgotSubmit"><span class="spinner" hidden></span><span class="lbl">Send reset link</span></button>
+          <button type="button" class="link auth-back" data-auth="login">Back to log in</button>
+        </form>
+
+        <!-- Reset link sent -->
+        <div class="auth-card auth-sent" id="sentPanel" hidden>
+          <span class="sent-ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2" fill="none"/><path d="M3 7l9 6 9-6" stroke="currentColor" stroke-width="2" fill="none"/></svg></span>
+          <p>We sent a password reset link to <b id="sentEmail"></b>. It expires in 30 minutes.</p>
+          <button type="button" class="btn btn-primary btn-block" data-auth="login">Back to log in</button>
+          <p class="auth-hint">Didn't get it? <button type="button" class="link" id="resendLink">Resend link</button></p>
+        </div>
+      </div>
+
+      <!-- Account -->
+      <div class="sheet-host" id="accountSheet" hidden>
+        <div class="scrim" data-close></div>
+        <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+          <div class="grabber"></div>
+          <header class="sheet-head">
+            <div><h2 id="accountTitle">Your account</h2></div>
+            <button type="button" class="icon-btn" data-close aria-label="Close">
+              <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+          </header>
+          <div class="sheet-body">
+            <div class="owner-chip" id="accountChip"></div>
+          </div>
+          <footer class="sheet-foot">
+            <button type="button" class="btn btn-outline" data-close>Cancel</button>
+            <button type="button" class="btn btn-solid" id="logoutBtn">Log out</button>
+          </footer>
+        </section>
+      </div>
 
       <div class="toast" id="toast" role="status" aria-live="polite" hidden>
         <span id="toastMsg"></span>

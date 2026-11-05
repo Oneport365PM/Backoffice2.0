@@ -714,3 +714,70 @@ button { font: inherit; color: inherit; }
   scrollbar-width: thin; scrollbar-color: var(--op-light-green) transparent; }
 .deal-acts + .pager { margin-bottom: 18px; }
 .deal-acts:last-child { margin-bottom: 18px; }
+
+/* ---------- Login flow ---------- */
+.auth {
+  position: absolute; left: 0; right: 0; bottom: 0; top: 44px; z-index: 150;
+  display: flex; flex-direction: column; overflow-y: auto; background: var(--op-cream);
+  transition: opacity .28s, transform .28s;
+}
+.auth.leaving { opacity: 0; transform: translateY(-12px); }
+@media (max-width: 760px) { .auth { top: 0; } }
+.auth-hero {
+  background: var(--op-dark-green); color: var(--op-cream);
+  padding: 28px 24px 56px; border-radius: 0 0 28px 28px; box-shadow: var(--op-elevation-hero);
+}
+.auth-brand { font-family: var(--op-font-display); font-weight: 600; font-size: 18px; margin-right: 8px; }
+.auth-brand b { color: var(--op-accent-lime); }
+.auth-hero .crm-badge { background: var(--op-accent-lime); color: var(--op-dark-green); vertical-align: 2px; }
+.auth-hero h2 { margin: 28px 0 6px; font-family: var(--op-font-display); font-weight: 600; font-size: 26px; letter-spacing: -.01em; }
+.auth-hero p { margin: 0; color: var(--op-light-green); line-height: 1.5; max-width: 300px; }
+.auth-card {
+  margin: -32px 16px 24px; background: var(--op-white); border: 1px solid var(--op-border-card);
+  border-radius: var(--op-radius-xl); box-shadow: var(--op-elevation-3); padding: 24px 16px 18px;
+}
+.btn-block { width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.auth-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: -4px 0 20px; font-size: 13px; }
+.auth-row .link { font-size: 13px; }
+.auth-hint { margin: 14px 0 0; text-align: center; font-size: 12px; color: var(--op-silver-light); line-height: 1.5; }
+.auth-hint .link { font-size: 12px; }
+.auth-back { display: block; margin: 16px auto 2px; font-size: 13px; }
+.auth-error {
+  background: var(--op-chip-error-bg); color: var(--op-chip-error-text); border-radius: var(--op-radius-md);
+  padding: 10px 12px; font-size: 13px; line-height: 1.45; margin-bottom: 18px;
+}
+.field-password { padding-right: 6px; }
+.field-password:focus-within { padding-right: 5.5px; }
+.pw-toggle {
+  width: 36px; height: 36px; flex-shrink: 0; border: 0; background: none; border-radius: var(--op-radius-md);
+  color: var(--op-silver-light); cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.pw-toggle svg { width: 18px; height: 18px; }
+.pw-toggle.on { color: var(--op-dark-green); background: var(--op-chip-neutral-bg); }
+.check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: var(--op-silver-dark); }
+.check input { position: absolute; opacity: 0; }
+.check .box { width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--op-dark-green); position: relative; flex-shrink: 0; }
+.check input:checked + .box { background: var(--op-accent-lime); }
+.check input:checked + .box::after {
+  content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px;
+  border: solid var(--op-dark-green); border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+.check input:focus-visible + .box { box-shadow: var(--op-focus-ring); }
+.spinner {
+  width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(2,56,25,.25); border-top-color: var(--op-dark-green);
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.btn-primary:disabled .spinner { border-color: rgba(253,251,241,.35); border-top-color: var(--op-cream); }
+.auth-sent { text-align: center; }
+.auth-sent p { line-height: 1.55; margin: 12px 0 20px; }
+.sent-ico {
+  width: 56px; height: 56px; border-radius: 16px; background: var(--op-accent-lime); color: var(--op-dark-green);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.sent-ico svg { width: 26px; height: 26px; }
+.avatar-btn { border: 0; cursor: pointer; }
+.avatar-btn:hover { box-shadow: 0 0 0 3px rgba(191,251,79,.5); }
+.phone.auth-on .statusbar { background: var(--op-dark-green); color: var(--op-cream); }
+.statusbar { transition: background .28s, color .28s; }
+.auth-hero { padding-top: max(28px, env(safe-area-inset-top)); }
