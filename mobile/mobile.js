@@ -1047,11 +1047,10 @@
   function renderAll() { renderPipeline(); renderCompanies(); renderActivity(); }
 
   // ---------- Login flow ----------
+  // Dummy credentials for the prototype
+  var DEMO_USER = { email: "demo@oneport365.com", password: "Demo@365", name: "Demo User" };
   var currentUser = { name: "", email: "" };
-  function nameFromEmail(email) {
-    var local = email.split("@")[0].split(/[._-]+/)[0] || "User";
-    return local.charAt(0).toUpperCase() + local.slice(1).toLowerCase();
-  }
+
   function showAuth(view) {
     $("loginForm").hidden = view !== "login";
     $("forgotForm").hidden = view !== "forgot";
@@ -1098,7 +1097,7 @@
     setBusy(btn, true, "Logging in…");
     setTimeout(function () {
       setBusy(btn, false, "Log in");
-      if (pw.value.length < 6) {
+      if (email.value.trim().toLowerCase() !== DEMO_USER.email || pw.value !== DEMO_USER.password) {
         $("loginError").innerHTML = "<b>That email and password don't match.</b> Check them and try again, or reset your password.";
         $("loginError").hidden = false;
         pw.value = ""; pw.focus();
@@ -1108,10 +1107,8 @@
     }, 900);
   });
   function logIn(email) {
-    currentUser = { email: email, name: nameFromEmail(email) };
-    // "ada.okeke@" -> AO, "nkechim@" -> NK
-    var parts = email.split("@")[0].split(/[._-]+/).filter(Boolean);
-    $("profileBtn").textContent = (parts.length > 1 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2)).toUpperCase();
+    currentUser = { email: DEMO_USER.email, name: DEMO_USER.name };
+    $("profileBtn").textContent = initials(DEMO_USER.name);
     $("auth").classList.add("leaving");
     setTimeout(function () {
       $("auth").hidden = true;
@@ -1121,6 +1118,12 @@
       toast("Welcome back, <b>" + esc(currentUser.name) + "</b>");
     }, 280);
   }
+  $("fillDemo").addEventListener("click", function () {
+    $("loginEmail").value = DEMO_USER.email;
+    $("loginPassword").value = DEMO_USER.password;
+    clearErrors($("loginForm")); $("loginError").hidden = true;
+    $("loginSubmit").focus();
+  });
   $("forgotLink").addEventListener("click", function () {
     $("forgotEmail").value = $("loginEmail").value.trim();
     showAuth("forgot");

@@ -781,3 +781,12 @@ button { font: inherit; color: inherit; }
 .phone.auth-on .statusbar { background: var(--op-dark-green); color: var(--op-cream); }
 .statusbar { transition: background .28s, color .28s; }
 .auth-hero { padding-top: max(28px, env(safe-area-inset-top)); }
+
+.demo-cred {
+  margin-top: 16px; padding: 12px 14px; border-radius: var(--op-radius-lg);
+  background: #F4F6EF; border: 1px dashed var(--op-border-input); font-size: 13px;
+}
+.demo-cred dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0 10px; }
+.demo-cred dt { color: var(--op-silver-light); }
+.demo-cred dd { margin: 0; font-weight: 700; color: var(--op-dark-green); user-select: all; }
+.demo-cred .link { font-size: 13px; }
