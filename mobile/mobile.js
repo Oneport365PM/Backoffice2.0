@@ -790,10 +790,9 @@
     $("companySummary").innerHTML = "<b>" + state.companies.length + "</b> companies registered";
     if (!list.length) $("pager-companies").hidden = true;
     $("companyList").innerHTML = list.length ? paginate("companies", list).map(function (c) {
-      var n = state.deals.filter(function (d) { return d.companyId === c.id; }).length;
       return '<button type="button" class="row' + (c.id === freshCompany ? " fresh" : "") + '" data-company="' + c.id + '">' + avatar(c.name) +
         '<span class="row-main"><span class="row-title">' + esc(c.name) + '</span><span class="row-sub">' + esc(c.email || c.industry) + "</span></span>" +
-        '<span class="row-side">' + tierChip(c.tier) + '<span class="muted">' + n + " deal" + (n === 1 ? "" : "s") + "</span></span></button>";
+        '<span class="row-side">' + tierChip(c.tier) + "</span></button>";
     }).join("") : '<div class="empty" style="border:0"><b>No companies found</b>Try a different search.</div>';
     freshCompany = null;
   }
