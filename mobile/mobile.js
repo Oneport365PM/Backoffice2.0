@@ -17,6 +17,7 @@
     arrow: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     check: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     cross: '<svg viewBox="0 0 24 24" width="10" height="10"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+    pencil: '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>',
     chevron: '<svg viewBox="0 0 24 24" class="chev"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
     phone: '<svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></svg>',
@@ -874,7 +875,8 @@
     return '<li class="activity' + (showDeal ? " is-link" : "") + '"' + (showDeal ? ' data-activity-deal="' + a.dealId + '" tabindex="0"' : "") + ">" +
       '<span class="act-ico">' + (TYPE_ICON[a.type] || TYPE_ICON.TBD) + "</span>" +
       '<div class="act-main">' +
-      '<div class="act-top"><b>' + esc(a.type) + (showDeal ? " · " + esc(company(d.companyId).name) : "") + "</b></div>" +
+      '<div class="act-top"><b>' + esc(a.type) + (showDeal ? " · " + esc(company(d.companyId).name) : "") + "</b>" +
+      '<button type="button" class="act-edit" data-edit-activity="' + a.id + '" aria-label="Edit ' + esc(a.type) + ' activity">' + ICON.pencil + "Edit</button></div>" +
       '<div class="act-meta"><span>' + esc(fmtDate(a.date)) + " · " + esc(a.time) + " · " + esc(a.duration) + ' min</span><span class="chip chip-mode">' + esc(stageById(a.stage).name) + "</span></div>" +
       '<p class="act-comment">' + esc(a.comment) + "</p>" +
       '<small class="muted">Logged by ' + esc(a.by) + "</small></div></li>";
@@ -922,10 +924,13 @@
     renderActivity();
   });
   $("activityList").addEventListener("click", function (e) {
+    var ed = e.target.closest("[data-edit-activity]");
+    if (ed) { openEditActivity(ed.getAttribute("data-edit-activity")); return; }
     var r = e.target.closest("[data-activity-deal]");
     if (r) openDealActivities(r.getAttribute("data-activity-deal"));
   });
   $("activityList").addEventListener("keydown", function (e) {
+    if (e.target.closest("button")) return;
     var r = e.target.closest("[data-activity-deal]");
     if (r && e.key === "Enter") openDealActivities(r.getAttribute("data-activity-deal"));
   });
@@ -957,21 +962,42 @@
     $("daBody").innerHTML = stageStatus(d, stageIndex(d.stage)) + activitiesBlock(d) + commentsBlock(d);
   }
   $("daBody").addEventListener("click", function (e) {
+    var ed = e.target.closest("[data-edit-activity]");
+    if (ed) { openEditActivity(ed.getAttribute("data-edit-activity")); return; }
     if (e.target.closest("[data-add-activity]")) openActivity(daDealId);
     if (turnDealActPage(e)) renderDealActivities();
   });
 
   // Add activity sheet. From a deal the deal is fixed; from the Activity tab you pick one.
-  var acDealId = null, acFixed = false;
+  var acDealId = null, acFixed = false, acEditing = null;
   function openActivity(dealId) {
     $("activityForm").reset();
     clearErrors($("activityForm"));
-    acDealId = dealId; acFixed = !!dealId;
+    acDealId = dealId; acFixed = !!dealId; acEditing = null;
     var t = new Date();
     $("acDate").value = t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0");
     $("acType").value = "Call";
+    setActivityMode();
     renderAcDeal();
     openSheet("activitySheet");
+  }
+  // Edit an existing activity: same form, prefilled; deal and logged stage stay as they were
+  function openEditActivity(id) {
+    var a = state.activities.filter(function (x) { return x.id === id; })[0];
+    if (!a) return;
+    $("activityForm").reset();
+    clearErrors($("activityForm"));
+    acDealId = a.dealId; acFixed = true; acEditing = a;
+    $("acType").value = a.type; $("acDate").value = a.date; $("acTime").value = a.time;
+    $("acDuration").value = a.duration; $("acComment").value = a.comment;
+    setActivityMode();
+    renderAcDeal();
+    openSheet("activitySheet");
+  }
+  function setActivityMode() {
+    $("activityTitle").textContent = acEditing ? "Edit activity" : "Add activity";
+    $("activitySub").textContent = acEditing ? "Update the details of this activity" : "Enter the details below to add a new activity";
+    $("acSubmit").textContent = acEditing ? "Save changes" : "Save activity";
   }
   function renderAcDeal() {
     $("acDealField").hidden = acFixed;
@@ -981,7 +1007,7 @@
       $("acDealFixed").innerHTML = avatar(company(d.companyId).name, "sm") + '<div><b>' + esc(company(d.companyId).name) + "</b><small>" + esc(d.product) + " · " + money(d.value) + "</small></div>";
     } else setPickerBtn($("acDealBtn"), d ? company(d.companyId).name + " · " + d.product : "", "Search deals…");
     $("acStageHint").hidden = !d;
-    if (d) $("acStageHint").innerHTML = "Logged to the <b>" + esc(stageById(d.stage).name) + "</b> stage";
+    if (d) $("acStageHint").innerHTML = "Logged to the <b>" + esc(stageById(acEditing ? acEditing.stage : d.stage).name) + "</b> stage";
     validateAc();
   }
   function validateAc() {
@@ -1008,6 +1034,16 @@
     validateAc();
     if ($("acSubmit").disabled) return;
     var d = deal(acDealId);
+    if (acEditing) {
+      var ed = acEditing;
+      ed.type = $("acType").value; ed.date = $("acDate").value; ed.time = $("acTime").value;
+      ed.duration = Math.round(Number($("acDuration").value)); ed.comment = $("acComment").value.trim();
+      closeSheet("activitySheet");
+      renderActivity();
+      if ($("dealActSheet").classList.contains("open") && daDealId === d.id) renderDealActivities();
+      toast(esc(ed.type) + " on <b>" + esc(company(d.companyId).name) + "</b> updated");
+      return;
+    }
     var a = { id: uid("ac"), dealId: d.id, stage: d.stage, type: $("acType").value, date: $("acDate").value, time: $("acTime").value,
       duration: Math.round(Number($("acDuration").value)), comment: $("acComment").value.trim(), by: currentUser.name };
     state.activities.push(a);

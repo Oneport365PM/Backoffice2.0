@@ -802,3 +802,12 @@ button { font: inherit; color: inherit; }
 .class-chip.class-SME { border-color: var(--op-border-input); color: var(--op-chip-neutral-text); }
 .class-chip.class-Enterprise { border-color: var(--op-dark-green); color: var(--op-dark-green); }
 .deal-acts + .section-title, .deal-acts + .pager + .section-title { margin-top: 18px; }
+
+/* Edit activity */
+.act-edit {
+  display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; cursor: pointer;
+  background: var(--op-white); border: 1px solid var(--op-border-card); border-radius: var(--op-radius-sm);
+  padding: 4px 8px; font-size: 12px; font-weight: 700; color: var(--op-dark-green);
+}
+.act-edit svg { width: 13px; height: 13px; }
+.act-edit:hover { border-color: var(--op-dark-green); }
