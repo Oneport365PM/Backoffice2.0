@@ -442,26 +442,40 @@
     renderDealSheet(id);
     openSheet("dealSheet");
   }
+  // Deal detail (from the Pipeline): deal information only, laid out like the desktop deal page
   function renderDealSheet(id) {
-    var d = deal(id), c = company(d.companyId), ct = contact(d.contactId);
-    var idx = stageIndex(d.stage);
-    $("dealSheetTitle").textContent = c.name;
-    $("dealSheetSub").textContent = d.product + " · Created " + d.created;
-
+    var d = deal(id), ct = contact(d.contactId);
+    var stageText = d.stage === "closed" ? "Closed · " + (d.outcome === "won" ? "Won" : "Lost") : stageById(d.stage).name;
+    var stageCls = d.outcome === "won" ? " chip-won" : d.outcome === "lost" ? " chip-lost" : "";
+    $("dealSheetTitle").textContent = company(d.companyId).name;
+    $("dealSheetSub").innerHTML = '<span class="chip stage-chip-sm' + stageCls + '">' + esc(stageText) + "</span>";
+    var item = function (label, value, wide) {
+      return '<div class="di' + (wide ? " di-wide" : "") + '"><dt>' + label + "</dt><dd>" + value + "</dd></div>";
+    };
+    var comments = d.comments || [];
     $("dealSheetBody").innerHTML =
-      '<div class="detail-hero"><div><span class="kpi-label">Deal value</span><span class="detail-value">' + money(d.value) + "</span></div>" +
-      '<div>' + tierChip(d.tier) + " " + outcomeChip(d) + "</div></div>" +
-      stageStatus(d, idx) +
-      activitiesBlock(d) +
-      commentsBlock(d) +
-      '<p class="section-title">Contact</p>' +
-      contactCard(ct) +
-      '<p class="section-title">Details</p><dl class="info-card">' +
-      '<div class="info-row"><dt>Owner</dt><dd><span class="owner">' + avatar(d.owner, "xs") + "<span>" + esc(d.owner) + "</span></span></dd></div>" +
-      '<div class="info-row"><dt>Product</dt><dd><span class="chip chip-mode">' + esc(d.product) + "</span></dd></div>" +
-      '<div class="info-row"><dt>Company email</dt><dd>' + esc(c.email || "—") + "</dd></div>" +
-      '<div class="info-row"><dt>Industry</dt><dd>' + esc(c.industry || "—") + "</dd></div></dl>";
-
+      '<section class="deal-info">' +
+      '<p class="section-title">Deal information</p>' +
+      '<dl class="di-grid">' +
+      item("Contact", esc(contactName(ct))) +
+      item("Deal amount", '<span class="di-money">' + money(d.value) + "</span>") +
+      item("Product", esc(d.product)) +
+      item("Date created", esc(d.created.replace(/-/g, "/"))) +
+      item("Sales owner", '<span class="di-owner">' + avatar(d.owner, "sm") + "<span><b>" + esc(d.owner) + "</b><small>Sales Executive</small></span></span>") +
+      item("Class", '<span class="chip class-chip class-' + esc(d.tier) + '">' + esc(d.tier) + "</span>") +
+      "</dl>" +
+      '<p class="section-title">Note</p>' +
+      '<div class="di-box di-note">' + (d.note ? esc(d.note) : "No notes on this deal yet.") + "</div>" +
+      '<p class="section-title">Comments</p>' +
+      (comments.length
+        ? '<ol class="di-comments">' + comments.map(function (c) {
+            return '<li class="di-box"><div class="comment-head">' + avatar(c.by, "xs") + "<b>" + esc(c.by) + "</b>" +
+              '<span class="muted">' + esc(c.date.replace(/-/g, "/")) + "</span></div>" +
+              '<p class="comment-move">' + esc(stageById(c.from).name) + " → " + esc(stageLabel(c)) + "</p>" +
+              (c.text ? '<p class="comment-text">' + esc(c.text) + "</p>" : '<p class="comment-text muted">No comment added</p>') + "</li>";
+          }).join("") + "</ol>"
+        : '<div class="di-box">No comments on this deal yet.</div>') +
+      "</section>";
   }
   function stageStatus(d, idx) {
     var label = d.stage === "closed" ? "Closed · " + (d.outcome === "won" ? "Won" : "Lost") : stageById(d.stage).name;

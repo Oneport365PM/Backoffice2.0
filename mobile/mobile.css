@@ -782,3 +782,22 @@ button { font: inherit; color: inherit; }
 .statusbar { transition: background .28s, color .28s; }
 .auth-hero { padding-top: max(28px, env(safe-area-inset-top)); }
 
+
+/* Deal detail: deal information only (mirrors the desktop deal page) */
+.stage-chip-sm { margin-top: 6px; font-weight: 600; font-size: 12px; padding: 4px 10px; border-radius: var(--op-radius-md); }
+.deal-info .section-title { color: var(--op-silver-dark); margin-top: 4px; }
+.di-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; margin: 14px 0 22px; }
+.di { min-width: 0; }
+.di dt { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--op-silver-light); margin-bottom: 4px; }
+.di dd { margin: 0; font-size: 15px; color: var(--op-silver-dark); overflow-wrap: anywhere; }
+.di-money { font-family: var(--op-font-display); font-weight: 600; color: var(--op-chip-warning-text); }
+.di-owner { display: flex; align-items: center; gap: 8px; }
+.di-owner b { display: block; font-family: var(--op-font-display); font-weight: 600; font-size: 14px; color: var(--op-dark-green); line-height: 1.2; }
+.di-owner small { font-size: 12px; color: var(--op-silver-light); }
+.class-chip { background: var(--op-white); border: 1px solid var(--op-gold); color: var(--op-chip-warning-text); border-radius: var(--op-radius-md); font-weight: 600; padding: 4px 10px; }
+.di-box { background: var(--op-chip-neutral-bg); border-radius: var(--op-radius-lg); padding: 14px 16px; color: var(--op-silver-dark); line-height: 1.5; margin-bottom: 20px; }
+.di-note { min-height: 80px; }
+.di-comments { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 10px; }
+.di-comments .di-box { margin: 0; }
+.class-chip.class-SME { border-color: var(--op-border-input); color: var(--op-chip-neutral-text); }
+.class-chip.class-Enterprise { border-color: var(--op-dark-green); color: var(--op-dark-green); }
