@@ -452,7 +452,6 @@
     var item = function (label, value, wide) {
       return '<div class="di' + (wide ? " di-wide" : "") + '"><dt>' + label + "</dt><dd>" + value + "</dd></div>";
     };
-    var comments = d.comments || [];
     $("dealSheetBody").innerHTML =
       '<section class="deal-info">' +
       '<p class="section-title">Deal information</p>' +
@@ -466,15 +465,6 @@
       "</dl>" +
       '<p class="section-title">Note</p>' +
       '<div class="di-box di-note">' + (d.note ? esc(d.note) : "No notes on this deal yet.") + "</div>" +
-      '<p class="section-title">Comments</p>' +
-      (comments.length
-        ? '<ol class="di-comments">' + comments.map(function (c) {
-            return '<li class="di-box"><div class="comment-head">' + avatar(c.by, "xs") + "<b>" + esc(c.by) + "</b>" +
-              '<span class="muted">' + esc(c.date.replace(/-/g, "/")) + "</span></div>" +
-              '<p class="comment-move">' + esc(stageById(c.from).name) + " → " + esc(stageLabel(c)) + "</p>" +
-              (c.text ? '<p class="comment-text">' + esc(c.text) + "</p>" : '<p class="comment-text muted">No comment added</p>') + "</li>";
-          }).join("") + "</ol>"
-        : '<div class="di-box">No comments on this deal yet.</div>') +
       "</section>";
   }
   function stageStatus(d, idx) {
@@ -487,16 +477,18 @@
   function stageLabel(c) {
     return c.to === "closed" ? "Closed · " + (c.outcome === "won" ? "Won" : "Lost") : stageById(c.to).name;
   }
+  // Stage-move comments, shown with a deal's activities (Activity tab)
   function commentsBlock(d) {
-    var list = d.comments || [];
-    return '<p class="section-title">Comments · ' + list.length + "</p>" +
-      (list.length ? '<ol class="comments">' + list.map(function (c) {
-        return '<li class="comment"><div class="comment-head">' + avatar(c.by, "xs") + "<b>" + esc(c.by) + "</b>" +
-          '<span class="muted">' + esc(c.date) + "</span></div>" +
-          '<p class="comment-move">' + esc(stageById(c.from).name) + " → " + esc(stageLabel(c)) + "</p>" +
-          (c.text ? '<p class="comment-text">' + esc(c.text) + "</p>" : '<p class="comment-text muted">No comment added</p>') + "</li>";
-      }).join("") + "</ol>"
-        : '<p class="muted comments-empty">No comments yet. Add one when you move this deal to a later stage.</p>');
+    var comments = d.comments || [];
+    return '<p class="section-title">Comments · ' + comments.length + "</p>" +
+      (comments.length
+        ? '<ol class="di-comments">' + comments.map(function (c) {
+            return '<li class="di-box"><div class="comment-head">' + avatar(c.by, "xs") + "<b>" + esc(c.by) + "</b>" +
+              '<span class="muted">' + esc(c.date.replace(/-/g, "/")) + "</span></div>" +
+              '<p class="comment-move">' + esc(stageById(c.from).name) + " → " + esc(stageLabel(c)) + "</p>" +
+              (c.text ? '<p class="comment-text">' + esc(c.text) + "</p>" : '<p class="comment-text muted">No comment added</p>') + "</li>";
+          }).join("") + "</ol>"
+        : '<div class="di-box">No comments on this deal yet.</div>');
   }
   function contactCard(ct) {
     if (!ct) return '<p class="muted">No contact linked.</p>';
@@ -962,7 +954,7 @@
     var d = deal(daDealId);
     $("daTitle").textContent = company(d.companyId).name;
     $("daSub").textContent = d.product + " · " + money(d.value);
-    $("daBody").innerHTML = stageStatus(d, stageIndex(d.stage)) + activitiesBlock(d);
+    $("daBody").innerHTML = stageStatus(d, stageIndex(d.stage)) + activitiesBlock(d) + commentsBlock(d);
   }
   $("daBody").addEventListener("click", function (e) {
     if (e.target.closest("[data-add-activity]")) openActivity(daDealId);

@@ -801,3 +801,4 @@ button { font: inherit; color: inherit; }
 .di-comments .di-box { margin: 0; }
 .class-chip.class-SME { border-color: var(--op-border-input); color: var(--op-chip-neutral-text); }
 .class-chip.class-Enterprise { border-color: var(--op-dark-green); color: var(--op-dark-green); }
+.deal-acts + .section-title, .deal-acts + .pager + .section-title { margin-top: 18px; }
