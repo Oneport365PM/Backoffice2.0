@@ -95,7 +95,7 @@
         id: uid("dl"), companyId: cid, contactId: ctFor(cid), value: x[1], tier: x[2],
         product: PRODUCTS[i % PRODUCTS.length], owner: company.owner, stage: x[3], created: x[4],
         outcome: x[5] || null, note: x[6] || "",
-        ref: "DL-" + x[4].slice(8, 10) + "-" + x[4].slice(3, 5) + "-" + String(i + 1).padStart(3, "0"),
+        ref: "OP-" + x[4].slice(8, 10) + "-" + x[4].slice(3, 5) + "-" + String(i + 1).padStart(3, "0"),
         rfq: null, quote: null
       };
     });
@@ -795,7 +795,7 @@
       var ct = { id: uid("ct"), first: $("ndCtFirst").value.trim(), last: $("ndCtLast").value.trim(), companyId: coId, title: $("ndCtTitle").value.trim(), phone: $("ndCtPhone").value.trim(), email: $("ndCtEmail").value.trim() };
       state.contacts.unshift(ct); ctId = ct.id; made.push("contact");
     }
-    var d = { id: uid("dl"), companyId: coId, contactId: ctId, value: parseFloat($("ndValue").value.replace(/[^0-9.]/g, "")) || 0, tier: tier, product: $("ndProduct").value, owner: owner, stage: "prospect", created: today(), outcome: null, note: "", ref: nextRef("DL", "deal"), rfq: null, quote: null };
+    var d = { id: uid("dl"), companyId: coId, contactId: ctId, value: parseFloat($("ndValue").value.replace(/[^0-9.]/g, "")) || 0, tier: tier, product: $("ndProduct").value, owner: owner, stage: "prospect", created: today(), outcome: null, note: "", ref: nextRef("OP", "deal"), rfq: null, quote: null };
     state.deals.unshift(d);
 
     closeSheet("newDealSheet");
