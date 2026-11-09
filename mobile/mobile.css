@@ -811,3 +811,19 @@ button { font: inherit; color: inherit; }
 }
 .act-edit svg { width: 13px; height: 13px; }
 .act-edit:hover { border-color: var(--op-dark-green); }
+
+/* Deal IDs and linked RFQ / quote numbers */
+.deal-id { margin: 2px 0 0; font-size: 12px; font-weight: 700; letter-spacing: .02em; color: var(--op-silver-light); }
+.deal-refs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.doc-link {
+  display: inline-flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap;
+  border-radius: var(--op-radius-sm); padding: 3px 8px; border: 1px solid transparent;
+  font-family: var(--op-font-body); font-size: 11.5px; font-weight: 700;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.doc-link svg { width: 12px; height: 12px; flex-shrink: 0; }
+.doc-rfq { background: var(--op-chip-mode-bg); color: var(--op-chip-mode-text); }
+.doc-quote { background: var(--op-chip-warning-bg); color: var(--op-chip-warning-text); }
+.doc-link:hover { border-color: currentColor; }
+.deal-id-sub { margin-left: 8px; font-size: 12px; font-weight: 700; color: var(--op-silver-light); vertical-align: -1px; }
+.di-ref { font-weight: 700; color: var(--op-dark-green); }

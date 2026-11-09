@@ -94,9 +94,18 @@
       return {
         id: uid("dl"), companyId: cid, contactId: ctFor(cid), value: x[1], tier: x[2],
         product: PRODUCTS[i % PRODUCTS.length], owner: company.owner, stage: x[3], created: x[4],
-        outcome: x[5] || null, note: x[6] || ""
+        outcome: x[5] || null, note: x[6] || "",
+        ref: "DL-" + x[4].slice(8, 10) + "-" + x[4].slice(3, 5) + "-" + String(i + 1).padStart(3, "0"),
+        rfq: null, quote: null
       };
     });
+    // RFQs exist from Qualified onwards; quotes from Quote issued onwards
+    var links = {
+      8: ["RFQ-26-11-015"], 9: ["RFQ-26-10-012"], 10: ["RFQ-26-10-011"],
+      11: ["RFQ-26-10-013", "Q-26-11-017"], 12: ["RFQ-26-10-014", "Q-26-11-016"], 13: ["RFQ-26-10-009", "Q-26-10-012"],
+      14: ["RFQ-26-10-006", "Q-26-10-008"], 15: ["RFQ-26-10-010", "Q-26-10-014"], 16: ["RFQ-26-10-004", "Q-26-10-005"]
+    };
+    Object.keys(links).forEach(function (i) { deals[i].rfq = links[i][0]; deals[i].quote = links[i][1] || null; });
 
     // Example comments left when deals were moved
     deals.forEach(function (d) { d.comments = []; });
@@ -135,7 +144,8 @@
       ["quote", "Call", "2026-11-02", "15:45", 30, "Agreed revised demurrage terms, sending updated quote."]
     ].forEach(function (x) { addA(13, x[0], x[1], x[2], x[3], x[4], x[5], "Adeshewa Adelowotan"); });
 
-    return { companies: companies, contacts: contacts, deals: deals, activities: activities, stage: "all", screen: "pipeline" };
+    return { companies: companies, contacts: contacts, deals: deals, activities: activities,
+      seq: { deal: deals.length, rfq: 15, quote: 17 }, stage: "all", screen: "pipeline" };
   }
 
   // ---------- Helpers ----------
@@ -254,10 +264,32 @@
   // ---------- Pipeline ----------
 
 
+  // Reference numbers: PREFIX-YY-MM-NNN using today's year and month
+  function nextRef(prefix, key) {
+    state.seq[key] += 1;
+    var t = new Date();
+    return prefix + "-" + String(t.getFullYear()).slice(2) + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(state.seq[key]).padStart(3, "0");
+  }
+  var LINK_ICON = '<svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+  function docLink(kind, ref) {
+    return '<button type="button" class="doc-link doc-' + kind + '" data-doc="' + esc(ref) + '" aria-label="Open ' + esc(ref) + '">' + LINK_ICON + esc(ref) + "</button>";
+  }
+  function dealRefs(d) {
+    if (!d.rfq && !d.quote) return "";
+    return '<div class="deal-refs">' + (d.rfq ? docLink("rfq", d.rfq) : "") + (d.quote ? docLink("quote", d.quote) : "") + "</div>";
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-doc]");
+    if (!b) return;
+    e.stopPropagation();
+    var ref = b.getAttribute("data-doc");
+    toast("Prototype: this would open <b>" + esc(ref) + "</b> in the " + (ref.indexOf("RFQ") === 0 ? "RFQ" : "Quotes") + " module");
+  }, true);
+
   function dealMatches(d, q) {
     if (!q) return true;
     var c = company(d.companyId);
-    return (c.name + " " + d.owner + " " + contactName(contact(d.contactId))).toLowerCase().indexOf(q) !== -1;
+    return (c.name + " " + d.owner + " " + contactName(contact(d.contactId)) + " " + d.ref + " " + (d.rfq || "") + " " + (d.quote || "")).toLowerCase().indexOf(q) !== -1;
   }
 
   // Stage filter: a single dropdown with live counts (respects the search)
@@ -279,6 +311,8 @@
       '<span class="stage-dot" style="background:' + stageById(d.stage).bar + '"></span>' + esc(stageById(d.stage).name) + ICON.chevron + "</button>";
     return '<article class="deal-card' + (d.id === freshId ? " fresh" : "") + '" data-deal="' + d.id + '" tabindex="0">' +
       '<div class="deal-top"><h3>' + esc(c.name) + '</h3><span class="deal-value">' + money(d.value) + "</span></div>" +
+      '<p class="deal-id">' + esc(d.ref) + "</p>" +
+      dealRefs(d) +
       '<div class="deal-meta"><span class="owner">' + avatar(d.owner, "xs") + "<span>" + esc(d.owner) + "</span></span>" + tierChip(d.tier) + "</div>" +
       (d.note ? '<p class="deal-note">' + esc(d.note) + "</p>" : "") +
       '<div class="deal-foot"><span class="muted">Created ' + esc(d.created) + "</span>" + foot + "</div></article>";
@@ -300,7 +334,7 @@
     $("dealList").innerHTML = list.length
       ? shown.map(function (d) { return dealCard(d, freshId); }).join("")
       : '<div class="empty"><b>' + (q ? "No deals match “" + esc($("dealSearch").value.trim()) + "”" : "No deals in " + esc(st.name)) + "</b>" +
-        (q ? "Search by company, deal owner or contact name." : "Move a deal here or create a new one.") + "</div>";
+        (q ? "Search by company, deal owner, contact name, deal ID, RFQ or quote number." : "Move a deal here or create a new one.") + "</div>";
   }
 
   function renderPipeline(freshId) {
@@ -331,12 +365,15 @@
     if (!d || d.stage === toStage && !outcome) return;
     if (stageIndex(toStage) < stageIndex(d.stage)) return; // deals only move forward
     if (toStage === "closed" && !outcome) { openMove(id, toStage); return; }
-    var prev = { stage: d.stage, outcome: d.outcome, note: d.note };
+    var prev = { stage: d.stage, outcome: d.outcome, note: d.note, rfq: d.rfq, quote: d.quote };
     var entry = { from: d.stage, to: toStage, outcome: outcome || null, text: comment || "", date: today(), by: currentUser.name };
     var card = document.querySelector('.deal-card[data-deal="' + id + '"]');
     var apply = function () {
       d.stage = toStage;
       d.outcome = toStage === "closed" ? outcome : null;
+      var made = [];
+      if ((toStage === "qualified" || toStage === "quote") && !d.rfq) { d.rfq = nextRef("RFQ", "rfq"); made.push(d.rfq); }
+      if (toStage === "quote" && !d.quote) { d.quote = nextRef("Q", "quote"); made.push(d.quote); }
       d.note = toStage === "closed" && outcome === "lost" ? (comment || "") : "";
       d.comments = d.comments || [];
       d.comments.unshift(entry);
@@ -344,8 +381,12 @@
       if ($("dealSheet").classList.contains("open")) renderDealSheet(id);
       var c = company(d.companyId);
       var label = toStage === "closed" ? "closed as " + (outcome === "won" ? "Won" : "Lost") : "moved to " + stageById(toStage).name;
+      if (made.length) label += " · " + made.map(esc).join(" and ") + " created";
       toast("<b>" + esc(c.name) + "</b> " + label, function () {
-        d.stage = prev.stage; d.outcome = prev.outcome; d.note = prev.note;
+        // undo also gives back the RFQ / quote numbers it took
+        if (d.rfq && !prev.rfq) state.seq.rfq -= 1;
+        if (d.quote && !prev.quote) state.seq.quote -= 1;
+        d.stage = prev.stage; d.outcome = prev.outcome; d.note = prev.note; d.rfq = prev.rfq; d.quote = prev.quote;
         d.comments = d.comments.filter(function (x) { return x !== entry; });
         renderPipeline();
         if ($("dealSheet").classList.contains("open")) renderDealSheet(id);
@@ -449,7 +490,7 @@
     var stageText = d.stage === "closed" ? "Closed · " + (d.outcome === "won" ? "Won" : "Lost") : stageById(d.stage).name;
     var stageCls = d.outcome === "won" ? " chip-won" : d.outcome === "lost" ? " chip-lost" : "";
     $("dealSheetTitle").textContent = company(d.companyId).name;
-    $("dealSheetSub").innerHTML = '<span class="chip stage-chip-sm' + stageCls + '">' + esc(stageText) + "</span>";
+    $("dealSheetSub").innerHTML = '<span class="chip stage-chip-sm' + stageCls + '">' + esc(stageText) + '</span><span class="deal-id-sub">' + esc(d.ref) + "</span>";
     var item = function (label, value, wide) {
       return '<div class="di' + (wide ? " di-wide" : "") + '"><dt>' + label + "</dt><dd>" + value + "</dd></div>";
     };
@@ -457,12 +498,15 @@
       '<section class="deal-info">' +
       '<p class="section-title">Deal information</p>' +
       '<dl class="di-grid">' +
+      item("Deal ID", '<span class="di-ref">' + esc(d.ref) + "</span>") +
       item("Contact", esc(contactName(ct))) +
       item("Deal amount", '<span class="di-money">' + money(d.value) + "</span>") +
       item("Product", esc(d.product)) +
       item("Date created", esc(d.created.replace(/-/g, "/"))) +
       item("Sales owner", '<span class="di-owner">' + avatar(d.owner, "sm") + "<span><b>" + esc(d.owner) + "</b><small>Sales Executive</small></span></span>") +
       item("Class", '<span class="chip class-chip class-' + esc(d.tier) + '">' + esc(d.tier) + "</span>") +
+      item("RFQ", d.rfq ? docLink("rfq", d.rfq) : '<span class="muted">Raised at Qualified</span>') +
+      item("Quote", d.quote ? docLink("quote", d.quote) : '<span class="muted">Raised at Quote issued</span>') +
       "</dl>" +
       '<p class="section-title">Note</p>' +
       '<div class="di-box di-note">' + (d.note ? esc(d.note) : "No notes on this deal yet.") + "</div>" +
@@ -751,7 +795,7 @@
       var ct = { id: uid("ct"), first: $("ndCtFirst").value.trim(), last: $("ndCtLast").value.trim(), companyId: coId, title: $("ndCtTitle").value.trim(), phone: $("ndCtPhone").value.trim(), email: $("ndCtEmail").value.trim() };
       state.contacts.unshift(ct); ctId = ct.id; made.push("contact");
     }
-    var d = { id: uid("dl"), companyId: coId, contactId: ctId, value: parseFloat($("ndValue").value.replace(/[^0-9.]/g, "")) || 0, tier: tier, product: $("ndProduct").value, owner: owner, stage: "prospect", created: today(), outcome: null, note: "" };
+    var d = { id: uid("dl"), companyId: coId, contactId: ctId, value: parseFloat($("ndValue").value.replace(/[^0-9.]/g, "")) || 0, tier: tier, product: $("ndProduct").value, owner: owner, stage: "prospect", created: today(), outcome: null, note: "", ref: nextRef("DL", "deal"), rfq: null, quote: null };
     state.deals.unshift(d);
 
     closeSheet("newDealSheet");
@@ -957,7 +1001,7 @@
   function renderDealActivities() {
     var d = deal(daDealId);
     $("daTitle").textContent = company(d.companyId).name;
-    $("daSub").textContent = d.product + " · " + money(d.value);
+    $("daSub").textContent = d.ref + " · " + d.product + " · " + money(d.value);
     $("daBody").innerHTML = stageStatus(d, stageIndex(d.stage)) + activitiesBlock(d) + commentsBlock(d);
   }
   $("daBody").addEventListener("click", function (e) {
@@ -1019,7 +1063,7 @@
       placeholder: "Search deals…",
       items: function () {
         return state.deals.filter(function (d) { return d.stage !== "closed"; }).map(function (d) {
-          return { id: d.id, label: company(d.companyId).name, sub: d.product + " · " + stageById(d.stage).name + " · " + money(d.value) };
+          return { id: d.id, label: company(d.companyId).name, sub: d.ref + " · " + stageById(d.stage).name + " · " + money(d.value) };
         });
       },
       selected: acDealId,
