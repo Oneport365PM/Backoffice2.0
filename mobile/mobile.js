@@ -512,13 +512,7 @@
       '<div class="di-box di-note">' + (d.note ? esc(d.note) : "No notes on this deal yet.") + "</div>" +
       "</section>";
   }
-  function stageStatus(d, idx) {
-    var label = d.stage === "closed" ? "Closed · " + (d.outcome === "won" ? "Won" : "Lost") : stageById(d.stage).name;
-    var cls = d.outcome === "won" ? " is-won" : d.outcome === "lost" ? " is-lost" : "";
-    return '<div class="stage-status' + cls + '"><span class="kpi-label">Deal stage</span>' +
-      '<div class="stage-status-row"><span class="stage-pill"><span class="stage-num">' + (idx + 1) + "</span>" + esc(label) + "</span>" +
-      '<span class="muted">Stage ' + (idx + 1) + " of " + STAGES.length + "</span></div></div>";
-  }
+
   function stageLabel(c) {
     return c.to === "closed" ? "Closed · " + (c.outcome === "won" ? "Won" : "Lost") : stageById(c.to).name;
   }
@@ -1002,7 +996,7 @@
     var d = deal(daDealId);
     $("daTitle").textContent = company(d.companyId).name;
     $("daSub").textContent = d.ref + " · " + d.product + " · " + money(d.value);
-    $("daBody").innerHTML = stageStatus(d, stageIndex(d.stage)) + activitiesBlock(d) + commentsBlock(d);
+    $("daBody").innerHTML = activitiesBlock(d) + commentsBlock(d);
   }
   $("daBody").addEventListener("click", function (e) {
     var ed = e.target.closest("[data-edit-activity]");
