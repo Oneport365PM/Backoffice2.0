@@ -134,7 +134,7 @@ button { font: inherit; color: inherit; }
 .col-active .col-name, .col-active .big { color: var(--op-cream); }
 
 .subs { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.subs-2 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, auto); grid-auto-flow: column; column-gap: 18px; }
+.subs-2 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(var(--rows, 3), auto); grid-auto-flow: column; column-gap: 18px; }
 .sub {
   width: 100%; display: flex; align-items: flex-start; gap: 8px; cursor: pointer; text-align: left;
   background: none; border: 0; border-radius: var(--op-radius-sm); padding: 5px 6px; margin: 0 -6px;
@@ -514,6 +514,8 @@ button { font: inherit; color: inherit; }
     receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/>',
     truck: '<path d="M3 6h11v10H3zM14 9h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
     star: '<path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8 6.6 19.7l1.1-6.1L3.2 9.4l6.1-.8z"/>',
+    briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3M12 11v5M9.5 13.5h5"/>',
+    phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/>',
     box: '<path d="M3 8l9-5 9 5v8l-9 5-9-5zM3 8l9 5 9-5M12 13v8"/>'
   };
   function icon(name) {
@@ -524,7 +526,7 @@ button { font: inherit; color: inherit; }
 
   var PHASES = [
     { id: "prospect", name: "Prospect", bar: "var(--op-cat-2)", steps: [
-      ["RFQ", 25, "inbox"], ["Rate request", 5, "calc"], ["Quote issued", 5, "doc"],
+      ["Deal created", 6, "briefcase"], ["Customer contacted", 9, "phone"], ["RFQ", 25, "inbox"], ["Rate request", 5, "calc"], ["Quote issued", 5, "doc"],
       ["Qualification & credit", 11, "shield"], ["Margin gate", 7, "percent"], ["Customer acceptance", 5, "check"]] },
     { id: "pre", name: "Pre-Booking", bar: "var(--op-cat-3)", steps: [
       ["Credit & payment terms", 14, "card"], ["Job opened", 15, "folder"]] },
@@ -626,7 +628,7 @@ button { font: inherit; color: inherit; }
         route: route[0] + " → " + route[1],
         created: String(day).padStart(2, "0") + "/11/2026",
         lost: !!p.lost,
-        lostStep: p.lost ? Math.floor(rand() * 6) : null,
+        lostStep: p.lost ? Math.floor(rand() * PHASES[0].steps.length) : null,
         lostReason: p.lost ? pick(LOST_REASONS) : null,
         step: p.lost ? null : p.step,
         phase: p.lost ? 0 : STEPS[p.step].phase,
@@ -704,7 +706,7 @@ button { font: inherit; color: inherit; }
         '<button type="button" class="col-head" data-filter="phase" data-value="' + pi + '" aria-label="Show ' + esc(p.name) + ' shipments">' +
         '<span class="col-name">' + esc(p.name) + '</span><span class="col-bar"></span></button>' +
         '<span class="big">' + n + "</span>" +
-        '<ul class="subs' + (steps.length > 4 ? " subs-2" : "") + '">' + steps.map(function (x) {
+        '<ul class="subs' + (steps.length > 4 ? ' subs-2" style="--rows:' + Math.ceil(steps.length / 2) : "") + '">' + steps.map(function (x) {
           var c = live.filter(function (s) { return s.step === x.si; }).length;
           return '<li><button type="button" class="sub' + on("step", x.si) + '" data-filter="step" data-value="' + x.si + '">' +
             icon(x.s.icon) + '<span class="lbl">' + esc(x.s.name) + '</span><span class="n">' + c + "</span></button></li>";
