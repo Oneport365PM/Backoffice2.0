@@ -113,12 +113,13 @@ button { font: inherit; color: inherit; }
 
 /* ---------- Summary ---------- */
 .summary {
-  display: grid; grid-template-columns: 1fr 1.9fr 1.1fr 1.1fr 1.15fr;
-  background: var(--op-white); border: 1px solid var(--op-border-card); border-radius: var(--op-radius-xl);
-  box-shadow: var(--op-elevation-1); margin-bottom: 24px;
+  display: grid; grid-template-columns: 1fr 1.9fr 1.1fr 1.1fr 1.15fr; gap: 16px; margin-bottom: 24px;
 }
-.col { padding: 20px 18px; border-right: 1px solid var(--op-border-divider); min-width: 0; }
-.col:last-child { border-right: 0; }
+.col {
+  padding: 20px 18px; min-width: 0;
+  background: var(--op-white); border: 1px solid var(--op-border-card); border-radius: var(--op-radius-xl);
+  box-shadow: var(--op-elevation-1);
+}
 .col-head {
   width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px;
   background: none; border: 0; padding: 0; cursor: pointer; text-align: left;
@@ -129,7 +130,7 @@ button { font: inherit; color: inherit; }
   display: block; margin: 6px 0 14px; font-family: var(--op-font-display); font-weight: 600;
   font-size: 40px; line-height: 1; letter-spacing: -.02em; color: var(--op-dark-green);
 }
-.col-active { background: var(--op-dark-green); border-radius: var(--op-radius-xl) 0 0 var(--op-radius-xl); border-right: 0; }
+.col-active { background: var(--op-dark-green); border-color: var(--op-dark-green); box-shadow: var(--op-elevation-2); }
 .col-active .col-name, .col-active .big { color: var(--op-cream); }
 
 .subs { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
@@ -329,16 +330,30 @@ button { font: inherit; color: inherit; }
 .step.current i { background: var(--op-accent-lime); border: 2px solid var(--op-dark-green); }
 .step.lost i { background: var(--op-chip-error-bg); border-color: var(--op-chip-error-text); color: var(--op-chip-error-text); }
 .step.lost { color: var(--op-chip-error-text); font-weight: 700; }
+.step { align-items: flex-start; }
+.step i { margin-top: 1px; }
+.step-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.step-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; font-weight: 400; color: var(--op-silver-light); }
+.step-meta b { font-weight: 600; color: var(--op-silver-dark); }
+.step-meta time { white-space: nowrap; }
+.avatar {
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--op-font-display); font-weight: 600; font-size: 8px; letter-spacing: .02em;
+}
+.avatar-1 { background: var(--op-avatar-1-bg); color: var(--op-avatar-1-text); }
+.avatar-2 { background: var(--op-avatar-2-bg); color: var(--op-avatar-2-text); }
+.avatar-3 { background: var(--op-avatar-3-bg); color: var(--op-avatar-3-text); }
+.avatar-4 { background: var(--op-avatar-4-bg); color: var(--op-avatar-4-text); }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1240px) {
   .summary { grid-template-columns: repeat(3, 1fr); }
-  .col { border-bottom: 1px solid var(--op-border-divider); }
-  .col-active { border-radius: var(--op-radius-xl) 0 0 0; }
+  .col-prospect { grid-column: span 2; }
 }
 @media (max-width: 820px) {
   .summary { grid-template-columns: 1fr 1fr; }
-  .col-active { grid-column: 1 / -1; border-radius: var(--op-radius-xl) var(--op-radius-xl) 0 0; }
+  .col-active { grid-column: 1 / -1; }
   .col-prospect { grid-column: 1 / -1; }
 }
 @media (max-width: 700px) {
@@ -538,6 +553,18 @@ button { font: inherit; color: inherit; }
     "Cdk industries", "Autochek", "Broadgrain africa", "Silver star", "Bejoice shipping", "Goshen agro", "Greenbles agtech",
     "Premium agro commodities export", "Sinopec oilfield equipment", "Gz industries ltd", "Flavors & fragrance"];
   var OWNERS = ["Aishat Jimoh", "Kayode Akintade", "Deborah Oje", "Adeshewa Adelowotan", "Gift Osaremen"];
+  // Who handles each step: the deal owner, or the team that owns that step
+  var TEAMS = {
+    pricing: ["Tunde Bakare", "Ifeoma Nwosu"],
+    finance: ["Chidi Okafor", "Bisi Adeyemi"],
+    ops: ["Emeka Obi", "Halima Yusuf", "Femi Lawal"]
+  };
+  var STEP_TEAM = {
+    "Rate request": "pricing", "Margin gate": "pricing",
+    "Qualification & credit": "finance", "Credit & payment terms": "finance",
+    "Cost-to-bill check": "finance", "Invoicing & collection": "finance",
+    "Booking": "ops", "Origin & sailing": "ops", "Pre-arrival & clearing": "ops", "Delivery & documents": "ops"
+  };
   var ROUTES = [["Shanghai", "Apapa"], ["Ningbo", "Tin Can"], ["Antwerp", "Apapa"], ["Lagos", "Rotterdam"], ["Dubai (Jebel Ali)", "Onne"],
     ["Mumbai (Nhava Sheva)", "Apapa"], ["Lagos (LOS)", "London (LHR)"], ["Guangzhou", "Lekki Deep Sea"]];
   var LOST_REASONS = ["Customer chose a cheaper forwarder", "Rate not competitive", "Shipment cancelled by customer", "No response after follow-ups", "Credit check failed"];
@@ -755,6 +782,41 @@ button { font: inherit; color: inherit; }
     if (b) openDrawer(b.getAttribute("data-ship"));
   });
 
+  // ---------- Step owners and completion times ----------
+  function hash(str) { var x = 2166136261; for (var i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619); } return x >>> 0; }
+  function stepOwner(s, si) {
+    var team = STEP_TEAM[STEPS[si].name];
+    if (!team) return s.owner; // RFQ, quote, acceptance, job opened, close: the deal owner
+    var list = TEAMS[team];
+    return list[hash(s.id + team) % list.length];
+  }
+  // For steps 0..current: who handled it and when it was completed (or, for the current step, when it started)
+  var AS_OF = new Date(2026, 10, 10, 12, 0); // sample data is dated up to 10 Nov 2026
+  function stepHistory(s, current) {
+    // Work in "office minutes" (08:00-18:00) so every time lands within working hours
+    var d = s.created.split("/");
+    var day0 = new Date(+d[2], +d[1] - 1, +d[0]);
+    var days = Math.round((new Date(AS_OF.getFullYear(), AS_OF.getMonth(), AS_OF.getDate()) - day0) / 86400000);
+    var span = Math.max(days * 600 + (AS_OF.getHours() - 8) * 60 + AS_OF.getMinutes() - 30, 60 * (current + 1));
+    var slot = span / (current + 1);
+    var out = [];
+    for (var si = 0; si <= current; si++) {
+      var jitter = (hash(s.id + ":" + si) % 1000) / 1000; // 0..1, stable per shipment and step
+      var m = Math.round(30 + slot * si + slot * (0.25 + 0.6 * jitter));
+      var at = new Date(day0.getFullYear(), day0.getMonth(), day0.getDate() + Math.floor(m / 600), 8, m % 600);
+      out.push({ owner: stepOwner(s, si), at: at });
+    }
+    return out;
+  }
+  function fmtDateTime(dt) {
+    return dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) + ", " +
+      dt.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+  }
+  function avatar(name) {
+    var ini = name.split(" ").map(function (w) { return w.charAt(0); }).join("").slice(0, 2).toUpperCase();
+    return '<span class="avatar avatar-' + (hash(name) % 4 + 1) + '" aria-hidden="true">' + esc(ini) + "</span>";
+  }
+
   // ---------- Detail drawer ----------
   var lastFocus = null;
   function openDrawer(id) {
@@ -774,12 +836,20 @@ button { font: inherit; color: inherit; }
       "</b><br>" + esc(s.lostReason) + "</div></div>";
 
     var current = s.lost ? s.lostStep : s.step;
+    var hist = stepHistory(s, current);
     var steps = PHASES.map(function (p, pi) {
       return '<li class="step-phase">' + esc(p.name) + "</li>" + STEPS.map(function (st, si) {
         if (st.phase !== pi) return "";
         var cls = si < current ? "done" : si === current ? (s.lost ? "lost" : "current") : "";
         var mark = si < current ? CHECK : si === current && s.lost ? CROSS : "";
-        return '<li class="step ' + cls + '"><i>' + mark + "</i>" + esc(st.name) + "</li>";
+        var meta = "";
+        if (si <= current) {
+          var hh = hist[si];
+          var when = si < current ? "Completed " : s.lost ? "Lost " : "Started ";
+          meta = '<span class="step-meta">' + avatar(hh.owner) + "<b>" + esc(hh.owner) + "</b>·" +
+            '<time datetime="' + hh.at.toISOString() + '">' + when + fmtDateTime(hh.at) + "</time></span>";
+        }
+        return '<li class="step ' + cls + '"><i>' + mark + '</i><span class="step-body"><span>' + esc(st.name) + "</span>" + meta + "</span></li>";
       }).join("");
     }).join("");
 
