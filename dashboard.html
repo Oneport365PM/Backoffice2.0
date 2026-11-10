@@ -334,6 +334,13 @@ button { font: inherit; color: inherit; }
 .step i { margin-top: 1px; }
 .step-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .step-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; font-weight: 400; color: var(--op-silver-light); }
+.step-link {
+  color: var(--op-dark-green); font-weight: 700; text-decoration: none;
+  border-bottom: 1.5px solid var(--op-dark-green); align-self: flex-start;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.step-link svg { width: 12px; height: 12px; }
+.step-link:hover { background: var(--op-accent-lime); }
 .step-meta b { font-weight: 600; color: var(--op-silver-dark); }
 .step-meta time { white-space: nowrap; }
 .avatar {
@@ -559,6 +566,10 @@ button { font: inherit; color: inherit; }
     finance: ["Chidi Okafor", "Bisi Adeyemi"],
     ops: ["Emeka Obi", "Halima Yusuf", "Femi Lawal"]
   };
+  // Where the RFQ step in the shipment drawer links to: the backoffice RFQ table
+  var RFQ_TABLE_URL = "/rfq";
+  var STEP_LINKS = { "RFQ": RFQ_TABLE_URL };
+  var ARROW = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var STEP_TEAM = {
     "Rate request": "pricing", "Margin gate": "pricing",
     "Qualification & credit": "finance", "Credit & payment terms": "finance",
@@ -850,7 +861,10 @@ button { font: inherit; color: inherit; }
           meta = '<span class="step-meta">' + avatar(hh.owner) + "<b>" + esc(hh.owner) + "</b>·" +
             '<time datetime="' + hh.at.toISOString() + '">' + when + fmtDateTime(hh.at) + "</time></span>";
         }
-        return '<li class="step ' + cls + '"><i>' + mark + '</i><span class="step-body"><span>' + esc(st.name) + "</span>" + meta + "</span></li>";
+        return '<li class="step ' + cls + '"><i>' + mark + '</i><span class="step-body">' +
+          (STEP_LINKS[st.name]
+            ? '<a class="step-link" href="' + esc(STEP_LINKS[st.name]) + '" title="Open the RFQ table">' + esc(st.name) + ARROW + "</a>"
+            : "<span>" + esc(st.name) + "</span>") + meta + "</span></li>";
       }).join("");
     }).join("");
 
