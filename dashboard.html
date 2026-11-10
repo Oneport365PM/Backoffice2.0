@@ -623,7 +623,8 @@ button { font: inherit; color: inherit; }
       };
     });
   }
-  var SHIPMENTS = buildShipments();
+  // OP-26-11-004 (Silver star, Rate request) removed from the sample list
+  var SHIPMENTS = buildShipments().filter(function (s) { return s.id !== "OP-26-11-004"; });
 
   // ---------- Helpers ----------
   function $(id) { return document.getElementById(id); }
